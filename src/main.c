@@ -3,6 +3,19 @@
 #include <raylib.h>
 #include <raymath.h>
 
+/*
+TODOs:
+    - majorly clean up and finalise the SPEED logic, works now but old code left over that needs cleaning
+    - Vectorise the dy/dx mouse movement speed, I think moving diagonals is way faster than across
+    - add logic for the old man, different stages of awake
+    - add art for old man, maybe have him framed in a cool way? Old school TV with the antennas? courage the cowardly dog
+    - proper debug toggling logic
+    - get all of the text in the right place
+    - figure out what i'm going to do with the bar in the top right
+    - some kind of narrative framing around the bear seeing the guy? Periscope?
+    - add title screen with real image of a bear (make sure start button places paw at the bottom)
+*/
+
 typedef struct Bear {
     Rectangle hitbox;
     Texture2D tex;
@@ -46,11 +59,14 @@ int main()
 {
 	InitWindow(WIDTH, HEIGHT, "Sticky Paws");
     Texture2D picnicBlanket = LoadTexture("assets/picnic_blanket_grass.png");
+    Texture2D tv_asleep = LoadTexture("assets/tv_asleep.png");
+    Texture2D tv_1 = LoadTexture("assets/tv_1.png");
+    Texture2D tv_2 = LoadTexture("assets/tv_2.png");
+    Texture2D tv_3 = LoadTexture("assets/tv_3.png");
 
-    double currentTime = GetTime();
-    double lastTime;
-    int sensitivity = 50;
+    double currentTime, lastTime;
     float mouseSpeed, absMouseDelta;
+    int sensitivity = 50;
     Rectangle infoBox = { 0, 0, 400, 100 };
 
     // additional obsacles, e.g other picnic items
@@ -101,7 +117,7 @@ int main()
         Paw.pos.y = GetMouseY();
         Paw.hitbox = (Rectangle){ Paw.pos.x, Paw.pos.y, Paw.tex.width, Paw.tex.height };
 
-        // update Jar
+        // update Jar hitbox
         Jar.hitbox = (Vector2){ Jar.pos.x - Jar.radius, Jar.pos.y - Jar.radius };
 
         // handle sticky logic
@@ -121,7 +137,7 @@ int main()
         }
 
         // decrease speed total each frame
-        double currentTime = GetTime();
+        currentTime = GetTime();
         float speedDecrease;
         if (TOTAL_SPEED > 0 && ((currentTime - lastTime) >= TIME_INTERVAL) )
         {
@@ -168,15 +184,20 @@ int main()
             if (barWidth > barMax) { barWidth = barMax; }
 
             // the moving total bar
-            // DrawRectangle(20, 20, barWidth, 30, RED);
             DrawRectangleGradientH(20, 20, barWidth, 30, GREEN, RED);
 
             if ( TOTAL_SPEED >= sensitivity )
             {
-                DrawText("TOO FAST!", WIDTH/2, HEIGHT/2, 70, RED);
+                DrawText("TOO FAST!", 20, 60, 20, RED);
             }
 
             if (DEBUG) { DrawText(TextFormat("TOTAL_SPEED: %d", TOTAL_SPEED), 20, 60, 20, RED); }
+
+            // Draw old man in the corner)
+            if (TOTAL_SPEED >= 0) { DrawTexture(tv_asleep, 0, HEIGHT-250, WHITE); }
+            if (TOTAL_SPEED >= 30) { DrawTexture(tv_1, 0, HEIGHT-250, WHITE); }
+            if (TOTAL_SPEED >= 50) { DrawTexture(tv_2, 0, HEIGHT-250, WHITE); }
+            if (TOTAL_SPEED >= 80) { DrawTexture(tv_3, 0, HEIGHT-250, WHITE); }
 
 		EndDrawing();
 	}
@@ -185,26 +206,29 @@ int main()
     UnloadTexture(picnicBlanket);
     UnloadTexture(Jar.tex);
     UnloadTexture(Paw.tex);
+    UnloadTexture(tv_asleep);
+    UnloadTexture(tv_1);
+    UnloadTexture(tv_2);
+    UnloadTexture(tv_3);
 	CloseWindow();
 	return 0;
 }
 
 void handleStickyJar(Bear *paw, Honey *jar, Vector2 *dt)
 {
-        // Jar sticky logic
-        if (!jar->stuck)
+    if (!jar->stuck)
+    {
+        if ( CheckCollisionCircleRec(jar->pos, jar->radius, paw->hitbox) )
         {
-            if ( CheckCollisionCircleRec(jar->pos, jar->radius, paw->hitbox) )
-            {
-                jar->stuck = true;
-                SCORE += jar->value;
-                printf("SCORE: %d\n", SCORE);
-            }
-        } else {
-            // update Jar pos by adding mouse delta
-            jar->pos.x = jar->pos.x + dt->x;
-            jar->pos.y = jar->pos.y + dt->y;
+            jar->stuck = true;
+            SCORE += jar->value;
+            printf("SCORE: %d\n", SCORE);
         }
+    } else {
+        // update Jar pos by adding mouse delta
+        jar->pos.x = jar->pos.x + dt->x;
+        jar->pos.y = jar->pos.y + dt->y;
+    }
 }
 
 void handleStickyObstacle(Bear *paw, Obstacle obs[], int arrLen, Vector2 *dt)
@@ -240,11 +264,7 @@ void handleObjectPushing(Obstacle obs[], int arrLen, Honey *jar, Vector2 *dt)
         // object on object pushing logic
         for (int j=0; j <= arrLen; j++)
         {
-            // if ( (i == j) || (actor->stuck) ) {
-            if ( i == j ) {
-                // skip if same object or object already stuck to paw
-                continue;
-            }
+            if ( i == j ) { continue; } // skip if same object or object already stuck to paw
 
             Obstacle *subject = &obs[j];
 
@@ -266,7 +286,6 @@ void handleObjectPushing(Obstacle obs[], int arrLen, Honey *jar, Vector2 *dt)
 
 void handlePawPushing(Bear *paw, Obstacle obs[], int arrLen, Vector2 *dt)
 {
-    // paw on object pushing logic
     for (int i=0; i <= arrLen; i++)
     {
         Obstacle *subject = &obs[i];
