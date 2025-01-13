@@ -26,10 +26,10 @@ typedef struct Obstacle {
 
 bool DEBUG = true;
 int SCORE = 0;
-float TOTAL_SPEED = 0.0f;
+int TOTAL_SPEED = 0;
 float TOTAL_SPEED_MAX = 100.0f;
-float DECAY = 20.0f;
-double TIME_INTERVAL = 0.5;
+float DECAY = 5.0f;
+double TIME_INTERVAL = 0.1f;
 
 const float WIDTH = 1024.0f;
 const float HEIGHT = 768.0f;
@@ -49,7 +49,7 @@ int main()
 
     double currentTime = GetTime();
     double lastTime;
-    float sensitivity = 1.5f;
+    int sensitivity = 50;
     float mouseSpeed, absMouseDelta;
     Rectangle infoBox = { 0, 0, 400, 100 };
 
@@ -75,14 +75,14 @@ int main()
         .value = 50,
     };
 
-    // reset mouse so bear paw insn't in top right
+    // reset mouse so bear paw isn't in top right
     SetMousePosition(HEIGHT-50, WIDTH/2);
 
 	while (!WindowShouldClose()) {
 
         if (IsKeyPressed(KEY_TAB))
         {
-            if (DEBUG) { DEBUG = false; } else { DEBUG = true; }
+            (DEBUG) ? (DEBUG = false) : (DEBUG = true);
         }
 
         // mouse position diff used to stuck object movement
@@ -93,7 +93,7 @@ int main()
         {
             printf("mouse dx, xy: %0.2f, %0.2f \n", mouseDelta.x, mouseDelta.y);
             printf("mouse total: %0.2f \n", fabs(mouseDelta.x + mouseDelta.y));
-            printf("TOTAL_SPEED: %0.2f \n", TOTAL_SPEED);
+            printf("TOTAL_SPEED: %d \n", TOTAL_SPEED);
         }
 
         // update paw movement
@@ -117,15 +117,18 @@ int main()
         {
             absMouseDelta = fabs(mouseDelta.x) + fabs(mouseDelta.y);
             mouseSpeed = absMouseDelta;
-            TOTAL_SPEED = TOTAL_SPEED + mouseSpeed;
+            TOTAL_SPEED = TOTAL_SPEED + (int)mouseSpeed;
         }
 
         // decrease speed total each frame
         double currentTime = GetTime();
+        float speedDecrease;
         if (TOTAL_SPEED > 0 && ((currentTime - lastTime) >= TIME_INTERVAL) )
         {
             lastTime = currentTime;
-            TOTAL_SPEED = fabs(TOTAL_SPEED - DECAY);
+            speedDecrease = fabs(TOTAL_SPEED - DECAY);
+            TOTAL_SPEED = (int)speedDecrease;
+            printf("TOTAL_SPEED: %d \n", TOTAL_SPEED);
         }
 
         // limit the total speed
@@ -158,27 +161,22 @@ int main()
 
             // draw speed bar
             // bar height is total % of the bar max
-            int barMax = infoBox.width - (5 + 25);
-            int barWidth = (int)(TOTAL_SPEED);
+            int barMax = infoBox.width - (40);
+            int barWidth = TOTAL_SPEED * 4; // *4 because TOTAL_SPEED is out of 100, bar width is 400. TODO: make work with x=n
 
             // put max limit on the width
             if (barWidth > barMax) { barWidth = barMax; }
 
             // the moving total bar
             // DrawRectangle(20, 20, barWidth, 30, RED);
+            DrawRectangleGradientH(20, 20, barWidth, 30, GREEN, RED);
 
-            if ( mouseSpeed >= sensitivity )
+            if ( TOTAL_SPEED >= sensitivity )
             {
-                // DrawText("TOO FAST!", WIDTH/2, HEIGHT/2, 70, RED);
+                DrawText("TOO FAST!", WIDTH/2, HEIGHT/2, 70, RED);
             }
 
-            if (DEBUG) {
-                for (int i=0; i < 5; i++) {
-                    // DrawRectangleLinesEx(20*i, 20, 20, 20, BLACK);
-                    DrawRectangle(20*i, 20, 20, 20, RED);
-                }
-                DrawText(TextFormat("TOTAL_SPEED: %0.2f", TOTAL_SPEED), 20, 60, 20, RED);
-            }
+            if (DEBUG) { DrawText(TextFormat("TOTAL_SPEED: %d", TOTAL_SPEED), 20, 60, 20, RED); }
 
 		EndDrawing();
 	}
