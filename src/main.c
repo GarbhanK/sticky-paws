@@ -50,9 +50,8 @@ int main()
     double currentTime = GetTime();
     double lastTime;
     float sensitivity = 1.5f;
-    float mouseSpeed;
-    float absMouseDelta;
-    Rectangle infoBox = { 0, 0, 400, 100};
+    float mouseSpeed, absMouseDelta;
+    Rectangle infoBox = { 0, 0, 400, 100 };
 
     // additional obsacles, e.g other picnic items
     Obstacle obstacles[] = {
@@ -98,7 +97,7 @@ int main()
         }
 
         // update paw movement
-        Paw.pos.x = GetMouseX() - Paw.tex.width/2;
+        Paw.pos.x = GetMouseX() - (float)Paw.tex.width/2;
         Paw.pos.y = GetMouseY();
         Paw.hitbox = (Rectangle){ Paw.pos.x, Paw.pos.y, Paw.tex.width, Paw.tex.height };
 
@@ -173,12 +172,13 @@ int main()
                 // DrawText("TOO FAST!", WIDTH/2, HEIGHT/2, 70, RED);
             }
 
-            if (DEBUG)
+            if (DEBUG) {
                 for (int i=0; i < 5; i++) {
-                    DrawRectangleLinesEx(20*i, 20, 20, 20, BLACK);
+                    // DrawRectangleLinesEx(20*i, 20, 20, 20, BLACK);
                     DrawRectangle(20*i, 20, 20, 20, RED);
                 }
                 DrawText(TextFormat("TOTAL_SPEED: %0.2f", TOTAL_SPEED), 20, 60, 20, RED);
+            }
 
 		EndDrawing();
 	}
@@ -280,4 +280,3 @@ void handlePawPushing(Bear *paw, Obstacle obs[], int arrLen, Vector2 *dt)
         }
     }
 }
-
