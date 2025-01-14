@@ -39,6 +39,8 @@ typedef struct Obstacle {
 
 typedef struct UserInterface {
     Rectangle infoBox;
+    int barWidth;
+    int barMax;
     Rectangle startButton;
     Texture2D splashScreen;
     Texture2D wakeStates[4];
@@ -51,7 +53,7 @@ enum GAMESTATE {
     WIN
 } GAMESTATE;
 
-bool DEBUG = true;
+bool DEBUG = false;
 int SCORE = 0;
 int TOTAL_SPEED = 0;
 float TOTAL_SPEED_MAX = 100.0f;
@@ -68,7 +70,7 @@ void handleStickyObstacle(Bear *paw, Obstacle obs[], int arrLen, Vector2 *dt);
 void handlePawPushing(Bear *paw, Obstacle obs[], int arrLen, Vector2 *dt);
 void handleObjectPushing(Obstacle obs[], int arrLen, Honey *jar, Vector2 *dt);
 
-void drawUI(UserInterface *ui, bool warning, int barWidth);
+void DrawUI(UserInterface *ui, bool warning, int barWidth);
 
 
 int main()
@@ -106,7 +108,8 @@ int main()
 
     UserInterface GameUI = {
         .infoBox = { 0, 0, 400, 100 },
-        .startButton = { 300, 150, 200, 50 },
+        .barMax = GameUI.infoBox.width - (40),
+        .startButton = { WIDTH/2 - 200, HEIGHT-120, 400, 100 },
         .splashScreen = LoadTexture("assets/bear_splash.jpg"),
         .wakeStates = {
             LoadTexture("assets/tv_asleep.png"),
@@ -120,80 +123,83 @@ int main()
     SetMousePosition(HEIGHT-50, WIDTH/2);
 
 	while (!WindowShouldClose()) {
+        // mouse position diff used to stuck object movement
+        Vector2 mouseDelta = GetMouseDelta();
 
         if (IsKeyPressed(KEY_TAB))
         {
             (DEBUG) ? (DEBUG = false) : (DEBUG = true);
         }
 
-        // mouse position diff used to stuck object movement
-        Vector2 mouseDelta = GetMouseDelta();
-
         // debug mouse delta
         if (DEBUG && (mouseDelta.x != 0 && mouseDelta.y != 0) )
         {
-            // printf("mouse dx, xy: %0.2f, %0.2f \n", mouseDelta.x, mouseDelta.y);
-            // printf("mouse total: %0.2f \n", fabs(mouseDelta.x + mouseDelta.y));
-            // printf("TOTAL_SPEED: %d \n", TOTAL_SPEED);
-        }
-
-        // update paw movement
-        Paw.pos.x = GetMouseX() - (float)Paw.tex.width/2;
-        Paw.pos.y = GetMouseY();
-        Paw.hitbox = (Rectangle){ Paw.pos.x, Paw.pos.y, Paw.tex.width, Paw.tex.height };
-
-        // update Jar hitbox
-        Jar.hitbox = (Vector2){ Jar.pos.x - Jar.radius, Jar.pos.y - Jar.radius };
-
-        // handle sticky logic
-        handleStickyJar(&Paw, &Jar, &mouseDelta);
-        handleStickyObstacle(&Paw, obstacles, obstaclesLen, &mouseDelta);
-
-        // handle pushing logic
-        // handlePawPushing(&Paw, obstacles, obstaclesLen, &mouseDelta);
-        handleObjectPushing(obstacles, obstaclesLen, &Jar, &mouseDelta);
-
-        // speed/scoring
-        if (mouseDelta.x != 0 && mouseDelta.y != 0)
-        {
-            absMouseDelta = fabs(mouseDelta.x) + fabs(mouseDelta.y);
-            mouseSpeed = absMouseDelta;
-            TOTAL_SPEED = TOTAL_SPEED + (int)mouseSpeed;
-        }
-
-        // decrease speed total each frame
-        currentTime = GetTime();
-        float speedDecrease;
-        if (TOTAL_SPEED > 0 && ((currentTime - lastTime) >= TIME_INTERVAL) )
-        {
-            lastTime = currentTime;
-            speedDecrease = fabs(TOTAL_SPEED - DECAY);
-            TOTAL_SPEED = (int)speedDecrease;
+            printf("mouse dx, xy: %0.2f, %0.2f \n", mouseDelta.x, mouseDelta.y);
+            printf("mouse total: %0.2f \n", fabs(mouseDelta.x + mouseDelta.y));
             printf("TOTAL_SPEED: %d \n", TOTAL_SPEED);
         }
 
-        // limit the total speed
-        if (TOTAL_SPEED > TOTAL_SPEED_MAX)
-        {
-            TOTAL_SPEED = TOTAL_SPEED_MAX;
-        }
-
-        // speed bar update logic
-        int barMax = GameUI.infoBox.width - (40);
-        int barWidth = TOTAL_SPEED * 4; // *4 because TOTAL_SPEED is out of 100, bar width is 400. TODO: make work with x=n
-
-        // put max limit on the width
-        if (barWidth > barMax) { barWidth = barMax; }
-
         // start screen
-        if ( IsMouseButtonPressed(0) && CheckCollisionPointRec(GetMousePosition(), GameUI.startButton) )
-        {
-            printf("Hello, box!\n");
-            GAMESTATE = PLAY;
+        if (GAMESTATE == START) {
+            if ( IsMouseButtonPressed(0) && CheckCollisionPointRec(GetMousePosition(), GameUI.startButton) )
+            {
+                printf("Hello, box!\n");
+                GAMESTATE = PLAY;
+            }
         }
 
-        // set flag for warning message
-        ( TOTAL_SPEED >= sensitivity ) ? (warning = true) : (warning = false);
+        if (GAMESTATE == PLAY) {
+
+            // update paw movement
+            Paw.pos.x = GetMouseX() - (float)Paw.tex.width/2;
+            Paw.pos.y = GetMouseY();
+            Paw.hitbox = (Rectangle){ Paw.pos.x, Paw.pos.y, Paw.tex.width, Paw.tex.height };
+
+            // update Jar hitbox
+            Jar.hitbox = (Vector2){ Jar.pos.x - Jar.radius, Jar.pos.y - Jar.radius };
+
+            // handle sticky logic
+            handleStickyJar(&Paw, &Jar, &mouseDelta);
+            handleStickyObstacle(&Paw, obstacles, obstaclesLen, &mouseDelta);
+
+            // handle pushing logic
+            // handlePawPushing(&Paw, obstacles, obstaclesLen, &mouseDelta);
+            handleObjectPushing(obstacles, obstaclesLen, &Jar, &mouseDelta);
+
+            // speed/scoring
+            if (mouseDelta.x != 0 && mouseDelta.y != 0)
+            {
+                absMouseDelta = fabs(mouseDelta.x) + fabs(mouseDelta.y);
+                mouseSpeed = absMouseDelta;
+                TOTAL_SPEED = TOTAL_SPEED + (int)mouseSpeed;
+            }
+
+            // decrease speed total each frame
+            currentTime = GetTime();
+            float speedDecrease;
+            if (TOTAL_SPEED > 0 && ((currentTime - lastTime) >= TIME_INTERVAL) )
+            {
+                lastTime = currentTime;
+                speedDecrease = fabs(TOTAL_SPEED - DECAY);
+                TOTAL_SPEED = (int)speedDecrease;
+            }
+
+            // limit the total speed
+            if (TOTAL_SPEED > TOTAL_SPEED_MAX)
+            {
+                TOTAL_SPEED = TOTAL_SPEED_MAX;
+            }
+
+            // speed bar update logic
+            GameUI.barWidth = TOTAL_SPEED * 4; // *4 because TOTAL_SPEED is out of 100, bar width is 400. TODO: make work with x=n
+
+            // put max limit on the width
+            if (GameUI.barWidth > GameUI.barMax) { GameUI.barWidth = GameUI.barMax; }
+
+
+            // set flag for warning message
+            ( TOTAL_SPEED >= sensitivity ) ? (warning = true) : (warning = false);
+        }
 
         BeginDrawing();
 
@@ -202,54 +208,27 @@ int main()
             if (GAMESTATE == START) {
                 DrawTexture(GameUI.splashScreen, 0, 0, WHITE);
                 DrawRectangleRec(GameUI.startButton, BLACK);
-                DrawText("PLAY", GameUI.startButton.x, GameUI.startButton.y, 30, WHITE);
+                float startButtonTextLen = (float)MeasureText("PLAY", 50);
+                DrawText("PLAY",
+                    GameUI.startButton.x + (GameUI.startButton.width/2 - startButtonTextLen/2),
+                    GameUI.startButton.y + (GameUI.startButton.height/2 - 25),
+                    50, WHITE);
             }
 
             if (GAMESTATE == PLAY) {
-                DrawTexture(picnicBlanket, 0, 0, WHITE);
+                DrawTexture(picnicBlanket, 0, 0, WHITE);            // draw background image
                 // draw obstacles
                 for (int i=0; i <= obstaclesLen; i++)
                 {
                     Obstacle obs = obstacles[i];
-                    DrawRectangleRec(obs.rect, BLACK);
+                    DrawRectangleRec(obs.rect, BLACK);              // draw obstacles
                 }
 
-                // draw honey jar texture
-                DrawTextureV(Jar.tex, Jar.hitbox, WHITE);
-
-                // draw bear Paw texture
-                DrawTexture(Paw.tex, Paw.pos.x, Paw.pos.y, WHITE);
-
-                drawUI(&GameUI, warning, barWidth);
-
-                // // draw speed indicator in top left
-                // DrawRectangleRec(infoBox, WHITE);       // background box
-                // DrawRectangleLinesEx(infoBox, 5, RED);  // red outline
-
-                // // draw speed bar
-                // // bar height is total % of the bar max
-                // int barMax = infoBox.width - (40);
-                // int barWidth = TOTAL_SPEED * 4; // *4 because TOTAL_SPEED is out of 100, bar width is 400. TODO: make work with x=n
-
-                // // put max limit on the width
-                // if (barWidth > barMax) { barWidth = barMax; }
-
-                // // the moving total bar
-                // DrawRectangleGradientH(20, 20, barWidth, 30, GREEN, RED);
-
-                // if ( TOTAL_SPEED >= sensitivity )
-                // {
-                //     DrawText("TOO FAST!", 20, 60, 20, RED);
-                // }
-
-                // if (DEBUG) { DrawText(TextFormat("TOTAL_SPEED: %d", TOTAL_SPEED), 20, 60, 20, RED); }
-
-                // // Draw old man in the corner)
-                // if (TOTAL_SPEED >= 0) { DrawTexture(tv_asleep, 0, HEIGHT-250, WHITE); }
-                // if (TOTAL_SPEED >= 30) { DrawTexture(tv_1, 0, HEIGHT-250, WHITE); }
-                // if (TOTAL_SPEED >= 50) { DrawTexture(tv_2, 0, HEIGHT-250, WHITE); }
-                // if (TOTAL_SPEED >= 80) { DrawTexture(tv_3, 0, HEIGHT-250, WHITE); }
+                DrawTextureV(Jar.tex, Jar.hitbox, WHITE);           // draw honey Jar
+                DrawTexture(Paw.tex, Paw.pos.x, Paw.pos.y, WHITE);  // draw bear Paw
+                DrawUI(&GameUI, warning, GameUI.barWidth);                 // draw UI
             }
+
 		EndDrawing();
 	}
 
@@ -267,7 +246,7 @@ int main()
 	return 0;
 }
 
-void drawUI(UserInterface *ui, bool warning, int barWidth)
+void DrawUI(UserInterface *ui, bool warning, int barWidth)
 {
     // draw speed indicator in top left
     DrawRectangleRec(ui->infoBox, WHITE);       // background box
