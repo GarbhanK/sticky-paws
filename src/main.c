@@ -37,6 +37,20 @@ typedef struct Obstacle {
     int value;
 } Obstacle;
 
+typedef struct UserInterface {
+    Rectangle infoBox;
+    Rectangle startButton;
+    Texture2D splashScreen;
+    Texture2D wakeStates[4];
+} UserInterface;
+
+enum GAMESTATE {
+    START,
+    PLAY,
+    FAIL,
+    WIN
+} GAMESTATE;
+
 bool DEBUG = true;
 int SCORE = 0;
 int TOTAL_SPEED = 0;
@@ -54,20 +68,20 @@ void handleStickyObstacle(Bear *paw, Obstacle obs[], int arrLen, Vector2 *dt);
 void handlePawPushing(Bear *paw, Obstacle obs[], int arrLen, Vector2 *dt);
 void handleObjectPushing(Obstacle obs[], int arrLen, Honey *jar, Vector2 *dt);
 
+void drawUI(UserInterface *ui, bool warning, int barWidth);
+
 
 int main()
 {
 	InitWindow(WIDTH, HEIGHT, "Sticky Paws");
     Texture2D picnicBlanket = LoadTexture("assets/picnic_blanket_grass.png");
-    Texture2D tv_asleep = LoadTexture("assets/tv_asleep.png");
-    Texture2D tv_1 = LoadTexture("assets/tv_1.png");
-    Texture2D tv_2 = LoadTexture("assets/tv_2.png");
-    Texture2D tv_3 = LoadTexture("assets/tv_3.png");
 
     double currentTime, lastTime;
     float mouseSpeed, absMouseDelta;
     int sensitivity = 50;
-    Rectangle infoBox = { 0, 0, 400, 100 };
+    bool warning = false;
+
+    GAMESTATE = START;
 
     // additional obsacles, e.g other picnic items
     Obstacle obstacles[] = {
@@ -76,7 +90,6 @@ int main()
         { { 300, 250, 30, 50 }, false, 10 },
         { { 800, 500, 80, 110 }, false, 10 },
     };
-
     int obstaclesLen = sizeof(obstacles)/sizeof(obstacles[0]);
 
     Bear Paw = {
@@ -89,6 +102,18 @@ int main()
         .radius = 50.0f,
         .stuck = false,
         .value = 50,
+    };
+
+    UserInterface GameUI = {
+        .infoBox = { 0, 0, 400, 100 },
+        .startButton = { 300, 150, 200, 50 },
+        .splashScreen = LoadTexture("assets/bear_splash.jpg"),
+        .wakeStates = {
+            LoadTexture("assets/tv_asleep.png"),
+            LoadTexture("assets/tv_1.png"),
+            LoadTexture("assets/tv_2.png"),
+            LoadTexture("assets/tv_3.png"),
+        }
     };
 
     // reset mouse so bear paw isn't in top right
@@ -107,9 +132,9 @@ int main()
         // debug mouse delta
         if (DEBUG && (mouseDelta.x != 0 && mouseDelta.y != 0) )
         {
-            printf("mouse dx, xy: %0.2f, %0.2f \n", mouseDelta.x, mouseDelta.y);
-            printf("mouse total: %0.2f \n", fabs(mouseDelta.x + mouseDelta.y));
-            printf("TOTAL_SPEED: %d \n", TOTAL_SPEED);
+            // printf("mouse dx, xy: %0.2f, %0.2f \n", mouseDelta.x, mouseDelta.y);
+            // printf("mouse total: %0.2f \n", fabs(mouseDelta.x + mouseDelta.y));
+            // printf("TOTAL_SPEED: %d \n", TOTAL_SPEED);
         }
 
         // update paw movement
@@ -153,52 +178,78 @@ int main()
             TOTAL_SPEED = TOTAL_SPEED_MAX;
         }
 
-		BeginDrawing();
+        // speed bar update logic
+        int barMax = GameUI.infoBox.width - (40);
+        int barWidth = TOTAL_SPEED * 4; // *4 because TOTAL_SPEED is out of 100, bar width is 400. TODO: make work with x=n
+
+        // put max limit on the width
+        if (barWidth > barMax) { barWidth = barMax; }
+
+        // start screen
+        if ( IsMouseButtonPressed(0) && CheckCollisionPointRec(GetMousePosition(), GameUI.startButton) )
+        {
+            printf("Hello, box!\n");
+            GAMESTATE = PLAY;
+        }
+
+        // set flag for warning message
+        ( TOTAL_SPEED >= sensitivity ) ? (warning = true) : (warning = false);
+
+        BeginDrawing();
 
             ClearBackground(RAYWHITE);
-            DrawTexture(picnicBlanket, 0, 0, WHITE);
 
-            // draw obstacles
-            for (int i=0; i <= obstaclesLen; i++)
-            {
-                Obstacle obs = obstacles[i];
-                DrawRectangleRec(obs.rect, BLACK);
+            if (GAMESTATE == START) {
+                DrawTexture(GameUI.splashScreen, 0, 0, WHITE);
+                DrawRectangleRec(GameUI.startButton, BLACK);
+                DrawText("PLAY", GameUI.startButton.x, GameUI.startButton.y, 30, WHITE);
             }
 
-            // draw honey jar texture
-            DrawTextureV(Jar.tex, Jar.hitbox, WHITE);
+            if (GAMESTATE == PLAY) {
+                DrawTexture(picnicBlanket, 0, 0, WHITE);
+                // draw obstacles
+                for (int i=0; i <= obstaclesLen; i++)
+                {
+                    Obstacle obs = obstacles[i];
+                    DrawRectangleRec(obs.rect, BLACK);
+                }
 
-            // draw bear Paw texture
-            DrawTexture(Paw.tex, Paw.pos.x, Paw.pos.y, WHITE);
+                // draw honey jar texture
+                DrawTextureV(Jar.tex, Jar.hitbox, WHITE);
 
-            // draw speed indicator in top left
-            DrawRectangleRec(infoBox, WHITE);       // background box
-            DrawRectangleLinesEx(infoBox, 5, RED);  // red outline
+                // draw bear Paw texture
+                DrawTexture(Paw.tex, Paw.pos.x, Paw.pos.y, WHITE);
 
-            // draw speed bar
-            // bar height is total % of the bar max
-            int barMax = infoBox.width - (40);
-            int barWidth = TOTAL_SPEED * 4; // *4 because TOTAL_SPEED is out of 100, bar width is 400. TODO: make work with x=n
+                drawUI(&GameUI, warning, barWidth);
 
-            // put max limit on the width
-            if (barWidth > barMax) { barWidth = barMax; }
+                // // draw speed indicator in top left
+                // DrawRectangleRec(infoBox, WHITE);       // background box
+                // DrawRectangleLinesEx(infoBox, 5, RED);  // red outline
 
-            // the moving total bar
-            DrawRectangleGradientH(20, 20, barWidth, 30, GREEN, RED);
+                // // draw speed bar
+                // // bar height is total % of the bar max
+                // int barMax = infoBox.width - (40);
+                // int barWidth = TOTAL_SPEED * 4; // *4 because TOTAL_SPEED is out of 100, bar width is 400. TODO: make work with x=n
 
-            if ( TOTAL_SPEED >= sensitivity )
-            {
-                DrawText("TOO FAST!", 20, 60, 20, RED);
+                // // put max limit on the width
+                // if (barWidth > barMax) { barWidth = barMax; }
+
+                // // the moving total bar
+                // DrawRectangleGradientH(20, 20, barWidth, 30, GREEN, RED);
+
+                // if ( TOTAL_SPEED >= sensitivity )
+                // {
+                //     DrawText("TOO FAST!", 20, 60, 20, RED);
+                // }
+
+                // if (DEBUG) { DrawText(TextFormat("TOTAL_SPEED: %d", TOTAL_SPEED), 20, 60, 20, RED); }
+
+                // // Draw old man in the corner)
+                // if (TOTAL_SPEED >= 0) { DrawTexture(tv_asleep, 0, HEIGHT-250, WHITE); }
+                // if (TOTAL_SPEED >= 30) { DrawTexture(tv_1, 0, HEIGHT-250, WHITE); }
+                // if (TOTAL_SPEED >= 50) { DrawTexture(tv_2, 0, HEIGHT-250, WHITE); }
+                // if (TOTAL_SPEED >= 80) { DrawTexture(tv_3, 0, HEIGHT-250, WHITE); }
             }
-
-            if (DEBUG) { DrawText(TextFormat("TOTAL_SPEED: %d", TOTAL_SPEED), 20, 60, 20, RED); }
-
-            // Draw old man in the corner)
-            if (TOTAL_SPEED >= 0) { DrawTexture(tv_asleep, 0, HEIGHT-250, WHITE); }
-            if (TOTAL_SPEED >= 30) { DrawTexture(tv_1, 0, HEIGHT-250, WHITE); }
-            if (TOTAL_SPEED >= 50) { DrawTexture(tv_2, 0, HEIGHT-250, WHITE); }
-            if (TOTAL_SPEED >= 80) { DrawTexture(tv_3, 0, HEIGHT-250, WHITE); }
-
 		EndDrawing();
 	}
 
@@ -206,12 +257,37 @@ int main()
     UnloadTexture(picnicBlanket);
     UnloadTexture(Jar.tex);
     UnloadTexture(Paw.tex);
-    UnloadTexture(tv_asleep);
-    UnloadTexture(tv_1);
-    UnloadTexture(tv_2);
-    UnloadTexture(tv_3);
+
+    for (int i=0; i < 3; i++) {
+        printf("unloading: %d\n", GameUI.wakeStates[i].id);
+        UnloadTexture(GameUI.wakeStates[i]);
+    }
+
 	CloseWindow();
 	return 0;
+}
+
+void drawUI(UserInterface *ui, bool warning, int barWidth)
+{
+    // draw speed indicator in top left
+    DrawRectangleRec(ui->infoBox, WHITE);       // background box
+    DrawRectangleLinesEx(ui->infoBox, 5, RED);  // red outline
+
+    // the moving total bar
+    DrawRectangleGradientH(20, 20, barWidth, 30, GREEN, RED);
+
+    if ( warning )
+    {
+        DrawText("TOO FAST!", 20, 60, 20, RED);
+    }
+
+    if (DEBUG) { DrawText(TextFormat("TOTAL_SPEED: %d", TOTAL_SPEED), 20, 60, 20, RED); }
+
+    // Draw old man in the corner)
+    if (TOTAL_SPEED >= 0) { DrawTexture(ui->wakeStates[0], 0, HEIGHT-250, WHITE); }
+    if (TOTAL_SPEED >= 30) { DrawTexture(ui->wakeStates[1], 0, HEIGHT-250, WHITE); }
+    if (TOTAL_SPEED >= 50) { DrawTexture(ui->wakeStates[2], 0, HEIGHT-250, WHITE); }
+    if (TOTAL_SPEED >= 80) { DrawTexture(ui->wakeStates[3], 0, HEIGHT-250, WHITE); }
 }
 
 void handleStickyJar(Bear *paw, Honey *jar, Vector2 *dt)
