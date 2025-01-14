@@ -77,9 +77,10 @@ int main()
 {
 	InitWindow(WIDTH, HEIGHT, "Sticky Paws");
     Texture2D picnicBlanket = LoadTexture("assets/picnic_blanket_grass.png");
+    Texture2D bearNose = LoadTexture("assets/bear_nose.png");
 
     double currentTime, lastTime;
-    float mouseSpeed, absMouseDelta;
+    float mouseSpeed, absMouseDelta, speedDecrease;
     int sensitivity = 50;
     bool warning = false;
 
@@ -131,7 +132,7 @@ int main()
             (DEBUG) ? (DEBUG = false) : (DEBUG = true);
         }
 
-        // debug mouse delta
+        // debug printing
         if (DEBUG && (mouseDelta.x != 0 && mouseDelta.y != 0) )
         {
             printf("mouse dx, xy: %0.2f, %0.2f \n", mouseDelta.x, mouseDelta.y);
@@ -143,7 +144,7 @@ int main()
         if (GAMESTATE == START) {
             if ( IsMouseButtonPressed(0) && CheckCollisionPointRec(GetMousePosition(), GameUI.startButton) )
             {
-                printf("Hello, box!\n");
+                printf("Game started!\n");
                 GAMESTATE = PLAY;
             }
         }
@@ -176,7 +177,6 @@ int main()
 
             // decrease speed total each frame
             currentTime = GetTime();
-            float speedDecrease;
             if (TOTAL_SPEED > 0 && ((currentTime - lastTime) >= TIME_INTERVAL) )
             {
                 lastTime = currentTime;
@@ -188,14 +188,18 @@ int main()
             if (TOTAL_SPEED > TOTAL_SPEED_MAX)
             {
                 TOTAL_SPEED = TOTAL_SPEED_MAX;
+                if (!DEBUG) // TEMP: removes fail state for testing
+                    GAMESTATE = FAIL;
             }
 
             // speed bar update logic
             GameUI.barWidth = TOTAL_SPEED * 4; // *4 because TOTAL_SPEED is out of 100, bar width is 400. TODO: make work with x=n
 
             // put max limit on the width
-            if (GameUI.barWidth > GameUI.barMax) { GameUI.barWidth = GameUI.barMax; }
-
+            if (GameUI.barWidth > GameUI.barMax)
+            {
+                GameUI.barWidth = GameUI.barMax;
+            }
 
             // set flag for warning message
             ( TOTAL_SPEED >= sensitivity ) ? (warning = true) : (warning = false);
@@ -207,7 +211,12 @@ int main()
 
             if (GAMESTATE == START) {
                 DrawTexture(GameUI.splashScreen, 0, 0, WHITE);
-                DrawRectangleRec(GameUI.startButton, BLACK);
+
+                if (CheckCollisionPointRec(GetMousePosition(), GameUI.startButton)) {
+                    DrawRectangleRec(GameUI.startButton, GRAY);
+                } else {
+                    DrawRectangleRec(GameUI.startButton, BLACK);
+                }
                 float startButtonTextLen = (float)MeasureText("PLAY", 50);
                 DrawText("PLAY",
                     GameUI.startButton.x + (GameUI.startButton.width/2 - startButtonTextLen/2),
@@ -226,7 +235,30 @@ int main()
 
                 DrawTextureV(Jar.tex, Jar.hitbox, WHITE);           // draw honey Jar
                 DrawTexture(Paw.tex, Paw.pos.x, Paw.pos.y, WHITE);  // draw bear Paw
-                DrawUI(&GameUI, warning, GameUI.barWidth);                 // draw UI
+                DrawUI(&GameUI, warning, GameUI.barWidth);          // draw UI
+
+                // TODO: bear nose from top-down when paw is past 75% of Y value, follow the mouse movement
+                Vector2 nosePos = { (WIDTH/2)-150, Paw.pos.y + HEIGHT*0.75 };
+                if (nosePos.y >= HEIGHT) { nosePos.y = HEIGHT; };
+                printf("HEIGHT: %0.2f\n", HEIGHT);
+                printf("nosePos.y: %0.2f\n", nosePos.y);
+                printf("nosePos.x: %0.2f\n", nosePos.x);
+                DrawTextureV(bearNose, nosePos, WHITE);
+            }
+
+            if (GAMESTATE == FAIL) {
+                DrawTexture(GameUI.splashScreen, 0, 0, WHITE);
+                DrawText("FAIL", WIDTH/2, HEIGHT/2, 200, RED);
+                // paw movement paused, Loud sound, old man angry
+                // picture of bear being arrested (fade in)
+                // restart button
+                if (IsKeyPressed(KEY_ENTER)) {
+                    GAMESTATE = START;
+                }
+             }
+            if (GAMESTATE == WIN) {
+                // picture of a happy bear, sympathy for the devil
+                // restart button
             }
 
 		EndDrawing();
@@ -237,7 +269,7 @@ int main()
     UnloadTexture(Jar.tex);
     UnloadTexture(Paw.tex);
 
-    for (int i=0; i < 3; i++) {
+    for (int i=0; i <= 3; i++) {
         printf("unloading: %d\n", GameUI.wakeStates[i].id);
         UnloadTexture(GameUI.wakeStates[i]);
     }
@@ -251,9 +283,7 @@ void DrawUI(UserInterface *ui, bool warning, int barWidth)
     // draw speed indicator in top left
     DrawRectangleRec(ui->infoBox, WHITE);       // background box
     DrawRectangleLinesEx(ui->infoBox, 5, RED);  // red outline
-
-    // the moving total bar
-    DrawRectangleGradientH(20, 20, barWidth, 30, GREEN, RED);
+    DrawRectangleGradientH(20, 20, barWidth, 30, GREEN, RED); // moving total bar
 
     if ( warning )
     {
@@ -262,7 +292,7 @@ void DrawUI(UserInterface *ui, bool warning, int barWidth)
 
     if (DEBUG) { DrawText(TextFormat("TOTAL_SPEED: %d", TOTAL_SPEED), 20, 60, 20, RED); }
 
-    // Draw old man in the corner)
+    // Draw old man in the corner
     if (TOTAL_SPEED >= 0) { DrawTexture(ui->wakeStates[0], 0, HEIGHT-250, WHITE); }
     if (TOTAL_SPEED >= 30) { DrawTexture(ui->wakeStates[1], 0, HEIGHT-250, WHITE); }
     if (TOTAL_SPEED >= 50) { DrawTexture(ui->wakeStates[2], 0, HEIGHT-250, WHITE); }
