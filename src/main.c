@@ -191,6 +191,16 @@ int main()
                 absMouseDelta = fabs(mouseDelta.x) + fabs(mouseDelta.y);
                 mouseSpeed = absMouseDelta;
                 TOTAL_SPEED = TOTAL_SPEED + (int)mouseSpeed;
+            } else if (mouseDelta.x == 0 && mouseDelta.y != 0)
+            {
+                absMouseDelta = fabs(mouseDelta.y);
+                mouseSpeed = absMouseDelta;
+                TOTAL_SPEED = TOTAL_SPEED + (int)mouseSpeed*2;
+            } else if (mouseDelta.x != 0 && mouseDelta.y == 0)
+            {
+                absMouseDelta = fabs(mouseDelta.x);
+                mouseSpeed = absMouseDelta;
+                TOTAL_SPEED = TOTAL_SPEED + (int)mouseSpeed*2;
             }
 
             // decrease speed total each frame
@@ -243,12 +253,12 @@ int main()
             }
 
             if (GAMESTATE == PLAY) {
-                DrawTexture(picnicBlanket, 0, 0, WHITE);            // draw background image
+                DrawTexture(picnicBlanket, 0, 0, WHITE);    // draw background image
                 // draw obstacles
                 for (int i=0; i <= obstaclesLen; i++)
                 {
                     Obstacle obs = obstacles[i];
-                    DrawRectangleRec(obs.rect, BLACK);              // draw obstacles
+                    DrawRectangleRec(obs.rect, BLACK);      // draw obstacles
                 }
 
                 DrawTextureV(Jar.tex, Jar.hitbox, WHITE);           // draw honey Jar
@@ -260,15 +270,16 @@ int main()
                 // Vector2 nosePos = { (Paw.pos.x-150), Paw.pos.y + HEIGHT*0.50 };
                 float noseThreshold = HEIGHT - bearNose.height;
 
+                // limit nose position past the bottom of the texture
                 if ( nosePos.y <= noseThreshold ) {
                     nosePos.y = noseThreshold;
                 };
 
-                if (DEBUG) {
-                    printf("HEIGHT: %0.2f\n", HEIGHT);
-                    printf("nosePos.y: %0.2f\n", nosePos.y);
-                    printf("nosePos.x: %0.2f\n", nosePos.x);
-                }
+                // if (DEBUG) {
+                //     printf("HEIGHT: %0.2f\n", HEIGHT);
+                //     printf("nosePos.y: %0.2f\n", nosePos.y);
+                //     printf("nosePos.x: %0.2f\n", nosePos.x);
+                // }
                 DrawTextureV(bearNose, nosePos, WHITE);
             }
 
