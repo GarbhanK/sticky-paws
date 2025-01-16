@@ -1,19 +1,34 @@
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <raylib.h>
 #include <raymath.h>
 
 /*
 TODOs:
-    - majorly clean up and finalise the SPEED logic, works now but old code left over that needs cleaning
-    - Vectorise the dy/dx mouse movement speed, I think moving diagonals is way faster than across
-    - add logic for the old man, different stages of awake
-    - add art for old man, maybe have him framed in a cool way? Old school TV with the antennas? courage the cowardly dog
-    - proper debug toggling logic
-    - get all of the text in the right place
-    - figure out what i'm going to do with the bar in the top right
-    - some kind of narrative framing around the bear seeing the guy? Periscope?
-    - add title screen with real image of a bear (make sure start button places paw at the bottom)
+    - [x] majorly clean up and finalise the SPEED logic, works now but old code left over that needs cleaning
+    - [ ] Vectorise the dy/dx mouse movement speed, I think moving diagonals is way faster than across
+    - [x] add logic for the old man, different stages of awake
+    - [x] add art for old man, maybe have him framed in a cool way? Old school TV with the antennas? courage the cowardly dog
+    - [x] proper debug toggling logic
+    - [ ] get all of the text in the right place
+    - [x] figure out what i'm going to do with the bar in the top right
+    - [ ] some kind of narrative framing around the bear seeing the guy? Periscope?
+    - [x] add title screen with real image of a bear (make sure start button places paw at the bottom)
+    - [ ] Ensure sticky members are reset to false when restarted after fail
+    - [ ] Stuck obj acting on unstuck obj, stuck object acting like it's being moved too. need to investigate/fix
+    - [ ] possibly replace jar of honey with a salmon
+    - [ ] add win animations of bear pics moving across screen overlapped
+    - [ ] need lots and lots of sfx for final polish
+        - sniffing nose
+        - snoring/sleeping
+        - obj movement
+        - sticking noise
+        - UI noises
+        - tense music?
+    - [ ] Countdown timer until loss state
+    - [ ] LERP smoothing
+    - [ ] Add bear nose and associated vars to Bear struct
 */
 
 typedef struct Bear {
@@ -145,6 +160,9 @@ int main()
             if ( IsMouseButtonPressed(0) && CheckCollisionPointRec(GetMousePosition(), GameUI.startButton) )
             {
                 printf("Game started!\n");
+                // TODO: reset everything
+                Jar.stuck = false;
+                Jar.pos = (Vector2){ WIDTH/2 + 50, 100 };
                 GAMESTATE = PLAY;
             }
         }
@@ -237,12 +255,20 @@ int main()
                 DrawTexture(Paw.tex, Paw.pos.x, Paw.pos.y, WHITE);  // draw bear Paw
                 DrawUI(&GameUI, warning, GameUI.barWidth);          // draw UI
 
-                // TODO: bear nose from top-down when paw is past 75% of Y value, follow the mouse movement
-                Vector2 nosePos = { (WIDTH/2)-150, Paw.pos.y + HEIGHT*0.75 };
-                if (nosePos.y >= HEIGHT) { nosePos.y = HEIGHT; };
-                printf("HEIGHT: %0.2f\n", HEIGHT);
-                printf("nosePos.y: %0.2f\n", nosePos.y);
-                printf("nosePos.x: %0.2f\n", nosePos.x);
+                Vector2 nosePos = { (WIDTH/2)-150, Paw.pos.y + HEIGHT*0.50 };
+                // TODO: maybe use below nose movement logic instead?
+                // Vector2 nosePos = { (Paw.pos.x-150), Paw.pos.y + HEIGHT*0.50 };
+                float noseThreshold = HEIGHT - bearNose.height;
+
+                if ( nosePos.y <= noseThreshold ) {
+                    nosePos.y = noseThreshold;
+                };
+
+                if (DEBUG) {
+                    printf("HEIGHT: %0.2f\n", HEIGHT);
+                    printf("nosePos.y: %0.2f\n", nosePos.y);
+                    printf("nosePos.x: %0.2f\n", nosePos.x);
+                }
                 DrawTextureV(bearNose, nosePos, WHITE);
             }
 
