@@ -15,7 +15,7 @@ TODOs:
     - [x] figure out what i'm going to do with the bar in the top right
     - [x] some kind of narrative framing around the bear seeing the guy? Periscope?
     - [x] add title screen with real image of a bear (make sure start button places paw at the bottom)
-    - [ ] Ensure sticky members are reset to false when restarted after fail
+    - [x] Ensure sticky members are reset to false when restarted after fail
     - [ ] Stuck obj acting on unstuck obj, stuck object acting like it's being moved too. need to investigate/fix
     - [ ] possibly replace jar of honey with a salmon
     - [ ] add win animations of bear pics moving across screen overlapped
@@ -25,7 +25,6 @@ TODOs:
         - obj movement
         - sticking noise
         - UI noises
-        - tense music?
     - [ ] Countdown timer until loss state
     - [ ] LERP smoothing
     - [ ] Add bear nose and associated vars to Bear struct
@@ -71,10 +70,12 @@ enum GAMESTATE {
 
 bool DEBUG = false;
 int SCORE = 0;
+int TIMER = 30;
 int TOTAL_SPEED = 0;
 float TOTAL_SPEED_MAX = 100.0f;
 float DECAY = 5.0f;
 double TIME_INTERVAL = 0.1f;
+
 
 const float WIDTH = 1024.0f;
 const float HEIGHT = 768.0f;
@@ -102,7 +103,7 @@ int main()
     Texture2D picnicBlanket = LoadTexture("assets/picnic_blanket_grass.png");
     Texture2D bearNose = LoadTexture("assets/bear_nose.png");
 
-    double currentTime, lastTime;
+    double currentTime, lastTime, timerPrev;
     float mouseSpeed, absMouseDelta, speedDecrease;
     int sensitivity = 50;
     bool warning = false;
@@ -176,6 +177,13 @@ int main()
         }
 
         if (GAMESTATE == PLAY) {
+            currentTime = GetTime();
+
+            // decrease timer every second (1.0 = 1 sec)
+            if ( (currentTime - timerPrev) >= 1.0 ) {
+                timerPrev = currentTime;
+                TIMER = TIMER - 1;
+            }
 
             // update paw movement
             Paw.pos.x = GetMouseX() - (float)Paw.tex.width/2;
@@ -193,7 +201,7 @@ int main()
             // handlePawPushing(&Paw, obstacles, obstaclesLen, &mouseDelta);
             handleObjectPushing(obstacles, obstaclesLen, &Jar, &mouseDelta);
 
-            // speed/scoring
+            // speed increase
             if (mouseDelta.x != 0 && mouseDelta.y != 0)
             {
                 absMouseDelta = fabs(mouseDelta.x) + fabs(mouseDelta.y);
@@ -252,7 +260,10 @@ int main()
                 resetObjects(&Jar, obstacles, obstaclesLen);
                 GAMESTATE = PLAY;
             }
+        }
 
+        if (GAMESTATE == WIN) {
+            printf("You Win!");
         }
 
         BeginDrawing();
@@ -303,6 +314,8 @@ int main()
                 //     printf("nosePos.x: %0.2f\n", nosePos.x);
                 // }
                 DrawTextureV(bearNose, nosePos, WHITE);
+
+                DrawText(TextFormat("TIMER: %d\n", TIMER), WIDTH/2, HEIGHT/2, 50, RED);
             }
 
             if (GAMESTATE == FAIL) {
@@ -405,7 +418,6 @@ void handleStickyObstacle(Bear *paw, Obstacle obs[], int arrLen, Vector2 *dt)
     }
 }
 
-
 void handleObjectPushing(Obstacle obs[], int arrLen, Honey *jar, Vector2 *dt)
 {
     for (int i=0; i <= arrLen; i++)
@@ -451,6 +463,11 @@ void handlePawPushing(Bear *paw, Obstacle obs[], int arrLen, Vector2 *dt)
 
 void resetObjects(Honey *jar, Obstacle obs[], int arrLen)
 {
+    // reset scores
+    TOTAL_SPEED = 0;
+    SCORE = 0;
+    TIMER = 30;
+
     // reset honey jar
     jar->stuck = false;
     jar->pos = (Vector2){ WIDTH/2 + 50, 100 };
