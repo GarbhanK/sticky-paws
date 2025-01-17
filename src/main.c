@@ -226,6 +226,9 @@ int main()
                 GameUI.barWidth = GameUI.barMax;
             }
 
+            // win game logic
+            if (Jar.pos.y >= HEIGHT) { GAMESTATE = WIN; }
+
             // set flag for warning message
             ( TOTAL_SPEED >= sensitivity ) ? (warning = true) : (warning = false);
         }
@@ -295,8 +298,6 @@ int main()
                 //     printf("nosePos.x: %0.2f\n", nosePos.x);
                 // }
                 DrawTextureV(bearNose, nosePos, WHITE);
-
-                DrawText(TextFormat("TIMER: %d\n", TIMER), WIDTH/2, HEIGHT/2, 50, RED);
             }
 
             if (GAMESTATE == FAIL) {
@@ -319,6 +320,7 @@ int main()
             if (GAMESTATE == WIN) {
                 // picture of a happy bear, sympathy for the devil
                 // restart button
+                DrawText("WIN", WIDTH/2, HEIGHT/2, 100, RED);
             }
 
 		EndDrawing();
@@ -351,6 +353,7 @@ void DrawUI(UserInterface *ui, bool warning, int barWidth)
     }
 
     if (DEBUG) { DrawText(TextFormat("TOTAL_SPEED: %d", TOTAL_SPEED), 20, 60, 20, RED); }
+    if (!DEBUG) { DrawText(TextFormat("TIMER: %d", TIMER), 20, 60, 20, RED); }
 
     // Draw old man in the corner
     if (TOTAL_SPEED >= 0) { DrawTexture(ui->wakeStates[0], 0, HEIGHT-250, WHITE); }
