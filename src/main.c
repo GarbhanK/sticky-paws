@@ -33,6 +33,7 @@ TODOs:
 typedef struct Bear {
     Rectangle hitbox;
     Texture2D tex;
+    Texture2D nose;
     Vector2 pos;
 } Bear;
 
@@ -87,11 +88,27 @@ void handleStickyObstacle(Bear *paw, Obstacle obs[], int arrLen, Vector2 *dt);
 void handlePawPushing(Bear *paw, Obstacle obs[], int arrLen, Vector2 *dt);
 void handleObjectPushing(Obstacle obs[], int arrLen, Honey *jar, Vector2 *dt);
 
-void DrawUI(UserInterface *ui, bool warning, int barWidth);
+void drawUI(UserInterface *ui, bool warning, int barWidth);
+void drawBear(Bear *b);
 void resetObjects(Honey *jar, Obstacle obs[], int arrLen);
 void handleSpeed(Vector2 *dt);
 
+void drawBear(Bear *b)
+{
+    // draw bear paw
+    DrawTexture(b->tex, b->pos.x, b->pos.y, WHITE);
 
+    float noseThreshold = HEIGHT - b->nose.height;
+    Vector2 nosePos = { (WIDTH/2)-150, b->pos.y + HEIGHT*0.50 };
+    // TODO: maybe use below nose movement logic instead?
+    // Vector2 nosePos = { (Paw.pos.x-150), Paw.pos.y + HEIGHT*0.50 };
+
+    // limit nose position past the bottom of the texture
+    if ( nosePos.y <= noseThreshold ) {
+        nosePos.y = noseThreshold;
+    };
+    DrawTextureV(b->nose, nosePos, WHITE);
+}
 
 Rectangle obstacleInit[] = {
     { 30, HEIGHT/2, 150, 150 },
@@ -125,6 +142,7 @@ int main()
 
     Bear Paw = {
         .tex = LoadTexture("assets/sticky_paw.png"),
+        .nose = LoadTexture("assets/bear_nose.png")
     };
 
     Honey Jar = {
@@ -271,33 +289,22 @@ int main()
 
             if (GAMESTATE == PLAY) {
                 DrawTexture(picnicBlanket, 0, 0, WHITE);    // draw background image
-                // draw obstacles
+
                 for (int i=0; i <= obstaclesLen; i++)
                 {
                     Obstacle obs = obstacles[i];
                     DrawRectangleRec(obs.rect, BLACK);      // draw obstacles
                 }
 
-                DrawTextureV(Jar.tex, Jar.hitbox, WHITE);           // draw honey Jar
-                DrawTexture(Paw.tex, Paw.pos.x, Paw.pos.y, WHITE);  // draw bear Paw
-                DrawUI(&GameUI, warning, GameUI.barWidth);          // draw UI
-
-                Vector2 nosePos = { (WIDTH/2)-150, Paw.pos.y + HEIGHT*0.50 };
-                // TODO: maybe use below nose movement logic instead?
-                // Vector2 nosePos = { (Paw.pos.x-150), Paw.pos.y + HEIGHT*0.50 };
-                float noseThreshold = HEIGHT - bearNose.height;
-
-                // limit nose position past the bottom of the texture
-                if ( nosePos.y <= noseThreshold ) {
-                    nosePos.y = noseThreshold;
-                };
+                DrawTextureV(Jar.tex, Jar.hitbox, WHITE);   // draw honey Jar
+                drawUI(&GameUI, warning, GameUI.barWidth);  // draw UI
+                drawBear(&Paw);
 
                 // if (DEBUG) {
                 //     printf("HEIGHT: %0.2f\n", HEIGHT);
                 //     printf("nosePos.y: %0.2f\n", nosePos.y);
                 //     printf("nosePos.x: %0.2f\n", nosePos.x);
                 // }
-                DrawTextureV(bearNose, nosePos, WHITE);
             }
 
             if (GAMESTATE == FAIL) {
@@ -330,6 +337,7 @@ int main()
     UnloadTexture(picnicBlanket);
     UnloadTexture(Jar.tex);
     UnloadTexture(Paw.tex);
+    UnloadTexture(Paw.nose);
 
     for (int i=0; i <= 3; i++) {
         printf("unloading: %d\n", GameUI.wakeStates[i].id);
@@ -340,7 +348,7 @@ int main()
 	return 0;
 }
 
-void DrawUI(UserInterface *ui, bool warning, int barWidth)
+void drawUI(UserInterface *ui, bool warning, int barWidth)
 {
     // draw speed indicator in top left
     DrawRectangleRec(ui->infoBox, WHITE);       // background box
