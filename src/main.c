@@ -7,13 +7,13 @@
 /*
 TODOs:
     - [x] majorly clean up and finalise the SPEED logic, works now but old code left over that needs cleaning
-    - [ ] Vectorise the dy/dx mouse movement speed, I think moving diagonals is way faster than across
+    - [x] Vectorise the dy/dx mouse movement speed, I think moving diagonals is way faster than across
     - [x] add logic for the old man, different stages of awake
     - [x] add art for old man, maybe have him framed in a cool way? Old school TV with the antennas? courage the cowardly dog
     - [x] proper debug toggling logic
     - [ ] get all of the text in the right place
     - [x] figure out what i'm going to do with the bar in the top right
-    - [ ] some kind of narrative framing around the bear seeing the guy? Periscope?
+    - [x] some kind of narrative framing around the bear seeing the guy? Periscope?
     - [x] add title screen with real image of a bear (make sure start button places paw at the bottom)
     - [ ] Ensure sticky members are reset to false when restarted after fail
     - [ ] Stuck obj acting on unstuck obj, stuck object acting like it's being moved too. need to investigate/fix
@@ -58,6 +58,7 @@ typedef struct UserInterface {
     int barMax;
     Rectangle startButton;
     Texture2D splashScreen;
+    Texture2D failScreen;
     Texture2D wakeStates[4];
 } UserInterface;
 
@@ -86,7 +87,14 @@ void handlePawPushing(Bear *paw, Obstacle obs[], int arrLen, Vector2 *dt);
 void handleObjectPushing(Obstacle obs[], int arrLen, Honey *jar, Vector2 *dt);
 
 void DrawUI(UserInterface *ui, bool warning, int barWidth);
+void resetObjects(Honey *jar, Obstacle obs[], int arrLen);
 
+Rectangle obstacleInit[] = {
+    { 30, HEIGHT/2, 150, 150 },
+    { 500, HEIGHT/3, 70, 200 },
+    { 300, 250, 30, 50 },
+    { 800, 500, 80, 110 }
+};
 
 int main()
 {
@@ -103,10 +111,10 @@ int main()
 
     // additional obsacles, e.g other picnic items
     Obstacle obstacles[] = {
-        { { 30, HEIGHT/2, 150, 150 }, false, 10 },
-        { { 500, HEIGHT/3, 70, 200 }, false, 10 },
-        { { 300, 250, 30, 50 }, false, 10 },
-        { { 800, 500, 80, 110 }, false, 10 },
+        { obstacleInit[0], false, 10 },
+        { obstacleInit[1], false, 10 },
+        { obstacleInit[2], false, 10 },
+        { obstacleInit[3], false, 10 },
     };
     int obstaclesLen = sizeof(obstacles)/sizeof(obstacles[0]);
 
@@ -127,6 +135,7 @@ int main()
         .barMax = GameUI.infoBox.width - (40),
         .startButton = { WIDTH/2 - 200, HEIGHT-120, 400, 100 },
         .splashScreen = LoadTexture("assets/bear_splash.jpg"),
+        .failScreen = LoadTexture("assets/bear_jail.png"),
         .wakeStates = {
             LoadTexture("assets/tv_asleep.png"),
             LoadTexture("assets/tv_1.png"),
@@ -161,8 +170,7 @@ int main()
             {
                 printf("Game started!\n");
                 // TODO: reset everything
-                Jar.stuck = false;
-                Jar.pos = (Vector2){ WIDTH/2 + 50, 100 };
+                resetObjects(&Jar, obstacles, obstaclesLen);
                 GAMESTATE = PLAY;
             }
         }
@@ -233,6 +241,20 @@ int main()
             ( TOTAL_SPEED >= sensitivity ) ? (warning = true) : (warning = false);
         }
 
+        if (GAMESTATE == FAIL)
+        {
+            if (IsKeyPressed(KEY_ENTER)) {
+                GAMESTATE = START;
+            }
+
+            if ( IsMouseButtonPressed(0) && CheckCollisionPointRec(GetMousePosition(), GameUI.startButton) )
+            {
+                resetObjects(&Jar, obstacles, obstaclesLen);
+                GAMESTATE = PLAY;
+            }
+
+        }
+
         BeginDrawing();
 
             ClearBackground(RAYWHITE);
@@ -284,15 +306,22 @@ int main()
             }
 
             if (GAMESTATE == FAIL) {
-                DrawTexture(GameUI.splashScreen, 0, 0, WHITE);
+                DrawTexture(GameUI.failScreen, 0, 0, WHITE);
                 DrawText("FAIL", WIDTH/2, HEIGHT/2, 200, RED);
-                // paw movement paused, Loud sound, old man angry
-                // picture of bear being arrested (fade in)
                 // restart button
-                if (IsKeyPressed(KEY_ENTER)) {
-                    GAMESTATE = START;
+                // TODO: turn into common function with start code
+                if (CheckCollisionPointRec(GetMousePosition(), GameUI.startButton)) {
+                    DrawRectangleRec(GameUI.startButton, GRAY);
+                } else {
+                    DrawRectangleRec(GameUI.startButton, BLACK);
                 }
-             }
+                float startButtonTextLen = (float)MeasureText("PLAY", 50);
+                DrawText("PLAY",
+                    GameUI.startButton.x + (GameUI.startButton.width/2 - startButtonTextLen/2),
+                    GameUI.startButton.y + (GameUI.startButton.height/2 - 25),
+                    50, WHITE);
+            }
+
             if (GAMESTATE == WIN) {
                 // picture of a happy bear, sympathy for the devil
                 // restart button
@@ -417,5 +446,20 @@ void handlePawPushing(Bear *paw, Obstacle obs[], int arrLen, Vector2 *dt)
             subject->rect.x = subject->rect.x + dt->x;
             subject->rect.y = subject->rect.y + dt->y;
         }
+    }
+}
+
+void resetObjects(Honey *jar, Obstacle obs[], int arrLen)
+{
+    // reset honey jar
+    jar->stuck = false;
+    jar->pos = (Vector2){ WIDTH/2 + 50, 100 };
+    jar->hitbox = jar->pos;
+
+    // loop through obstacles and set to original x/y
+    for (int i = 0; i <= arrLen; i++) {
+        Obstacle *o = &obs[i];
+        o->stuck = false;
+        o->rect = obstacleInit[i];
     }
 }
