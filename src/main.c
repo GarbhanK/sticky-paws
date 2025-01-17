@@ -89,6 +89,9 @@ void handleObjectPushing(Obstacle obs[], int arrLen, Honey *jar, Vector2 *dt);
 
 void DrawUI(UserInterface *ui, bool warning, int barWidth);
 void resetObjects(Honey *jar, Obstacle obs[], int arrLen);
+void handleSpeed(Vector2 *dt);
+
+
 
 Rectangle obstacleInit[] = {
     { 30, HEIGHT/2, 150, 150 },
@@ -104,7 +107,8 @@ int main()
     Texture2D bearNose = LoadTexture("assets/bear_nose.png");
 
     double currentTime, lastTime, timerPrev;
-    float mouseSpeed, absMouseDelta, speedDecrease;
+    // float mouseSpeed, absMouseDelta, speedDecrease;
+    float speedDecrease;
     int sensitivity = 50;
     bool warning = false;
 
@@ -156,6 +160,10 @@ int main()
         {
             (DEBUG) ? (DEBUG = false) : (DEBUG = true);
         }
+        if (IsKeyPressed(KEY_R))
+        {
+            GAMESTATE = PLAY;
+        }
 
         // debug printing
         if (DEBUG && (mouseDelta.x != 0 && mouseDelta.y != 0) )
@@ -169,8 +177,6 @@ int main()
         if (GAMESTATE == START) {
             if ( IsMouseButtonPressed(0) && CheckCollisionPointRec(GetMousePosition(), GameUI.startButton) )
             {
-                printf("Game started!\n");
-                // TODO: reset everything
                 resetObjects(&Jar, obstacles, obstaclesLen);
                 GAMESTATE = PLAY;
             }
@@ -201,39 +207,14 @@ int main()
             // handlePawPushing(&Paw, obstacles, obstaclesLen, &mouseDelta);
             handleObjectPushing(obstacles, obstaclesLen, &Jar, &mouseDelta);
 
-            // speed increase
-            if (mouseDelta.x != 0 && mouseDelta.y != 0)
-            {
-                absMouseDelta = fabs(mouseDelta.x) + fabs(mouseDelta.y);
-                mouseSpeed = absMouseDelta;
-                TOTAL_SPEED = TOTAL_SPEED + (int)mouseSpeed;
-            } else if (mouseDelta.x == 0 && mouseDelta.y != 0)
-            {
-                absMouseDelta = fabs(mouseDelta.y);
-                mouseSpeed = absMouseDelta;
-                TOTAL_SPEED = TOTAL_SPEED + (int)mouseSpeed*2;
-            } else if (mouseDelta.x != 0 && mouseDelta.y == 0)
-            {
-                absMouseDelta = fabs(mouseDelta.x);
-                mouseSpeed = absMouseDelta;
-                TOTAL_SPEED = TOTAL_SPEED + (int)mouseSpeed*2;
-            }
+            handleSpeed(&mouseDelta);
 
             // decrease speed total each frame
-            currentTime = GetTime();
             if (TOTAL_SPEED > 0 && ((currentTime - lastTime) >= TIME_INTERVAL) )
             {
                 lastTime = currentTime;
                 speedDecrease = fabs(TOTAL_SPEED - DECAY);
                 TOTAL_SPEED = (int)speedDecrease;
-            }
-
-            // limit the total speed
-            if (TOTAL_SPEED > TOTAL_SPEED_MAX)
-            {
-                TOTAL_SPEED = TOTAL_SPEED_MAX;
-                if (!DEBUG) // TEMP: removes fail state for testing
-                    GAMESTATE = FAIL;
             }
 
             // speed bar update logic
@@ -478,5 +459,36 @@ void resetObjects(Honey *jar, Obstacle obs[], int arrLen)
         Obstacle *o = &obs[i];
         o->stuck = false;
         o->rect = obstacleInit[i];
+    }
+}
+
+void handleSpeed(Vector2 *dt)
+{
+    float absMouseDelta, mouseSpeed;
+
+    // speed increase
+    if (dt->x != 0 && dt->y != 0)
+    {
+        absMouseDelta = fabs(dt->x) + fabs(dt->y);
+        mouseSpeed = absMouseDelta;
+        TOTAL_SPEED = TOTAL_SPEED + (int)mouseSpeed;
+    } else if (dt->x == 0 && dt->y != 0)
+    {
+        absMouseDelta = fabs(dt->y);
+        mouseSpeed = absMouseDelta;
+        TOTAL_SPEED = TOTAL_SPEED + (int)mouseSpeed*2;
+    } else if (dt->x != 0 && dt->y == 0)
+    {
+        absMouseDelta = fabs(dt->x);
+        mouseSpeed = absMouseDelta;
+        TOTAL_SPEED = TOTAL_SPEED + (int)mouseSpeed*2;
+    }
+
+    // limit the total speed
+    if (TOTAL_SPEED > TOTAL_SPEED_MAX)
+    {
+        TOTAL_SPEED = TOTAL_SPEED_MAX;
+        if (!DEBUG) // TEMP: removes fail state for testing
+            GAMESTATE = FAIL;
     }
 }
