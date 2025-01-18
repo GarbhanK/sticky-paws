@@ -1,8 +1,11 @@
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
+
 #include <raylib.h>
 #include <raymath.h>
+
+#include "ui.h"
 
 /*
 TODOs:
@@ -27,7 +30,7 @@ TODOs:
         - UI noises
     - [ ] Countdown timer until loss state
     - [ ] LERP smoothing
-    - [ ] Add bear nose and associated vars to Bear struct
+    - [x] Add bear nose and associated vars to Bear struct
 */
 
 typedef struct Bear {
@@ -52,16 +55,6 @@ typedef struct Obstacle {
     int value;
 } Obstacle;
 
-typedef struct UserInterface {
-    Rectangle infoBox;
-    int barWidth;
-    int barMax;
-    Rectangle startButton;
-    Texture2D splashScreen;
-    Texture2D failScreen;
-    Texture2D wakeStates[4];
-} UserInterface;
-
 enum GAMESTATE {
     START,
     PLAY,
@@ -77,7 +70,6 @@ float TOTAL_SPEED_MAX = 100.0f;
 float DECAY = 5.0f;
 double TIME_INTERVAL = 0.1f;
 
-
 const float WIDTH = 1024.0f;
 const float HEIGHT = 768.0f;
 
@@ -88,27 +80,11 @@ void handleStickyObstacle(Bear *paw, Obstacle obs[], int arrLen, Vector2 *dt);
 void handlePawPushing(Bear *paw, Obstacle obs[], int arrLen, Vector2 *dt);
 void handleObjectPushing(Obstacle obs[], int arrLen, Honey *jar, Vector2 *dt);
 
-void drawUI(UserInterface *ui, bool warning, int barWidth);
+// void drawUI(UserInterface *ui, bool warning, int barWidth, int totalSpeed);
 void drawBear(Bear *b);
 void resetObjects(Honey *jar, Obstacle obs[], int arrLen);
 void handleSpeed(Vector2 *dt);
 
-void drawBear(Bear *b)
-{
-    // draw bear paw
-    DrawTexture(b->tex, b->pos.x, b->pos.y, WHITE);
-
-    float noseThreshold = HEIGHT - b->nose.height;
-    Vector2 nosePos = { (WIDTH/2)-150, b->pos.y + HEIGHT*0.50 };
-    // TODO: maybe use below nose movement logic instead?
-    // Vector2 nosePos = { (Paw.pos.x-150), Paw.pos.y + HEIGHT*0.50 };
-
-    // limit nose position past the bottom of the texture
-    if ( nosePos.y <= noseThreshold ) {
-        nosePos.y = noseThreshold;
-    };
-    DrawTextureV(b->nose, nosePos, WHITE);
-}
 
 Rectangle obstacleInit[] = {
     { 30, HEIGHT/2, 150, 150 },
@@ -121,7 +97,8 @@ int main()
 {
 	InitWindow(WIDTH, HEIGHT, "Sticky Paws");
     Texture2D picnicBlanket = LoadTexture("assets/picnic_blanket_grass.png");
-    Texture2D bearNose = LoadTexture("assets/bear_nose.png");
+
+    greet();
 
     double currentTime, lastTime, timerPrev;
     // float mouseSpeed, absMouseDelta, speedDecrease;
@@ -348,28 +325,6 @@ int main()
 	return 0;
 }
 
-void drawUI(UserInterface *ui, bool warning, int barWidth)
-{
-    // draw speed indicator in top left
-    DrawRectangleRec(ui->infoBox, WHITE);       // background box
-    DrawRectangleLinesEx(ui->infoBox, 5, RED);  // red outline
-    DrawRectangleGradientH(20, 20, barWidth, 30, GREEN, RED); // moving total bar
-
-    if ( warning )
-    {
-        DrawText("TOO FAST!", 20, 60, 20, RED);
-    }
-
-    if (DEBUG) { DrawText(TextFormat("TOTAL_SPEED: %d", TOTAL_SPEED), 20, 60, 20, RED); }
-    if (!DEBUG) { DrawText(TextFormat("TIMER: %d", TIMER), 20, 60, 20, RED); }
-
-    // Draw old man in the corner
-    if (TOTAL_SPEED >= 0) { DrawTexture(ui->wakeStates[0], 0, HEIGHT-250, WHITE); }
-    if (TOTAL_SPEED >= 30) { DrawTexture(ui->wakeStates[1], 0, HEIGHT-250, WHITE); }
-    if (TOTAL_SPEED >= 50) { DrawTexture(ui->wakeStates[2], 0, HEIGHT-250, WHITE); }
-    if (TOTAL_SPEED >= 80) { DrawTexture(ui->wakeStates[3], 0, HEIGHT-250, WHITE); }
-}
-
 void handleStickyJar(Bear *paw, Honey *jar, Vector2 *dt)
 {
     if (!jar->stuck)
@@ -502,4 +457,21 @@ void handleSpeed(Vector2 *dt)
         if (!DEBUG) // TEMP: removes fail state for testing
             GAMESTATE = FAIL;
     }
+}
+
+void drawBear(Bear *b)
+{
+    // draw bear paw
+    DrawTexture(b->tex, b->pos.x, b->pos.y, WHITE);
+
+    float noseThreshold = HEIGHT - b->nose.height;
+    Vector2 nosePos = { (WIDTH/2)-150, b->pos.y + HEIGHT*0.50 };
+    // TODO: maybe use below nose movement logic instead?
+    // Vector2 nosePos = { (Paw.pos.x-150), Paw.pos.y + HEIGHT*0.50 };
+
+    // limit nose position past the bottom of the texture
+    if ( nosePos.y <= noseThreshold ) {
+        nosePos.y = noseThreshold;
+    };
+    DrawTextureV(b->nose, nosePos, WHITE);
 }
