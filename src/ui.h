@@ -12,3 +12,4 @@ typedef struct UserInterface {
 
 void greet();
 void drawUI(UserInterface *ui, bool warning, int barWidth);
+void drawButton(char *msg, Rectangle area);

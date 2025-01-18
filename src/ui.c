@@ -34,6 +34,20 @@ void drawUI(UserInterface *ui, bool warning, int barWidth)
     if (TOTAL_SPEED >= 80) { DrawTexture(ui->wakeStates[3], 0, HEIGHT-250, WHITE); }
 }
 
+void drawButton(char *msg, Rectangle area)
+{
+    if (CheckCollisionPointRec(GetMousePosition(), area)) {
+        DrawRectangleRec(area, GRAY);
+    } else {
+        DrawRectangleRec(area, BLACK);
+    }
+    float startButtonTextLen = (float)MeasureText(msg, 50);
+    DrawText(msg,
+        area.x + (area.width/2 - startButtonTextLen/2),
+        area.y + (area.height/2 - 25),
+        50, WHITE);
+}
+
 // void drawBear(Bear *b)
 // {
 //     // draw bear paw

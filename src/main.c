@@ -93,6 +93,13 @@ Rectangle obstacleInit[] = {
     { 800, 500, 80, 110 }
 };
 
+// try struct array method
+typedef struct {
+    Obstacle* items;
+    int length;
+    int capacity;
+} ObstacleArray;
+
 int main()
 {
 	InitWindow(WIDTH, HEIGHT, "Sticky Paws");
@@ -251,17 +258,7 @@ int main()
 
             if (GAMESTATE == START) {
                 DrawTexture(GameUI.splashScreen, 0, 0, WHITE);
-
-                if (CheckCollisionPointRec(GetMousePosition(), GameUI.startButton)) {
-                    DrawRectangleRec(GameUI.startButton, GRAY);
-                } else {
-                    DrawRectangleRec(GameUI.startButton, BLACK);
-                }
-                float startButtonTextLen = (float)MeasureText("PLAY", 50);
-                DrawText("PLAY",
-                    GameUI.startButton.x + (GameUI.startButton.width/2 - startButtonTextLen/2),
-                    GameUI.startButton.y + (GameUI.startButton.height/2 - 25),
-                    50, WHITE);
+                drawButton("PLAY", GameUI.startButton);
             }
 
             if (GAMESTATE == PLAY) {
@@ -287,18 +284,7 @@ int main()
             if (GAMESTATE == FAIL) {
                 DrawTexture(GameUI.failScreen, 0, 0, WHITE);
                 DrawText("FAIL", WIDTH/2, HEIGHT/2, 200, RED);
-                // restart button
-                // TODO: turn into common function with start code
-                if (CheckCollisionPointRec(GetMousePosition(), GameUI.startButton)) {
-                    DrawRectangleRec(GameUI.startButton, GRAY);
-                } else {
-                    DrawRectangleRec(GameUI.startButton, BLACK);
-                }
-                float startButtonTextLen = (float)MeasureText("PLAY", 50);
-                DrawText("PLAY",
-                    GameUI.startButton.x + (GameUI.startButton.width/2 - startButtonTextLen/2),
-                    GameUI.startButton.y + (GameUI.startButton.height/2 - 25),
-                    50, WHITE);
+                drawButton("RESTART", GameUI.startButton);
             }
 
             if (GAMESTATE == WIN) {
