@@ -36,7 +36,7 @@ TODOs:
 typedef struct Honey {
     Texture2D tex;
     Vector2 pos;
-    Rectangle hitbox_r;
+    Rectangle hitbox;
     bool stuck;
     int value;
 } Honey;
@@ -82,7 +82,7 @@ void handlePawPushing(Bear *b, Obstacle obs[], int arrLen, Vector2 *dt);
 void handleObjectPushing(Obstacle obs[], int arrLen, Honey *jar, Vector2 *dt);
 
 void resetObjects(Honey *jar, Obstacle obs[], int arrLen);
-void handleSpeed(Vector2 *dt);
+void handleSpeed();
 
 
 Rectangle obstacleInit[] = {
@@ -102,6 +102,13 @@ int main()
     bool warning = false;
 
     GAMESTATE = START;
+
+    // TODO: change for existing obstacles[] array
+    // ObstacleArray Obs = {
+    //     .init = obstacleInit,
+    //     .items = obstacles,
+    //     .len = sizeof(obstacles)/sizeof(obstacles[0]),
+    // };
 
     // additional obsacles, e.g other picnic items
     Obstacle obstacles[] = {
@@ -179,8 +186,7 @@ int main()
             Paw.hitbox = (Rectangle){ Paw.pos.x, Paw.pos.y, Paw.tex.width, Paw.tex.height };
 
             // update Jar hitbox
-            // Jar.hitbox = (Vector2){ Jar.pos.x - Jar.radius, Jar.pos.y - Jar.radius };
-            Jar.hitbox_r = (Rectangle){
+            Jar.hitbox = (Rectangle){
                 Jar.pos.x + 10,
                 Jar.pos.y + 15,
                 Jar.tex.width - 20,
@@ -195,7 +201,7 @@ int main()
             // handlePawPushing(&Paw, obstacles, obstaclesLen, &mouseDelta);
             handleObjectPushing(obstacles, obstaclesLen, &Jar, &mouseDelta);
 
-            handleSpeed(&mouseDelta);
+            handleSpeed();
 
             // decrease speed total each frame
             if (TOTAL_SPEED > 0 && ((currentTime - lastTime) >= TIME_INTERVAL) )
@@ -250,7 +256,7 @@ int main()
                 }
 
                 DrawTexture(Jar.tex, Jar.pos.x, Jar.pos.y, WHITE);   // draw honey Jar
-                DrawRectangleRec(Jar.hitbox_r, GREEN);               // DEBUG HONEY HITBOX
+                    DrawRectangleRec(Jar.hitbox, GREEN);               // DEBUG HONEY HITBOX
 
                 drawUI(&GameUI, warning, GameUI.barWidth);  // draw UI
                 drawBear(&Paw);
@@ -292,7 +298,7 @@ void handleStickyJar(Bear *paw, Honey *jar, Vector2 *dt)
 {
     if (!jar->stuck)
     {
-        if ( CheckCollisionRecs(jar->hitbox_r, paw->hitbox) )
+        if ( CheckCollisionRecs(jar->hitbox, paw->hitbox) )
         {
             jar->stuck = true;
             SCORE += jar->value;
@@ -351,7 +357,7 @@ void handleObjectPushing(Obstacle obs[], int arrLen, Honey *jar, Vector2 *dt)
         }
 
         // object on honey jar logic
-        if ( CheckCollisionRecs(jar->hitbox_r, actor->rect) )
+        if ( CheckCollisionRecs(jar->hitbox, actor->rect) )
         {
             if (!jar->stuck) {
                 jar->pos.x = jar->pos.x + dt->x;
@@ -389,7 +395,7 @@ void resetObjects(Honey *jar, Obstacle obs[], int arrLen)
     jar->stuck = false;
     jar->pos = (Vector2){ WIDTH/2 + 50, 100 };
     // jar->hitbox = jar->pos;
-    jar->hitbox_r = (Rectangle){ jar->pos.x, jar->pos.y, jar->hitbox_r.width, jar->hitbox_r.height };
+    jar->hitbox = (Rectangle){ jar->pos.x, jar->pos.y, jar->hitbox.width, jar->hitbox.height };
 
     // loop through obstacles and set to original x/y
     for (int i = 0; i <= arrLen; i++) {
@@ -399,33 +405,30 @@ void resetObjects(Honey *jar, Obstacle obs[], int arrLen)
     }
 }
 
-void handleSpeed(Vector2 *dt)
+void handleSpeed()
 {
+    Vector2 dt = GetMouseDelta();
     float absMouseDelta, mouseSpeed;
 
     // speed increase
-    if (dt->x != 0 && dt->y != 0)
-    {
-        absMouseDelta = fabs(dt->x) + fabs(dt->y);
+    if (dt.x != 0 && dt.y != 0) {
+        absMouseDelta = fabs(dt.x) + fabs(dt.y);
         mouseSpeed = absMouseDelta;
         TOTAL_SPEED = TOTAL_SPEED + ((int)mouseSpeed * SENSITIVITY);
-    } else if (dt->x == 0 && dt->y != 0)
-    {
-        absMouseDelta = fabs(dt->y);
+    } else if (dt.x == 0 && dt.y != 0) {
+        absMouseDelta = fabs(dt.y);
         mouseSpeed = absMouseDelta;
         // TOTAL_SPEED = TOTAL_SPEED + (int)mouseSpeed*2;
         TOTAL_SPEED = TOTAL_SPEED + ((int)mouseSpeed*2 * SENSITIVITY);
-    } else if (dt->x != 0 && dt->y == 0)
-    {
-        absMouseDelta = fabs(dt->x);
+    } else if (dt.x != 0 && dt.y == 0) {
+        absMouseDelta = fabs(dt.x);
         mouseSpeed = absMouseDelta;
         // TOTAL_SPEED = TOTAL_SPEED + (int)mouseSpeed*2;
         TOTAL_SPEED = TOTAL_SPEED + ((int)mouseSpeed*2 * SENSITIVITY);
     }
 
     // limit the total speed
-    if (TOTAL_SPEED > TOTAL_SPEED_MAX)
-    {
+    if (TOTAL_SPEED > TOTAL_SPEED_MAX) {
         TOTAL_SPEED = TOTAL_SPEED_MAX;
         if (!DEBUG) // TEMP: removes fail state for testing
             GAMESTATE = FAIL;
