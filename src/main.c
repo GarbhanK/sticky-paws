@@ -45,27 +45,25 @@ typedef struct Honey {
     Texture2D tex;
     Vector2 pos;
     Vector2 hitbox;
+    Rectangle hitbox_r;
     float radius;
     bool stuck;
     int value;
 } Honey;
 
-typedef struct Obstacle {
+typedef struct Obstacle{
     Rectangle rect;
     bool stuck;
     int value;
+    Texture2D tex;
 } Obstacle;
 
 typedef struct {
-    int actor;
-    int subject;
-} ObstaclePair;
-
-typedef struct {
-    ObstaclePair* items;
-    int len;
-    int cap;
-} ObstaclePairArray;
+    Obstacle* items;    // the Obstacles
+    Rectangle* init;    // array of rect positions to restart/init the game
+    int len;    // current no. items
+    int cap;    // total arr capacity
+} ObstacleArray;
 
 enum GAMESTATE {
     START,
@@ -91,9 +89,7 @@ void handleStickyJar(Bear *paw, Honey *jar, Vector2 *dt);
 void handleStickyObstacle(Bear *paw, Obstacle obs[], int arrLen, Vector2 *dt);
 
 void handlePawPushing(Bear *paw, Obstacle obs[], int arrLen, Vector2 *dt);
-void handleObjectPushing(ObstaclePairArray *o, Obstacle obs[], int arrLen, Honey *jar, Vector2 *dt);
-bool checkSubjectActorPairs(ObstaclePairArray *o, int a, int s);
-bool pairInArray(ObstaclePairArray *o, ObstaclePair pair);
+void handleObjectPushing(Obstacle obs[], int arrLen, Honey *jar, Vector2 *dt);
 
 void drawBear(Bear *b);
 void resetObjects(Honey *jar, Obstacle obs[], int arrLen);
@@ -108,32 +104,12 @@ Rectangle obstacleInit[] = {
 };
 
 
-void insertPair(ObstaclePairArray *o, ObstaclePair *newPair)
-{
-    printf("Inserting: (%d, %d) @ %d\n", newPair->actor, newPair->subject, o->len);
-    o->items[o->len] = *newPair;
-    o->len = o->len + 1;
-}
-
-void printArray(ObstaclePairArray* arr)
-{
-    // for (int i=0; i <= arr->cap; i++) {
-    for (int i=0; i <= arr->len; i++) {
-        ObstaclePair* el = &arr->items[i];
-        printf("idx %d: (%d, %d)\n", i, el->actor, el->subject);
-    }
-}
-
-
 int main()
 {
 	InitWindow(WIDTH, HEIGHT, "Sticky Paws");
-    Texture2D picnicBlanket = LoadTexture("assets/picnic_blanket_grass.png");
-
-    greet();
+    // Texture2D picnicBlanket = LoadTexture("assets/picnic_blanket_grass.png");
 
     double currentTime, lastTime, timerPrev;
-    // float mouseSpeed, absMouseDelta, speedDecrease;
     float speedDecrease;
     int sensitivity = 50;
     bool warning = false;
@@ -166,6 +142,7 @@ int main()
         .infoBox = { 0, 0, 400, 100 },
         .barMax = GameUI.infoBox.width - (40),
         .startButton = { WIDTH/2 - 200, HEIGHT-120, 400, 100 },
+        .background = LoadTexture("assets/picnic_blanket_grass.png"),
         .splashScreen = LoadTexture("assets/bear_splash.jpg"),
         .failScreen = LoadTexture("assets/bear_jail.png"),
         .wakeStates = {
@@ -175,15 +152,6 @@ int main()
             LoadTexture("assets/tv_3.png"),
         }
     };
-
-    ObstaclePairArray obsPairArr = {
-        .items = {},
-        .len = 0,
-        .cap = OBS_ARR_SIZE,
-    };
-    obsPairArr.items = (ObstaclePair*)malloc(
-        sizeof(ObstaclePair) * OBS_ARR_SIZE
-    );
 
     // reset mouse so bear paw isn't in top right
     SetMousePosition(HEIGHT-50, WIDTH/2);
@@ -234,6 +202,7 @@ int main()
 
             // update Jar hitbox
             Jar.hitbox = (Vector2){ Jar.pos.x - Jar.radius, Jar.pos.y - Jar.radius };
+            Jar.hitbox_r = (Rectangle){ Jar.pos.x - Jar.radius, Jar.pos.y - Jar.radius, Jar.tex.width, Jar.tex.height };
 
             // handle sticky logic
             handleStickyJar(&Paw, &Jar, &mouseDelta);
@@ -241,7 +210,8 @@ int main()
 
             // handle pushing logic
             // handlePawPushing(&Paw, obstacles, obstaclesLen, &mouseDelta);
-            handleObjectPushing(&obsPairArr, obstacles, obstaclesLen, &Jar, &mouseDelta);
+            handleObjectPushing(obstacles, obstaclesLen, &Jar, &mouseDelta);
+            // handleJarPushing(&Jar, obstacles, obstaclesLen, &mouseDelta);
 
             handleSpeed(&mouseDelta);
 
@@ -296,7 +266,7 @@ int main()
             }
 
             if (GAMESTATE == PLAY) {
-                DrawTexture(picnicBlanket, 0, 0, WHITE);    // draw background image
+                DrawTexture(GameUI.background, 0, 0, WHITE);    // draw background image
 
                 for (int i=0; i <= obstaclesLen; i++)
                 {
@@ -305,6 +275,7 @@ int main()
                 }
 
                 DrawTextureV(Jar.tex, Jar.hitbox, WHITE);   // draw honey Jar
+                DrawRectangleRec(Jar.hitbox_r, GREEN);
                 drawUI(&GameUI, warning, GameUI.barWidth);  // draw UI
                 drawBear(&Paw);
             }
@@ -324,7 +295,7 @@ int main()
 	}
 
     // clean up resources
-    UnloadTexture(picnicBlanket);
+    UnloadTexture(GameUI.background);
     UnloadTexture(GameUI.failScreen);
     UnloadTexture(GameUI.splashScreen);
     UnloadTexture(Jar.tex);
@@ -380,40 +351,7 @@ void handleStickyObstacle(Bear *paw, Obstacle obs[], int arrLen, Vector2 *dt)
     }
 }
 
-// bool checkSubjectActorPairs(ObstaclePairArray *o, int a, int s)
-// {   // iterate through pair array and see if a/s exists
-//     for (int i=0; i <= o->len; i++) {
-
-//         ObstaclePair pair = o->items[i];
-
-//         if (pair.actor == s && pair.subject == a) {
-//             printf("pairs!: (%d, %d) (%d, %d)\n", a, s, pair.actor, pair.subject);
-//             return true;
-//         } else {
-//             // check if pair exists to avoid duplicate inserts
-//             if ( !pairInArray(o, (ObstaclePair){a, s} ) ) {
-//                 printf("Inserting new Pair... (%d, %d)\n", a, s);
-//                 insertPair(o, &(ObstaclePair){a, s});
-//             }
-//             return false;
-//         }
-//     }
-//     return false;
-// }
-
-// bool pairInArray(ObstaclePairArray *o, ObstaclePair pair)
-// {
-//     for (int i=0; i <= o->len; i++) {
-//         ObstaclePair p = o->items[i];
-//         if (p.actor == pair.actor && p.subject == pair.subject) {
-//             printf("Pair already in array! (%d, %d)\n", p.actor, p.subject);
-//             return true;
-//         }
-//     }
-//     return false;
-// }
-
-void handleObjectPushing(ObstaclePairArray *o, Obstacle obs[], int arrLen, Honey *jar, Vector2 *dt)
+void handleObjectPushing(Obstacle obs[], int arrLen, Honey *jar, Vector2 *dt)
 {
     for (int i=0; i <= arrLen; i++)
     {
@@ -436,10 +374,12 @@ void handleObjectPushing(ObstaclePairArray *o, Obstacle obs[], int arrLen, Honey
         }
 
         // object on honey jar logic
-        if ( CheckCollisionCircleRec(jar->pos, jar->radius, actor->rect) )
+        if ( CheckCollisionRecs(jar->hitbox_r, actor->rect) )
         {
-            jar->pos.x = jar->pos.x + dt->x;
-            jar->pos.y = jar->pos.y + dt->y;
+            if (!jar->stuck) {
+                jar->pos.x = jar->pos.x + dt->x;
+                jar->pos.y = jar->pos.y + dt->y;
+            }
         }
     }
 }

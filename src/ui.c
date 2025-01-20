@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <stdbool.h>
 #include <raylib.h>
 #include "ui.h"
@@ -7,10 +6,6 @@ extern int TOTAL_SPEED, TIMER;
 extern float WIDTH, HEIGHT;
 extern bool DEBUG;
 
-void greet()
-{
-    printf("Hello from ui!\n");
-}
 
 void drawUI(UserInterface *ui, bool warning, int barWidth)
 {
@@ -47,20 +42,3 @@ void drawButton(char *msg, Rectangle area)
         area.y + (area.height/2 - 25),
         50, WHITE);
 }
-
-// void drawBear(Bear *b)
-// {
-//     // draw bear paw
-//     DrawTexture(b->tex, b->pos.x, b->pos.y, WHITE);
-
-//     float noseThreshold = HEIGHT - b->nose.height;
-//     Vector2 nosePos = { (WIDTH/2)-150, b->pos.y + HEIGHT*0.50 };
-//     // TODO: maybe use below nose movement logic instead?
-//     // Vector2 nosePos = { (Paw.pos.x-150), Paw.pos.y + HEIGHT*0.50 };
-
-//     // limit nose position past the bottom of the texture
-//     if ( nosePos.y <= noseThreshold ) {
-//         nosePos.y = noseThreshold;
-//     };
-//     DrawTextureV(b->nose, nosePos, WHITE);
-// }
