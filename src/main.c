@@ -6,6 +6,7 @@
 #include <raymath.h>
 
 #include "ui.h"
+#include "bear.h"
 
 /*
 TODOs:
@@ -19,7 +20,7 @@ TODOs:
     - [x] some kind of narrative framing around the bear seeing the guy? Periscope?
     - [x] add title screen with real image of a bear (make sure start button places paw at the bottom)
     - [x] Ensure sticky members are reset to false when restarted after fail
-    - [ ] Stuck obj acting on unstuck obj, stuck object acting like it's being moved too. need to investigate/fix
+    - [x] Stuck obj acting on unstuck obj, stuck object acting like it's being moved too. need to investigate/fix
     - [ ] possibly replace jar of honey with a salmon
     - [ ] add win animations of bear pics moving across screen overlapped
     - [ ] need lots and lots of sfx for final polish
@@ -28,24 +29,14 @@ TODOs:
         - obj movement
         - sticking noise
         - UI noises
-    - [ ] Countdown timer until loss state
-    - [ ] LERP smoothing
+    - [x] Countdown timer until loss state
     - [x] Add bear nose and associated vars to Bear struct
 */
-
-typedef struct Bear {
-    Rectangle hitbox;
-    Texture2D tex;
-    Texture2D nose;
-    Vector2 pos;
-} Bear;
 
 typedef struct Honey {
     Texture2D tex;
     Vector2 pos;
-    Vector2 hitbox;
     Rectangle hitbox_r;
-    float radius;
     bool stuck;
     int value;
 } Honey;
@@ -73,10 +64,11 @@ enum GAMESTATE {
 
 bool DEBUG = true;
 int SCORE = 0;
-int TIMER = 30;
+int TIMER = 15;
 int TOTAL_SPEED = 0;
 float TOTAL_SPEED_MAX = 400.0f;
-float DECAY = 5.0f;
+float DECAY = 10.0f;
+float SENSITIVITY = 2.0f;
 double TIME_INTERVAL = 0.1f;
 
 const float WIDTH = 1024.0f;
@@ -89,13 +81,12 @@ void handleStickyObstacle(Bear *paw, Obstacle obs[], int arrLen, Vector2 *dt);
 void handlePawPushing(Bear *b, Obstacle obs[], int arrLen, Vector2 *dt);
 void handleObjectPushing(Obstacle obs[], int arrLen, Honey *jar, Vector2 *dt);
 
-void drawBear(Bear *b);
 void resetObjects(Honey *jar, Obstacle obs[], int arrLen);
 void handleSpeed(Vector2 *dt);
 
 
 Rectangle obstacleInit[] = {
-    { 30, HEIGHT/2, 150, 150 },
+    { 200, HEIGHT/2, 150, 150 },
     { 500, HEIGHT/3, 70, 200 },
     { 300, 250, 30, 50 },
     { 800, 500, 80, 110 }
@@ -108,7 +99,6 @@ int main()
 
     double currentTime, lastTime, timerPrev;
     float speedDecrease;
-    int sensitivity = 50;
     bool warning = false;
 
     GAMESTATE = START;
@@ -130,14 +120,13 @@ int main()
     Honey Jar = {
         .tex = LoadTexture("assets/honey.png"),
         .pos = { WIDTH/2 + 50, 100 },
-        .radius = 50.0f,
         .stuck = false,
         .value = 50,
     };
 
     UserInterface GameUI = {
         .infoBox = { 0, 0, 400, 100 },
-        .barMax = GameUI.infoBox.width - (40),
+        .barMax = (GameUI.infoBox.width - 40),
         .startButton = { WIDTH/2 - 200, HEIGHT-120, 400, 100 },
         .background = LoadTexture("assets/picnic_blanket_grass.png"),
         .splashScreen = LoadTexture("assets/bear_splash.jpg"),
@@ -157,22 +146,12 @@ int main()
         // mouse position diff used to stuck object movement
         Vector2 mouseDelta = GetMouseDelta();
 
-        if (IsKeyPressed(KEY_TAB))
-        {
+        if (IsKeyPressed(KEY_TAB)) {
             (DEBUG) ? (DEBUG = false) : (DEBUG = true);
         }
-        if (IsKeyPressed(KEY_R))
-        {
+        if (IsKeyPressed(KEY_R)) {
             GAMESTATE = PLAY;
         }
-
-        // debug printing
-        // if (DEBUG && (mouseDelta.x != 0 && mouseDelta.y != 0) )
-        // {
-        //     printf("mouse dx, xy: %0.2f, %0.2f \n", mouseDelta.x, mouseDelta.y);
-        //     printf("mouse total: %0.2f \n", fabs(mouseDelta.x + mouseDelta.y));
-        //     printf("TOTAL_SPEED: %d \n", TOTAL_SPEED);
-        // }
 
         // start screen
         if (GAMESTATE == START) {
@@ -200,15 +179,20 @@ int main()
             Paw.hitbox = (Rectangle){ Paw.pos.x, Paw.pos.y, Paw.tex.width, Paw.tex.height };
 
             // update Jar hitbox
-            Jar.hitbox = (Vector2){ Jar.pos.x - Jar.radius, Jar.pos.y - Jar.radius };
-            Jar.hitbox_r = (Rectangle){ Jar.pos.x - Jar.radius, Jar.pos.y - Jar.radius, Jar.tex.width, Jar.tex.height };
+            // Jar.hitbox = (Vector2){ Jar.pos.x - Jar.radius, Jar.pos.y - Jar.radius };
+            Jar.hitbox_r = (Rectangle){
+                Jar.pos.x + 10,
+                Jar.pos.y + 15,
+                Jar.tex.width - 20,
+                Jar.tex.height - 25
+            };
 
             // handle sticky logic
             handleStickyJar(&Paw, &Jar, &mouseDelta);
             handleStickyObstacle(&Paw, obstacles, obstaclesLen, &mouseDelta);
 
             // handle pushing logic
-            // handlePawPushing(&Bear, obstacles, obstaclesLen, &mouseDelta);
+            // handlePawPushing(&Paw, obstacles, obstaclesLen, &mouseDelta);
             handleObjectPushing(obstacles, obstaclesLen, &Jar, &mouseDelta);
 
             handleSpeed(&mouseDelta);
@@ -221,20 +205,8 @@ int main()
                 TOTAL_SPEED = (int)speedDecrease;
             }
 
-            // speed bar update logic
-            GameUI.barWidth = TOTAL_SPEED;
-
-            // put max limit on the width
-            if (GameUI.barWidth > GameUI.barMax)
-            {
-                GameUI.barWidth = GameUI.barMax;
-            }
-
             // win game logic
             if (Jar.pos.y >= HEIGHT) { GAMESTATE = WIN; }
-
-            // set flag for warning message
-            ( TOTAL_SPEED >= sensitivity ) ? (warning = true) : (warning = false);
         }
 
         if (GAMESTATE == FAIL)
@@ -252,6 +224,11 @@ int main()
 
         if (GAMESTATE == WIN) {
             // printf("You Win!");
+            if ( IsMouseButtonPressed(0) && CheckCollisionPointRec(GetMousePosition(), GameUI.startButton) )
+            {
+                resetObjects(&Jar, obstacles, obstaclesLen);
+                GAMESTATE = PLAY;
+            }
         }
 
         BeginDrawing();
@@ -272,8 +249,9 @@ int main()
                     DrawRectangleRec(obs.rect, BLACK);      // draw obstacles
                 }
 
-                DrawTextureV(Jar.tex, Jar.hitbox, WHITE);   // draw honey Jar
-                DrawRectangleRec(Jar.hitbox_r, GREEN);
+                DrawTexture(Jar.tex, Jar.pos.x, Jar.pos.y, WHITE);   // draw honey Jar
+                DrawRectangleRec(Jar.hitbox_r, GREEN);               // DEBUG HONEY HITBOX
+
                 drawUI(&GameUI, warning, GameUI.barWidth);  // draw UI
                 drawBear(&Paw);
             }
@@ -287,6 +265,7 @@ int main()
             if (GAMESTATE == WIN) {
                 // picture of a happy bear, sympathy for the devil w/ restart button
                 DrawText("WIN", WIDTH/2, HEIGHT/2, 100, RED);
+                drawButton("RESTART", GameUI.startButton);
             }
 
 		EndDrawing();
@@ -313,7 +292,7 @@ void handleStickyJar(Bear *paw, Honey *jar, Vector2 *dt)
 {
     if (!jar->stuck)
     {
-        if ( CheckCollisionCircleRec(jar->pos, jar->radius, paw->hitbox) )
+        if ( CheckCollisionRecs(jar->hitbox_r, paw->hitbox) )
         {
             jar->stuck = true;
             SCORE += jar->value;
@@ -409,7 +388,8 @@ void resetObjects(Honey *jar, Obstacle obs[], int arrLen)
     // reset honey jar
     jar->stuck = false;
     jar->pos = (Vector2){ WIDTH/2 + 50, 100 };
-    jar->hitbox = jar->pos;
+    // jar->hitbox = jar->pos;
+    jar->hitbox_r = (Rectangle){ jar->pos.x, jar->pos.y, jar->hitbox_r.width, jar->hitbox_r.height };
 
     // loop through obstacles and set to original x/y
     for (int i = 0; i <= arrLen; i++) {
@@ -428,17 +408,19 @@ void handleSpeed(Vector2 *dt)
     {
         absMouseDelta = fabs(dt->x) + fabs(dt->y);
         mouseSpeed = absMouseDelta;
-        TOTAL_SPEED = TOTAL_SPEED + (int)mouseSpeed;
+        TOTAL_SPEED = TOTAL_SPEED + ((int)mouseSpeed * SENSITIVITY);
     } else if (dt->x == 0 && dt->y != 0)
     {
         absMouseDelta = fabs(dt->y);
         mouseSpeed = absMouseDelta;
-        TOTAL_SPEED = TOTAL_SPEED + (int)mouseSpeed*2;
+        // TOTAL_SPEED = TOTAL_SPEED + (int)mouseSpeed*2;
+        TOTAL_SPEED = TOTAL_SPEED + ((int)mouseSpeed*2 * SENSITIVITY);
     } else if (dt->x != 0 && dt->y == 0)
     {
         absMouseDelta = fabs(dt->x);
         mouseSpeed = absMouseDelta;
-        TOTAL_SPEED = TOTAL_SPEED + (int)mouseSpeed*2;
+        // TOTAL_SPEED = TOTAL_SPEED + (int)mouseSpeed*2;
+        TOTAL_SPEED = TOTAL_SPEED + ((int)mouseSpeed*2 * SENSITIVITY);
     }
 
     // limit the total speed
@@ -448,21 +430,4 @@ void handleSpeed(Vector2 *dt)
         if (!DEBUG) // TEMP: removes fail state for testing
             GAMESTATE = FAIL;
     }
-}
-
-void drawBear(Bear *b)
-{
-    // draw bear paw
-    DrawTexture(b->tex, b->pos.x, b->pos.y, WHITE);
-
-    float noseThreshold = HEIGHT - b->nose.height;
-    Vector2 nosePos = { (WIDTH/2)-150, b->pos.y + HEIGHT*0.50 };
-    // TODO: maybe use below nose movement logic instead?
-    // Vector2 nosePos = { (Paw.pos.x-150), Paw.pos.y + HEIGHT*0.50 };
-
-    // limit nose position past the bottom of the texture
-    if ( nosePos.y <= noseThreshold ) {
-        nosePos.y = noseThreshold;
-    };
-    DrawTextureV(b->nose, nosePos, WHITE);
 }
