@@ -392,6 +392,7 @@ bool checkSubjectActorPairs(ObstaclePairArray *o, int a, int s)
         } else {
             // check if pair exists to avoid duplicate inserts
             if ( !pairInArray(o, (ObstaclePair){a, s} ) ) {
+                printf("Inserting new Pair... (%d, %d)\n", a, s);
                 insertPair(o, &(ObstaclePair){a, s});
             }
             return false;
@@ -416,6 +417,7 @@ bool pairInArray(ObstaclePairArray *o, ObstaclePair pair)
     for (int i=0; i <= o->len; i++) {
         ObstaclePair p = o->items[i];
         if (p.actor == pair.actor && p.subject == pair.subject) {
+            printf("Pair already in array! (%d, %d)\n", p.actor, p.subject);
             return true;
         }
     }
@@ -439,7 +441,7 @@ void handleObjectPushing(ObstaclePairArray *o, Obstacle obs[], int arrLen, Honey
             {
                 // obstaclePairs
                 bool isAlreadyActing = checkSubjectActorPairs(o, i, j);
-                printArray(o);
+                // printArray(o);
                 if (isAlreadyActing) {
                     subject->rect.x = subject->rect.x + dt->x;
                     subject->rect.y = subject->rect.y + dt->y;
