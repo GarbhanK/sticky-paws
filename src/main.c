@@ -74,7 +74,7 @@ enum GAMESTATE {
     WIN
 } GAMESTATE;
 
-bool DEBUG = false;
+bool DEBUG = true;
 int OBS_ARR_SIZE = 32;
 int SCORE = 0;
 int TIMER = 30;
@@ -380,49 +380,38 @@ void handleStickyObstacle(Bear *paw, Obstacle obs[], int arrLen, Vector2 *dt)
     }
 }
 
-bool checkSubjectActorPairs(ObstaclePairArray *o, int a, int s)
-{   // iterate through pair array and see if a/s exists
-    for (int i=0; i <= o->len; i++) {
+// bool checkSubjectActorPairs(ObstaclePairArray *o, int a, int s)
+// {   // iterate through pair array and see if a/s exists
+//     for (int i=0; i <= o->len; i++) {
 
-        ObstaclePair pair = o->items[i];
+//         ObstaclePair pair = o->items[i];
 
-        if (pair.actor == s && pair.subject == a) {
-            printf("pairs!: (%d, %d) (%d, %d)\n", a, s, pair.actor, pair.subject);
-            return true;
-        } else {
-            // check if pair exists to avoid duplicate inserts
-            if ( !pairInArray(o, (ObstaclePair){a, s} ) ) {
-                printf("Inserting new Pair... (%d, %d)\n", a, s);
-                insertPair(o, &(ObstaclePair){a, s});
-            }
-            return false;
-        }
-    }
-    // check if the subject is already acting on the actor
-    // i.e
-    //  objA (Actor) -> objB (Subject)
-    //      A pushes B
-    //      add to pairs
-    //  objB (Actor) -> objA (Subject)
-    //      check pairs
-    //      if (present)
-    //          pass
-    //      else
-    //          push
-    return false;
-}
+//         if (pair.actor == s && pair.subject == a) {
+//             printf("pairs!: (%d, %d) (%d, %d)\n", a, s, pair.actor, pair.subject);
+//             return true;
+//         } else {
+//             // check if pair exists to avoid duplicate inserts
+//             if ( !pairInArray(o, (ObstaclePair){a, s} ) ) {
+//                 printf("Inserting new Pair... (%d, %d)\n", a, s);
+//                 insertPair(o, &(ObstaclePair){a, s});
+//             }
+//             return false;
+//         }
+//     }
+//     return false;
+// }
 
-bool pairInArray(ObstaclePairArray *o, ObstaclePair pair)
-{
-    for (int i=0; i <= o->len; i++) {
-        ObstaclePair p = o->items[i];
-        if (p.actor == pair.actor && p.subject == pair.subject) {
-            printf("Pair already in array! (%d, %d)\n", p.actor, p.subject);
-            return true;
-        }
-    }
-    return false;
-}
+// bool pairInArray(ObstaclePairArray *o, ObstaclePair pair)
+// {
+//     for (int i=0; i <= o->len; i++) {
+//         ObstaclePair p = o->items[i];
+//         if (p.actor == pair.actor && p.subject == pair.subject) {
+//             printf("Pair already in array! (%d, %d)\n", p.actor, p.subject);
+//             return true;
+//         }
+//     }
+//     return false;
+// }
 
 void handleObjectPushing(ObstaclePairArray *o, Obstacle obs[], int arrLen, Honey *jar, Vector2 *dt)
 {
@@ -439,10 +428,7 @@ void handleObjectPushing(ObstaclePairArray *o, Obstacle obs[], int arrLen, Honey
 
             if ( CheckCollisionRecs(actor->rect, subject->rect) )
             {
-                // obstaclePairs
-                bool isAlreadyActing = checkSubjectActorPairs(o, i, j);
-                // printArray(o);
-                if (isAlreadyActing) {
+                if (actor->stuck) {
                     subject->rect.x = subject->rect.x + dt->x;
                     subject->rect.y = subject->rect.y + dt->y;
                 }
