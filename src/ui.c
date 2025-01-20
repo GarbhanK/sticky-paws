@@ -9,7 +9,7 @@ extern bool DEBUG;
 
 void greet()
 {
-    printf("Hello from graphics!\n");
+    printf("Hello from ui!\n");
 }
 
 void drawUI(UserInterface *ui, bool warning, int barWidth)

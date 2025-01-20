@@ -1,6 +1,7 @@
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include <raylib.h>
 #include <raymath.h>
@@ -55,6 +56,17 @@ typedef struct Obstacle {
     int value;
 } Obstacle;
 
+typedef struct {
+    int actor;
+    int subject;
+} ObstaclePair;
+
+typedef struct {
+    ObstaclePair* items;
+    int len;
+    int cap;
+} ObstaclePairArray;
+
 enum GAMESTATE {
     START,
     PLAY,
@@ -63,6 +75,7 @@ enum GAMESTATE {
 } GAMESTATE;
 
 bool DEBUG = false;
+int OBS_ARR_SIZE = 32;
 int SCORE = 0;
 int TIMER = 30;
 int TOTAL_SPEED = 0;
@@ -78,9 +91,10 @@ void handleStickyJar(Bear *paw, Honey *jar, Vector2 *dt);
 void handleStickyObstacle(Bear *paw, Obstacle obs[], int arrLen, Vector2 *dt);
 
 void handlePawPushing(Bear *paw, Obstacle obs[], int arrLen, Vector2 *dt);
-void handleObjectPushing(Obstacle obs[], int arrLen, Honey *jar, Vector2 *dt);
+void handleObjectPushing(ObstaclePairArray *o, Obstacle obs[], int arrLen, Honey *jar, Vector2 *dt);
+bool checkSubjectActorPairs(ObstaclePairArray *o, int a, int s);
+bool pairInArray(ObstaclePairArray *o, ObstaclePair pair);
 
-// void drawUI(UserInterface *ui, bool warning, int barWidth, int totalSpeed);
 void drawBear(Bear *b);
 void resetObjects(Honey *jar, Obstacle obs[], int arrLen);
 void handleSpeed(Vector2 *dt);
@@ -93,12 +107,23 @@ Rectangle obstacleInit[] = {
     { 800, 500, 80, 110 }
 };
 
-// try struct array method
-typedef struct {
-    Obstacle* items;
-    int length;
-    int capacity;
-} ObstacleArray;
+
+void insertPair(ObstaclePairArray *o, ObstaclePair *newPair)
+{
+    printf("Inserting: (%d, %d) @ %d\n", newPair->actor, newPair->subject, o->len);
+    o->items[o->len] = *newPair;
+    o->len = o->len + 1;
+}
+
+void printArray(ObstaclePairArray* arr)
+{
+    // for (int i=0; i <= arr->cap; i++) {
+    for (int i=0; i <= arr->len; i++) {
+        ObstaclePair* el = &arr->items[i];
+        printf("idx %d: (%d, %d)\n", i, el->actor, el->subject);
+    }
+}
+
 
 int main()
 {
@@ -151,6 +176,15 @@ int main()
         }
     };
 
+    ObstaclePairArray obsPairArr = {
+        .items = {},
+        .len = 0,
+        .cap = OBS_ARR_SIZE,
+    };
+    obsPairArr.items = (ObstaclePair*)malloc(
+        sizeof(ObstaclePair) * OBS_ARR_SIZE
+    );
+
     // reset mouse so bear paw isn't in top right
     SetMousePosition(HEIGHT-50, WIDTH/2);
 
@@ -168,12 +202,12 @@ int main()
         }
 
         // debug printing
-        if (DEBUG && (mouseDelta.x != 0 && mouseDelta.y != 0) )
-        {
-            printf("mouse dx, xy: %0.2f, %0.2f \n", mouseDelta.x, mouseDelta.y);
-            printf("mouse total: %0.2f \n", fabs(mouseDelta.x + mouseDelta.y));
-            printf("TOTAL_SPEED: %d \n", TOTAL_SPEED);
-        }
+        // if (DEBUG && (mouseDelta.x != 0 && mouseDelta.y != 0) )
+        // {
+        //     printf("mouse dx, xy: %0.2f, %0.2f \n", mouseDelta.x, mouseDelta.y);
+        //     printf("mouse total: %0.2f \n", fabs(mouseDelta.x + mouseDelta.y));
+        //     printf("TOTAL_SPEED: %d \n", TOTAL_SPEED);
+        // }
 
         // start screen
         if (GAMESTATE == START) {
@@ -207,7 +241,7 @@ int main()
 
             // handle pushing logic
             // handlePawPushing(&Paw, obstacles, obstaclesLen, &mouseDelta);
-            handleObjectPushing(obstacles, obstaclesLen, &Jar, &mouseDelta);
+            handleObjectPushing(&obsPairArr, obstacles, obstaclesLen, &Jar, &mouseDelta);
 
             handleSpeed(&mouseDelta);
 
@@ -249,7 +283,7 @@ int main()
         }
 
         if (GAMESTATE == WIN) {
-            printf("You Win!");
+            // printf("You Win!");
         }
 
         BeginDrawing();
@@ -273,12 +307,6 @@ int main()
                 DrawTextureV(Jar.tex, Jar.hitbox, WHITE);   // draw honey Jar
                 drawUI(&GameUI, warning, GameUI.barWidth);  // draw UI
                 drawBear(&Paw);
-
-                // if (DEBUG) {
-                //     printf("HEIGHT: %0.2f\n", HEIGHT);
-                //     printf("nosePos.y: %0.2f\n", nosePos.y);
-                //     printf("nosePos.x: %0.2f\n", nosePos.x);
-                // }
             }
 
             if (GAMESTATE == FAIL) {
@@ -288,8 +316,7 @@ int main()
             }
 
             if (GAMESTATE == WIN) {
-                // picture of a happy bear, sympathy for the devil
-                // restart button
+                // picture of a happy bear, sympathy for the devil w/ restart button
                 DrawText("WIN", WIDTH/2, HEIGHT/2, 100, RED);
             }
 
@@ -298,11 +325,13 @@ int main()
 
     // clean up resources
     UnloadTexture(picnicBlanket);
+    UnloadTexture(GameUI.failScreen);
+    UnloadTexture(GameUI.splashScreen);
     UnloadTexture(Jar.tex);
     UnloadTexture(Paw.tex);
     UnloadTexture(Paw.nose);
 
-    for (int i=0; i <= 3; i++) {
+    for (int i=0; i <= sizeof(GameUI.wakeStates); i++) {
         printf("unloading: %d\n", GameUI.wakeStates[i].id);
         UnloadTexture(GameUI.wakeStates[i]);
     }
@@ -351,7 +380,49 @@ void handleStickyObstacle(Bear *paw, Obstacle obs[], int arrLen, Vector2 *dt)
     }
 }
 
-void handleObjectPushing(Obstacle obs[], int arrLen, Honey *jar, Vector2 *dt)
+bool checkSubjectActorPairs(ObstaclePairArray *o, int a, int s)
+{   // iterate through pair array and see if a/s exists
+    for (int i=0; i <= o->len; i++) {
+
+        ObstaclePair pair = o->items[i];
+
+        if (pair.actor == s && pair.subject == a) {
+            printf("pairs!: (%d, %d) (%d, %d)\n", a, s, pair.actor, pair.subject);
+            return true;
+        } else {
+            // check if pair exists to avoid duplicate inserts
+            if ( !pairInArray(o, (ObstaclePair){a, s} ) ) {
+                insertPair(o, &(ObstaclePair){a, s});
+            }
+            return false;
+        }
+    }
+    // check if the subject is already acting on the actor
+    // i.e
+    //  objA (Actor) -> objB (Subject)
+    //      A pushes B
+    //      add to pairs
+    //  objB (Actor) -> objA (Subject)
+    //      check pairs
+    //      if (present)
+    //          pass
+    //      else
+    //          push
+    return false;
+}
+
+bool pairInArray(ObstaclePairArray *o, ObstaclePair pair)
+{
+    for (int i=0; i <= o->len; i++) {
+        ObstaclePair p = o->items[i];
+        if (p.actor == pair.actor && p.subject == pair.subject) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void handleObjectPushing(ObstaclePairArray *o, Obstacle obs[], int arrLen, Honey *jar, Vector2 *dt)
 {
     for (int i=0; i <= arrLen; i++)
     {
@@ -366,8 +437,13 @@ void handleObjectPushing(Obstacle obs[], int arrLen, Honey *jar, Vector2 *dt)
 
             if ( CheckCollisionRecs(actor->rect, subject->rect) )
             {
-                subject->rect.x = subject->rect.x + dt->x;
-                subject->rect.y = subject->rect.y + dt->y;
+                // obstaclePairs
+                bool isAlreadyActing = checkSubjectActorPairs(o, i, j);
+                printArray(o);
+                if (isAlreadyActing) {
+                    subject->rect.x = subject->rect.x + dt->x;
+                    subject->rect.y = subject->rect.y + dt->y;
+                }
             }
         }
 
