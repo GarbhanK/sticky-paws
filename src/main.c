@@ -1,7 +1,6 @@
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #include <raylib.h>
 #include <raymath.h>
@@ -73,11 +72,10 @@ enum GAMESTATE {
 } GAMESTATE;
 
 bool DEBUG = true;
-int OBS_ARR_SIZE = 32;
 int SCORE = 0;
 int TIMER = 30;
 int TOTAL_SPEED = 0;
-float TOTAL_SPEED_MAX = 100.0f;
+float TOTAL_SPEED_MAX = 400.0f;
 float DECAY = 5.0f;
 double TIME_INTERVAL = 0.1f;
 
@@ -88,7 +86,7 @@ const float HEIGHT = 768.0f;
 void handleStickyJar(Bear *paw, Honey *jar, Vector2 *dt);
 void handleStickyObstacle(Bear *paw, Obstacle obs[], int arrLen, Vector2 *dt);
 
-void handlePawPushing(Bear *paw, Obstacle obs[], int arrLen, Vector2 *dt);
+void handlePawPushing(Bear *b, Obstacle obs[], int arrLen, Vector2 *dt);
 void handleObjectPushing(Obstacle obs[], int arrLen, Honey *jar, Vector2 *dt);
 
 void drawBear(Bear *b);
@@ -107,7 +105,6 @@ Rectangle obstacleInit[] = {
 int main()
 {
 	InitWindow(WIDTH, HEIGHT, "Sticky Paws");
-    // Texture2D picnicBlanket = LoadTexture("assets/picnic_blanket_grass.png");
 
     double currentTime, lastTime, timerPrev;
     float speedDecrease;
@@ -195,6 +192,8 @@ int main()
                 TIMER = TIMER - 1;
             }
 
+            if (TIMER == 0) { GAMESTATE = FAIL; }
+
             // update paw movement
             Paw.pos.x = GetMouseX() - (float)Paw.tex.width/2;
             Paw.pos.y = GetMouseY();
@@ -209,9 +208,8 @@ int main()
             handleStickyObstacle(&Paw, obstacles, obstaclesLen, &mouseDelta);
 
             // handle pushing logic
-            // handlePawPushing(&Paw, obstacles, obstaclesLen, &mouseDelta);
+            // handlePawPushing(&Bear, obstacles, obstaclesLen, &mouseDelta);
             handleObjectPushing(obstacles, obstaclesLen, &Jar, &mouseDelta);
-            // handleJarPushing(&Jar, obstacles, obstaclesLen, &mouseDelta);
 
             handleSpeed(&mouseDelta);
 
@@ -224,7 +222,7 @@ int main()
             }
 
             // speed bar update logic
-            GameUI.barWidth = TOTAL_SPEED * 4; // *4 because TOTAL_SPEED is out of 100, bar width is 400. TODO: make work with x=n
+            GameUI.barWidth = TOTAL_SPEED;
 
             // put max limit on the width
             if (GameUI.barWidth > GameUI.barMax)
@@ -379,18 +377,21 @@ void handleObjectPushing(Obstacle obs[], int arrLen, Honey *jar, Vector2 *dt)
             if (!jar->stuck) {
                 jar->pos.x = jar->pos.x + dt->x;
                 jar->pos.y = jar->pos.y + dt->y;
+            } else {
+                actor->rect.x = actor->rect.x + dt->x;
+                actor->rect.y = actor->rect.y + dt->y;
             }
         }
     }
 }
 
-void handlePawPushing(Bear *paw, Obstacle obs[], int arrLen, Vector2 *dt)
+void handlePawPushing(Bear *b, Obstacle obs[], int arrLen, Vector2 *dt)
 {
     for (int i=0; i <= arrLen; i++)
     {
         Obstacle *subject = &obs[i];
 
-        if ( CheckCollisionRecs(paw->hitbox, subject->rect) )
+        if ( CheckCollisionRecs(b->hitbox, subject->rect) )
         {
             subject->rect.x = subject->rect.x + dt->x;
             subject->rect.y = subject->rect.y + dt->y;
