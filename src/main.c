@@ -51,13 +51,15 @@ typedef struct Obstacle{
 typedef struct {
     Obstacle* items;    // the Obstacles
     Rectangle* init;    // array of rect positions to restart/init the game
-    int len;    // current no. items
-    int cap;    // total arr capacity
+    int len;            // current no. items
+    int cap;            // total arr capacity
 } ObstacleArray;
 
 typedef struct {
     Sound growl1;
     Sound growl2;
+    Sound growl3;
+    Sound door_slam;
     Sound stick;
     Sound drag;
 } SoundBank;
@@ -113,6 +115,8 @@ int main()
     SoundBank sounds = {
         .growl1 = LoadSound("assets/sfx/zapsplat_animals_bear_grunt_001_17143.mp3"),
         .growl2 = LoadSound("assets/sfx/zapsplat_animals_bear_grunt_002_17144.mp3"),
+        .growl3 = LoadSound("assets/sfx/animals_bear_growl_grunt_003.mp3"),
+        .door_slam = LoadSound("assets/sfx/door_slam.mp3")
     };
 
     GAMESTATE = START;
@@ -227,10 +231,15 @@ int main()
 
             // win game logic
             if (Jar.pos.y >= HEIGHT) { GAMESTATE = WIN; }
+
+            // sfx triggers
+            if (Paw.pos.y > HEIGHT*0.75) PlaySound(sounds.growl3);
         }
 
         if (GAMESTATE == FAIL)
         {
+            PlaySound(sounds.door_slam);
+
             if (IsKeyPressed(KEY_ENTER)) {
                 GAMESTATE = START;
             }
@@ -299,10 +308,13 @@ int main()
     UnloadTexture(Paw.tex);
     UnloadTexture(Paw.nose);
 
-    for (int i=0; i <= sizeof(GameUI.wakeStates); i++) {
-        printf("unloading: %d\n", GameUI.wakeStates[i].id);
+    for (int i=0; i <= sizeof(GameUI.wakeStates); i++)
         UnloadTexture(GameUI.wakeStates[i]);
-    }
+
+    UnloadSound(sounds.growl1);
+    UnloadSound(sounds.growl2);
+    UnloadSound(sounds.growl3);
+    UnloadSound(sounds.door_slam);
 
 	CloseWindow();
 	return 0;
@@ -459,9 +471,10 @@ void handleSpeed()
 }
 
 void playBearSound(SoundBank *sb) {
-    if (GetRandomValue(1, 2) == 1) {
-        PlaySound(sb->growl1);
-    } else {
-        PlaySound(sb->growl2);
+    switch (GetRandomValue(1, 2)) {
+        case 1:
+            PlaySound(sb->growl1); break;
+        case 2:
+            PlaySound(sb->growl2); break;
     }
 }
