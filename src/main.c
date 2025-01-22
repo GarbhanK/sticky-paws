@@ -15,12 +15,14 @@ TODOs:
     - [x] add logic for the old man, different stages of awake
     - [x] add art for old man, maybe have him framed in a cool way? Old school TV with the antennas? courage the cowardly dog
     - [x] proper debug toggling logic
-    - [ ] get all of the text in the right place
     - [x] figure out what i'm going to do with the bar in the top right
     - [x] some kind of narrative framing around the bear seeing the guy? Periscope?
     - [x] add title screen with real image of a bear (make sure start button places paw at the bottom)
     - [x] Ensure sticky members are reset to false when restarted after fail
     - [x] Stuck obj acting on unstuck obj, stuck object acting like it's being moved too. need to investigate/fix
+    - [x] Countdown timer until loss state
+    - [x] Add bear nose and associated vars to Bear struct
+    - [ ] get all of the text in the right place
     - [ ] possibly replace jar of honey with a salmon
     - [ ] add win animations of bear pics moving across screen overlapped
     - [ ] need lots and lots of sfx for final polish
@@ -29,8 +31,6 @@ TODOs:
         - obj movement
         - sticking noise
         - UI noises
-    - [x] Countdown timer until loss state
-    - [x] Add bear nose and associated vars to Bear struct
 */
 
 typedef struct Honey {
@@ -55,6 +55,13 @@ typedef struct {
     int cap;    // total arr capacity
 } ObstacleArray;
 
+typedef struct {
+    Sound growl1;
+    Sound growl2;
+    Sound stick;
+    Sound drag;
+} SoundBank;
+
 enum GAMESTATE {
     START,
     PLAY,
@@ -67,22 +74,23 @@ int SCORE = 0;
 int TIMER = 15;
 int TOTAL_SPEED = 0;
 float TOTAL_SPEED_MAX = 400.0f;
-float DECAY = 10.0f;
-float SENSITIVITY = 2.0f;
+float DECAY = 15.0f;
+float SENSITIVITY = 3.0f;
 double TIME_INTERVAL = 0.1f;
 
 const float WIDTH = 1024.0f;
 const float HEIGHT = 768.0f;
 
 // declare functions
-void handleStickyJar(Bear *paw, Honey *jar, Vector2 *dt);
-void handleStickyObstacle(Bear *paw, Obstacle obs[], int arrLen, Vector2 *dt);
+void handleStickyJar(Bear *paw, Honey *jar, SoundBank *sb);
+void handleStickyObstacle(Bear *paw, Obstacle obs[], int arrLen, SoundBank *sb);
 
 void handlePawPushing(Bear *b, Obstacle obs[], int arrLen, Vector2 *dt);
 void handleObjectPushing(Obstacle obs[], int arrLen, Honey *jar, Vector2 *dt);
 
 void resetObjects(Honey *jar, Obstacle obs[], int arrLen);
 void handleSpeed();
+void playBearSound(SoundBank *sb);
 
 
 Rectangle obstacleInit[] = {
@@ -96,10 +104,16 @@ Rectangle obstacleInit[] = {
 int main()
 {
 	InitWindow(WIDTH, HEIGHT, "Sticky Paws");
+	InitAudioDevice();
 
     double currentTime, lastTime, timerPrev;
     float speedDecrease;
     bool warning = false;
+
+    SoundBank sounds = {
+        .growl1 = LoadSound("assets/sfx/zapsplat_animals_bear_grunt_001_17143.mp3"),
+        .growl2 = LoadSound("assets/sfx/zapsplat_animals_bear_grunt_002_17144.mp3"),
+    };
 
     GAMESTATE = START;
 
@@ -194,8 +208,8 @@ int main()
             };
 
             // handle sticky logic
-            handleStickyJar(&Paw, &Jar, &mouseDelta);
-            handleStickyObstacle(&Paw, obstacles, obstaclesLen, &mouseDelta);
+            handleStickyJar(&Paw, &Jar, &sounds);
+            handleStickyObstacle(&Paw, obstacles, obstaclesLen, &sounds);
 
             // handle pushing logic
             // handlePawPushing(&Paw, obstacles, obstaclesLen, &mouseDelta);
@@ -294,25 +308,28 @@ int main()
 	return 0;
 }
 
-void handleStickyJar(Bear *paw, Honey *jar, Vector2 *dt)
+void handleStickyJar(Bear *paw, Honey *jar, SoundBank *sb)
 {
+    Vector2 dt = GetMouseDelta();
     if (!jar->stuck)
     {
         if ( CheckCollisionRecs(jar->hitbox, paw->hitbox) )
         {
+            playBearSound(sb);
             jar->stuck = true;
             SCORE += jar->value;
             printf("SCORE: %d\n", SCORE);
         }
     } else {
         // update Jar pos by adding mouse delta
-        jar->pos.x = jar->pos.x + dt->x;
-        jar->pos.y = jar->pos.y + dt->y;
+        jar->pos.x = jar->pos.x + dt.x;
+        jar->pos.y = jar->pos.y + dt.y;
     }
 }
 
-void handleStickyObstacle(Bear *paw, Obstacle obs[], int arrLen, Vector2 *dt)
+void handleStickyObstacle(Bear *paw, Obstacle obs[], int arrLen, SoundBank *sb)
 {
+    Vector2 dt = GetMouseDelta();
     for (int i=0; i <= arrLen; i++)
     {
         Obstacle *subject = &obs[i];
@@ -322,14 +339,15 @@ void handleStickyObstacle(Bear *paw, Obstacle obs[], int arrLen, Vector2 *dt)
         {
             if ( CheckCollisionRecs(subject->rect, paw->hitbox) )
             {
+                playBearSound(sb);
                 subject->stuck = true;
                 SCORE += subject->value;
                 printf("SCORE: %d\n", SCORE);
             }
         } else {
             // update Jar pos by adding mouse delta
-            subject->rect.x = subject->rect.x + dt->x;
-            subject->rect.y = subject->rect.y + dt->y;
+            subject->rect.x = subject->rect.x + dt.x;
+            subject->rect.y = subject->rect.y + dt.y;
         }
     }
 }
@@ -432,5 +450,18 @@ void handleSpeed()
         TOTAL_SPEED = TOTAL_SPEED_MAX;
         if (!DEBUG) // TEMP: removes fail state for testing
             GAMESTATE = FAIL;
+    }
+
+    // get rid of that issue where score flashes back and forth at idle
+    if (TOTAL_SPEED <= 3) {
+        TOTAL_SPEED = 0;
+    }
+}
+
+void playBearSound(SoundBank *sb) {
+    if (GetRandomValue(1, 2) == 1) {
+        PlaySound(sb->growl1);
+    } else {
+        PlaySound(sb->growl2);
     }
 }
