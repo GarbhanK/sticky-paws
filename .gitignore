@@ -1,0 +1,11 @@
+
+# macos files
+*/.DS_Store
+
+# c files
+cache/
+
+# binaries
+bin/
+
+
