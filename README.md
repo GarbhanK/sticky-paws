@@ -1,0 +1,35 @@
+# Sticky Paws
+
+### TODOs
+**gameplay**
+- [x] majorly clean up and finalise the SPEED logic, works now but old code left over that needs cleaning - [x] Vectorise the dy/dx mouse movement speed, I think moving diagonals is way faster than across
+- [x] add logic for the old man, different stages of awake
+- [x] proper debug toggling logic
+- [x] figure out what i'm going to do with the bar in the top right
+- [x] Ensure sticky members are reset to false when restarted after fail
+- [x] Stuck obj acting on unstuck obj, stuck object acting like it's being moved too. need to investigate/fix
+- [x] Countdown timer until loss state
+- [ ] gameplay options menu
+- [ ] try have just paw be sticky
+
+**visuals**
+- [x] Add bear nose and associated vars to Bear struct
+- [x] add title screen with real image of a bear (make sure start button places paw at the bottom)
+- [x] add art for old man, maybe have him framed in a cool way? Old school TV with the antennas? courage the cowardly dog
+- [x] some kind of narrative framing around the bear seeing the guy? Periscope?
+- [ ] try raygui for buttons
+- [ ] rules explainer in the main menu
+- [ ] get all of the text in the right place
+- [ ] possibly replace jar of honey with a salmon
+- [ ] add win animations of bear pics moving across screen overlapped
+
+**sfx**
+- [x] bear growls
+- [ ] sniffing nose
+- [ ] snoring/sleeping
+- [ ] obj movement
+- [ ] sticking noise
+- [ ] UI noises (button click)
+- [ ] Menu music
+- [ ] Gameplay music
+- [ ] Win/Fail music

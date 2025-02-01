@@ -1,37 +1,11 @@
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
-
 #include <raylib.h>
 #include <raymath.h>
 
 #include "ui.h"
 #include "bear.h"
-
-/*
-TODOs:
-    - [x] majorly clean up and finalise the SPEED logic, works now but old code left over that needs cleaning
-    - [x] Vectorise the dy/dx mouse movement speed, I think moving diagonals is way faster than across
-    - [x] add logic for the old man, different stages of awake
-    - [x] add art for old man, maybe have him framed in a cool way? Old school TV with the antennas? courage the cowardly dog
-    - [x] proper debug toggling logic
-    - [x] figure out what i'm going to do with the bar in the top right
-    - [x] some kind of narrative framing around the bear seeing the guy? Periscope?
-    - [x] add title screen with real image of a bear (make sure start button places paw at the bottom)
-    - [x] Ensure sticky members are reset to false when restarted after fail
-    - [x] Stuck obj acting on unstuck obj, stuck object acting like it's being moved too. need to investigate/fix
-    - [x] Countdown timer until loss state
-    - [x] Add bear nose and associated vars to Bear struct
-    - [ ] get all of the text in the right place
-    - [ ] possibly replace jar of honey with a salmon
-    - [ ] add win animations of bear pics moving across screen overlapped
-    - [ ] need lots and lots of sfx for final polish
-        - sniffing nose
-        - snoring/sleeping
-        - obj movement
-        - sticking noise
-        - UI noises
-*/
 
 typedef struct Honey {
     Texture2D tex;
@@ -41,7 +15,7 @@ typedef struct Honey {
     int value;
 } Honey;
 
-typedef struct Obstacle{
+typedef struct Obstacle {
     Rectangle rect;
     bool stuck;
     int value;
@@ -92,9 +66,9 @@ void handleObjectPushing(Obstacle obs[], int arrLen, Honey *jar, Vector2 *dt);
 
 void resetObjects(Honey *jar, Obstacle obs[], int arrLen);
 void handleSpeed();
-void playBearSound(SoundBank *sb);
+void randomBearSound(SoundBank *sb);
 
-
+// the starting positions of the obstacles
 Rectangle obstacleInit[] = {
     { 200, HEIGHT/2, 150, 150 },
     { 500, HEIGHT/3, 70, 200 },
@@ -272,14 +246,13 @@ int main()
             if (GAMESTATE == PLAY) {
                 DrawTexture(GameUI.background, 0, 0, WHITE);    // draw background image
 
-                for (int i=0; i <= obstaclesLen; i++)
-                {
+                for (int i=0; i <= obstaclesLen; i++) {
                     Obstacle obs = obstacles[i];
-                    DrawRectangleRec(obs.rect, BLACK);      // draw obstacles
+                    DrawRectangleRec(obs.rect, BLACK);  // draw obstacles
                 }
 
                 DrawTexture(Jar.tex, Jar.pos.x, Jar.pos.y, WHITE);   // draw honey Jar
-                    DrawRectangleRec(Jar.hitbox, GREEN);               // DEBUG HONEY HITBOX
+                    // DrawRectangleRec(Jar.hitbox, GREEN);          // DEBUG HONEY HITBOX
 
                 drawUI(&GameUI, warning, GameUI.barWidth);  // draw UI
                 drawBear(&Paw);
@@ -311,6 +284,7 @@ int main()
     for (int i=0; i <= sizeof(GameUI.wakeStates); i++)
         UnloadTexture(GameUI.wakeStates[i]);
 
+    // unload sound data
     UnloadSound(sounds.growl1);
     UnloadSound(sounds.growl2);
     UnloadSound(sounds.growl3);
@@ -323,11 +297,9 @@ int main()
 void handleStickyJar(Bear *paw, Honey *jar, SoundBank *sb)
 {
     Vector2 dt = GetMouseDelta();
-    if (!jar->stuck)
-    {
-        if ( CheckCollisionRecs(jar->hitbox, paw->hitbox) )
-        {
-            playBearSound(sb);
+    if (!jar->stuck) {
+        if ( CheckCollisionRecs(jar->hitbox, paw->hitbox) ) {
+            randomBearSound(sb);
             jar->stuck = true;
             SCORE += jar->value;
             printf("SCORE: %d\n", SCORE);
@@ -351,7 +323,7 @@ void handleStickyObstacle(Bear *paw, Obstacle obs[], int arrLen, SoundBank *sb)
         {
             if ( CheckCollisionRecs(subject->rect, paw->hitbox) )
             {
-                playBearSound(sb);
+                randomBearSound(sb);
                 subject->stuck = true;
                 SCORE += subject->value;
                 printf("SCORE: %d\n", SCORE);
@@ -366,19 +338,16 @@ void handleStickyObstacle(Bear *paw, Obstacle obs[], int arrLen, SoundBank *sb)
 
 void handleObjectPushing(Obstacle obs[], int arrLen, Honey *jar, Vector2 *dt)
 {
-    for (int i=0; i <= arrLen; i++)
-    {
+    for (int i=0; i <= arrLen; i++) {
         Obstacle *actor = &obs[i];
 
         // object on object pushing logic
-        for (int j=0; j <= arrLen; j++)
-        {
+        for (int j=0; j <= arrLen; j++) {
             if ( i == j ) { continue; } // skip if same object or object already stuck to paw
 
             Obstacle *subject = &obs[j];
 
-            if ( CheckCollisionRecs(actor->rect, subject->rect) )
-            {
+            if ( CheckCollisionRecs(actor->rect, subject->rect) ) {
                 if (actor->stuck) {
                     subject->rect.x = subject->rect.x + dt->x;
                     subject->rect.y = subject->rect.y + dt->y;
@@ -387,8 +356,7 @@ void handleObjectPushing(Obstacle obs[], int arrLen, Honey *jar, Vector2 *dt)
         }
 
         // object on honey jar logic
-        if ( CheckCollisionRecs(jar->hitbox, actor->rect) )
-        {
+        if ( CheckCollisionRecs(jar->hitbox, actor->rect) ) {
             if (!jar->stuck) {
                 jar->pos.x = jar->pos.x + dt->x;
                 jar->pos.y = jar->pos.y + dt->y;
@@ -402,12 +370,10 @@ void handleObjectPushing(Obstacle obs[], int arrLen, Honey *jar, Vector2 *dt)
 
 void handlePawPushing(Bear *b, Obstacle obs[], int arrLen, Vector2 *dt)
 {
-    for (int i=0; i <= arrLen; i++)
-    {
+    for (int i=0; i <= arrLen; i++) {
         Obstacle *subject = &obs[i];
 
-        if ( CheckCollisionRecs(b->hitbox, subject->rect) )
-        {
+        if ( CheckCollisionRecs(b->hitbox, subject->rect) ) {
             subject->rect.x = subject->rect.x + dt->x;
             subject->rect.y = subject->rect.y + dt->y;
         }
@@ -448,12 +414,10 @@ void handleSpeed()
     } else if (dt.x == 0 && dt.y != 0) {
         absMouseDelta = fabs(dt.y);
         mouseSpeed = absMouseDelta;
-        // TOTAL_SPEED = TOTAL_SPEED + (int)mouseSpeed*2;
         TOTAL_SPEED = TOTAL_SPEED + ((int)mouseSpeed*2 * SENSITIVITY);
     } else if (dt.x != 0 && dt.y == 0) {
         absMouseDelta = fabs(dt.x);
         mouseSpeed = absMouseDelta;
-        // TOTAL_SPEED = TOTAL_SPEED + (int)mouseSpeed*2;
         TOTAL_SPEED = TOTAL_SPEED + ((int)mouseSpeed*2 * SENSITIVITY);
     }
 
@@ -470,7 +434,7 @@ void handleSpeed()
     }
 }
 
-void playBearSound(SoundBank *sb) {
+void randomBearSound(SoundBank *sb) {
     switch (GetRandomValue(1, 2)) {
         case 1:
             PlaySound(sb->growl1); break;
