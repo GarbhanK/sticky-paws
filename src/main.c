@@ -16,10 +16,9 @@ void unloadTextures(UserInterface *ui, Honey *jar, Bear *paw);
 
 int main()
 {
-	InitWindow(WIDTH, HEIGHT, "Sticky Paws");
-	InitAudioDevice();
-	loadSounds(sounds);
-
+    InitWindow(WIDTH, HEIGHT, "Sticky Paws");
+    InitAudioDevice();
+    loadSounds(sounds);
     double currentTime, lastTime, timerPrev;
     float speedDecrease;
     bool warning = false;
@@ -72,7 +71,7 @@ int main()
     // reset mouse so bear paw isn't in top right
     SetMousePosition(HEIGHT-50, WIDTH/2);
 
-	while (!WindowShouldClose()) {
+    while (!WindowShouldClose()) {
         // mouse position diff used to stuck object movement
         Vector2 mouseDelta = GetMouseDelta();
 
@@ -204,14 +203,14 @@ int main()
                 drawButton("RESTART", GameUI.startButton);
             }
 
-		EndDrawing();
-	}
+        EndDrawing();
+    }
 
-	unloadTextures(&GameUI, &Jar, &Paw);
-	unloadSounds(sounds);
+    unloadTextures(&GameUI, &Jar, &Paw);
+    unloadSounds(sounds);
 
-	CloseWindow();
-	return 0;
+    CloseWindow();
+    return 0;
 }
 
 void unloadTextures(UserInterface *ui, Honey *jar, Bear *paw) {
