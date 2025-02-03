@@ -35,8 +35,8 @@ typedef struct Obstacle {
 
 // https://youtu.be/_KSKH8C9Gf0?si=mmUkxPDIZce6YNlD
 typedef struct {
-    Obstacle* items;    // the Obstacles array
     Rectangle* init;    // array of rect positions to restart/init the game
+    Obstacle* items;    // the Obstacles array
     size_t length;      // current no. items
     size_t capapcity;   // total arr capacity
 } ObstacleArray;
@@ -53,8 +53,8 @@ Rectangle obstacleInit[4];
 
 // declare functions
 void handleStickyJar(Bear *paw, Honey *jar, Sound sb[]);
-void handleStickyObstacle(Bear *paw, Obstacle obs[], size_t arrLen, Sound sb[]);
-void handlePawPushing(Bear *b, Obstacle obs[], size_t arrLen, Vector2 *dt);
-void handleObjectPushing(Obstacle obs[], size_t arrLen, Honey *jar, Vector2 *dt);
-void resetObjects(Honey *jar, Obstacle obs[], size_t arrLen);
+void handleStickyObstacle(Bear *paw, ObstacleArray *obs, Sound sb[]);
+void handlePawPushing(Bear *b, ObstacleArray *obs, Vector2 *dt);
+void handleObjectPushing(ObstacleArray *obs, Honey *jar, Vector2 *dt);
+void resetObjects(Honey *jar, ObstacleArray *obs);
 void handleSpeed();

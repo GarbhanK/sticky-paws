@@ -26,13 +26,6 @@ int main()
 
     GAMESTATE = START;
 
-    // TODO: change for existing obstacles[] array
-    // ObstacleArray Obs = {
-    //     .init = obstacleInit,
-    //     .items = obstacles,
-    //     .length = sizeof(obstacles)/sizeof(obstacles[0]),
-    // };
-
     // additional obsacles, e.g other picnic items
     Obstacle obstacles[] = {
         { obstacleInit[0], false, 10 },
@@ -40,7 +33,13 @@ int main()
         { obstacleInit[2], false, 10 },
         { obstacleInit[3], false, 10 },
     };
-    size_t obstaclesLen = sizeof(obstacles)/sizeof(obstacles[0]);
+
+    // TODO: change for existing obstacles[] array
+    ObstacleArray Obs = {
+        .init = obstacleInit,
+        .items = obstacles,
+        .length = sizeof(obstacles)/sizeof(Obstacle),
+    };
 
     Bear Paw = {
         .tex = LoadTexture("assets/sticky_paw.png"),
@@ -88,7 +87,7 @@ int main()
         if (GAMESTATE == START) {
             if ( IsMouseButtonPressed(0) && CheckCollisionPointRec(GetMousePosition(), GameUI.startButton) )
             {
-                resetObjects(&Jar, obstacles, obstaclesLen);
+                resetObjects(&Jar, &Obs);
                 GAMESTATE = PLAY;
             }
         }
@@ -119,11 +118,12 @@ int main()
 
             // handle sticky logic
             handleStickyJar(&Paw, &Jar, sounds);
-            handleStickyObstacle(&Paw, obstacles, obstaclesLen, sounds);
+            handleStickyObstacle(&Paw, &Obs, sounds);
 
             // handle pushing logic
             // handlePawPushing(&Paw, obstacles, obstaclesLen, &mouseDelta);
-            handleObjectPushing(obstacles, obstaclesLen, &Jar, &mouseDelta);
+
+            handleObjectPushing(&Obs, &Jar, &mouseDelta);
 
             handleSpeed();
 
@@ -152,7 +152,7 @@ int main()
 
             if ( IsMouseButtonPressed(0) && CheckCollisionPointRec(GetMousePosition(), GameUI.startButton) )
             {
-                resetObjects(&Jar, obstacles, obstaclesLen);
+                resetObjects(&Jar, &Obs);
                 GAMESTATE = PLAY;
             }
         }
@@ -161,7 +161,7 @@ int main()
             // printf("You Win!");
             if ( IsMouseButtonPressed(0) && CheckCollisionPointRec(GetMousePosition(), GameUI.startButton) )
             {
-                resetObjects(&Jar, obstacles, obstaclesLen);
+                resetObjects(&Jar, &Obs);
                 GAMESTATE = PLAY;
             }
         }
@@ -179,13 +179,14 @@ int main()
             if (GAMESTATE == PLAY) {
                 DrawTexture(GameUI.background, 0, 0, WHITE);    // draw background image
 
-                for (int i=0; i <= obstaclesLen; i++) {
-                    Obstacle obs = obstacles[i];
-                    DrawRectangleRec(obs.rect, BLACK);  // draw obstacles
+                for (int i=0; i <= Obs.length; i++) {
+                    Obstacle *obs = &Obs.items[i];
+                    DrawRectangleRec(obs->rect, BLACK);  // draw obstacles
                 }
 
                 DrawTexture(Jar.tex, Jar.pos.x, Jar.pos.y, WHITE);   // draw honey Jar
-                    // DrawRectangleRec(Jar.hitbox, GREEN);          // DEBUG HONEY HITBOX
+                if (DEBUG)
+                    DrawRectangleRec(Jar.hitbox, GREEN);          // DEBUG HONEY HITBOX
 
                 drawUI(&GameUI, warning, GameUI.barWidth);  // draw UI
                 drawBear(&Paw);

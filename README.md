@@ -22,6 +22,7 @@
 - [ ] get all of the text in the right place
 - [ ] possibly replace jar of honey with a salmon
 - [ ] add win animations of bear pics moving across screen overlapped
+- [ ] split drawUI() into separate parts
 
 **sfx**
 - [x] bear growls
