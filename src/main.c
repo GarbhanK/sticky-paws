@@ -5,46 +5,9 @@
 #include <raymath.h>
 
 #include "ui.h"
-#include "bear.h"
+#include "main.h"
 
-typedef struct Honey {
-    Texture2D tex;
-    Vector2 pos;
-    Rectangle hitbox;
-    bool stuck;
-    int value;
-} Honey;
-
-typedef struct Obstacle {
-    Rectangle rect;
-    bool stuck;
-    int value;
-    Texture2D tex;
-} Obstacle;
-
-// https://youtu.be/_KSKH8C9Gf0?si=mmUkxPDIZce6YNlD
-typedef struct {
-    Obstacle* items;    // the Obstacles array
-    Rectangle* init;    // array of rect positions to restart/init the game
-    size_t length;      // current no. items
-    size_t capapcity;   // total arr capacity
-} ObstacleArray;
-
-typedef struct {
-    Sound growl1;
-    Sound growl2;
-    Sound growl3;
-    Sound door_slam;
-    Sound stick;
-    Sound drag;
-} SoundBank;
-
-enum GAMESTATE {
-    START,
-    PLAY,
-    FAIL,
-    WIN
-} GAMESTATE;
+#define MAX_SOUNDS SOUNDS_COUNT
 
 bool DEBUG = false;
 int SCORE = 0;
@@ -58,17 +21,6 @@ double TIME_INTERVAL = 0.1f;
 const float WIDTH = 1024.0f;
 const float HEIGHT = 768.0f;
 
-// declare functions
-void handleStickyJar(Bear *paw, Honey *jar, SoundBank *sb);
-void handleStickyObstacle(Bear *paw, Obstacle obs[], size_t size_t, SoundBank *sb);
-
-void handlePawPushing(Bear *b, Obstacle obs[], int arrLen, Vector2 *dt);
-void handleObjectPushing(Obstacle obs[], int arrLen, Honey *jar, Vector2 *dt);
-
-void resetObjects(Honey *jar, Obstacle obs[], size_t arrLen);
-void handleSpeed();
-void randomBearSound(SoundBank *sb);
-
 // the starting positions of the obstacles
 Rectangle obstacleInit[] = {
     { 200, HEIGHT/2, 150, 150 },
@@ -77,22 +29,19 @@ Rectangle obstacleInit[] = {
     { 800, 500, 80, 110 }
 };
 
+// array of sound variables
+Sound sounds[SOUND_COUNT];
+
 
 int main()
 {
 	InitWindow(WIDTH, HEIGHT, "Sticky Paws");
 	InitAudioDevice();
+	loadSounds();
 
     double currentTime, lastTime, timerPrev;
     float speedDecrease;
     bool warning = false;
-
-    SoundBank sounds = {
-        .growl1 = LoadSound("assets/sfx/zapsplat_animals_bear_grunt_001_17143.mp3"),
-        .growl2 = LoadSound("assets/sfx/zapsplat_animals_bear_grunt_002_17144.mp3"),
-        .growl3 = LoadSound("assets/sfx/animals_bear_growl_grunt_003.mp3"),
-        .door_slam = LoadSound("assets/sfx/door_slam.mp3")
-    };
 
     GAMESTATE = START;
 
@@ -188,8 +137,8 @@ int main()
             };
 
             // handle sticky logic
-            handleStickyJar(&Paw, &Jar, &sounds);
-            handleStickyObstacle(&Paw, obstacles, obstaclesLen, &sounds);
+            handleStickyJar(&Paw, &Jar, sounds);
+            handleStickyObstacle(&Paw, obstacles, obstaclesLen, sounds);
 
             // handle pushing logic
             // handlePawPushing(&Paw, obstacles, obstaclesLen, &mouseDelta);
@@ -209,12 +158,12 @@ int main()
             if (Jar.pos.y >= HEIGHT) { GAMESTATE = WIN; }
 
             // sfx triggers
-            if (Paw.pos.y > HEIGHT*0.75) PlaySound(sounds.growl3);
+            if (Paw.pos.y > HEIGHT*0.75) PlaySound(sounds[GROWL3]);
         }
 
         if (GAMESTATE == FAIL)
         {
-            PlaySound(sounds.door_slam);
+            PlaySound(sounds[DOOR_SLAM]);
 
             if (IsKeyPressed(KEY_ENTER)) {
                 GAMESTATE = START;
@@ -289,16 +238,14 @@ int main()
         UnloadTexture(GameUI.wakeStates[i]);
 
     // unload sound data
-    UnloadSound(sounds.growl1);
-    UnloadSound(sounds.growl2);
-    UnloadSound(sounds.growl3);
-    UnloadSound(sounds.door_slam);
+    for (int i = 0; i < SOUND_COUNT; i++)
+        UnloadSound(sounds[i]);
 
 	CloseWindow();
 	return 0;
 }
 
-void handleStickyJar(Bear *paw, Honey *jar, SoundBank *sb)
+void handleStickyJar(Bear *paw, Honey *jar, Sound sb[])
 {
     Vector2 dt = GetMouseDelta();
     if (!jar->stuck) {
@@ -315,7 +262,7 @@ void handleStickyJar(Bear *paw, Honey *jar, SoundBank *sb)
     }
 }
 
-void handleStickyObstacle(Bear *paw, Obstacle obs[], size_t arrLen, SoundBank *sb)
+void handleStickyObstacle(Bear *paw, Obstacle obs[], size_t arrLen, Sound sb[])
 {
     Vector2 dt = GetMouseDelta();
     for (int i=0; i <= arrLen; i++)
@@ -340,7 +287,7 @@ void handleStickyObstacle(Bear *paw, Obstacle obs[], size_t arrLen, SoundBank *s
     }
 }
 
-void handleObjectPushing(Obstacle obs[], int arrLen, Honey *jar, Vector2 *dt)
+void handleObjectPushing(Obstacle obs[], size_t arrLen, Honey *jar, Vector2 *dt)
 {
     for (int i=0; i <= arrLen; i++) {
         Obstacle *actor = &obs[i];
@@ -372,7 +319,7 @@ void handleObjectPushing(Obstacle obs[], int arrLen, Honey *jar, Vector2 *dt)
     }
 }
 
-void handlePawPushing(Bear *b, Obstacle obs[], int arrLen, Vector2 *dt)
+void handlePawPushing(Bear *b, Obstacle obs[], size_t arrLen, Vector2 *dt)
 {
     for (int i=0; i <= arrLen; i++) {
         Obstacle *subject = &obs[i];
@@ -438,11 +385,18 @@ void handleSpeed()
     }
 }
 
-void randomBearSound(SoundBank *sb) {
+void randomBearSound(Sound sb[]) {
     switch (GetRandomValue(1, 2)) {
         case 1:
-            PlaySound(sb->growl1); break;
+            PlaySound(sb[GROWL1]); break;
         case 2:
-            PlaySound(sb->growl2); break;
+            PlaySound(sb[GROWL2]); break;
     }
+}
+
+void loadSounds() {
+    sounds[GROWL1] = LoadSound("assets/sfx/zapsplat_animals_bear_grunt_001_17143.mp3");
+    sounds[GROWL2] = LoadSound("assets/sfx/zapsplat_animals_bear_grunt_002_17144.mp3");
+    sounds[GROWL3] = LoadSound("assets/sfx/animals_bear_growl_grunt_003.mp3");
+    sounds[DOOR_SLAM] = LoadSound("assets/sfx/door_slam.mp3");
 }
