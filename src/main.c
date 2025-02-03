@@ -22,11 +22,12 @@ typedef struct Obstacle {
     Texture2D tex;
 } Obstacle;
 
+// https://youtu.be/_KSKH8C9Gf0?si=mmUkxPDIZce6YNlD
 typedef struct {
-    Obstacle* items;    // the Obstacles
+    Obstacle* items;    // the Obstacles array
     Rectangle* init;    // array of rect positions to restart/init the game
-    int len;            // current no. items
-    int cap;            // total arr capacity
+    size_t length;      // current no. items
+    size_t capapcity;   // total arr capacity
 } ObstacleArray;
 
 typedef struct {
@@ -45,7 +46,7 @@ enum GAMESTATE {
     WIN
 } GAMESTATE;
 
-bool DEBUG = true;
+bool DEBUG = false;
 int SCORE = 0;
 int TIMER = 15;
 int TOTAL_SPEED = 0;
@@ -59,12 +60,12 @@ const float HEIGHT = 768.0f;
 
 // declare functions
 void handleStickyJar(Bear *paw, Honey *jar, SoundBank *sb);
-void handleStickyObstacle(Bear *paw, Obstacle obs[], int arrLen, SoundBank *sb);
+void handleStickyObstacle(Bear *paw, Obstacle obs[], size_t size_t, SoundBank *sb);
 
 void handlePawPushing(Bear *b, Obstacle obs[], int arrLen, Vector2 *dt);
 void handleObjectPushing(Obstacle obs[], int arrLen, Honey *jar, Vector2 *dt);
 
-void resetObjects(Honey *jar, Obstacle obs[], int arrLen);
+void resetObjects(Honey *jar, Obstacle obs[], size_t arrLen);
 void handleSpeed();
 void randomBearSound(SoundBank *sb);
 
@@ -99,7 +100,7 @@ int main()
     // ObstacleArray Obs = {
     //     .init = obstacleInit,
     //     .items = obstacles,
-    //     .len = sizeof(obstacles)/sizeof(obstacles[0]),
+    //     .length = sizeof(obstacles)/sizeof(obstacles[0]),
     // };
 
     // additional obsacles, e.g other picnic items
@@ -109,7 +110,7 @@ int main()
         { obstacleInit[2], false, 10 },
         { obstacleInit[3], false, 10 },
     };
-    int obstaclesLen = sizeof(obstacles)/sizeof(obstacles[0]);
+    size_t obstaclesLen = sizeof(obstacles)/sizeof(obstacles[0]);
 
     Bear Paw = {
         .tex = LoadTexture("assets/sticky_paw.png"),
@@ -130,6 +131,7 @@ int main()
         .background = LoadTexture("assets/picnic_blanket_grass.png"),
         .splashScreen = LoadTexture("assets/bear_splash.jpg"),
         .failScreen = LoadTexture("assets/bear_jail.png"),
+        .title = LoadTexture("assets/title_card.png"),
         .wakeStates = {
             LoadTexture("assets/tv_asleep.png"),
             LoadTexture("assets/tv_1.png"),
@@ -240,6 +242,7 @@ int main()
 
             if (GAMESTATE == START) {
                 DrawTexture(GameUI.splashScreen, 0, 0, WHITE);
+                DrawTexture(GameUI.title, 0, 0, WHITE);
                 drawButton("PLAY", GameUI.startButton);
             }
 
@@ -277,6 +280,7 @@ int main()
     UnloadTexture(GameUI.background);
     UnloadTexture(GameUI.failScreen);
     UnloadTexture(GameUI.splashScreen);
+    UnloadTexture(GameUI.title);
     UnloadTexture(Jar.tex);
     UnloadTexture(Paw.tex);
     UnloadTexture(Paw.nose);
@@ -311,7 +315,7 @@ void handleStickyJar(Bear *paw, Honey *jar, SoundBank *sb)
     }
 }
 
-void handleStickyObstacle(Bear *paw, Obstacle obs[], int arrLen, SoundBank *sb)
+void handleStickyObstacle(Bear *paw, Obstacle obs[], size_t arrLen, SoundBank *sb)
 {
     Vector2 dt = GetMouseDelta();
     for (int i=0; i <= arrLen; i++)
@@ -380,7 +384,7 @@ void handlePawPushing(Bear *b, Obstacle obs[], int arrLen, Vector2 *dt)
     }
 }
 
-void resetObjects(Honey *jar, Obstacle obs[], int arrLen)
+void resetObjects(Honey *jar, Obstacle obs[], size_t arrLen)
 {
     // reset scores
     TOTAL_SPEED = 0;

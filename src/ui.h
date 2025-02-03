@@ -8,6 +8,7 @@ typedef struct UserInterface {
     Texture2D background;
     Texture2D splashScreen;
     Texture2D failScreen;
+    Texture2D title;
     Texture2D wakeStates[4];
 } UserInterface;
 
