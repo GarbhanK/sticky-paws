@@ -5,6 +5,19 @@
 
 #include "bear.h"
 
+extern bool DEBUG;
+extern int SCORE;
+extern int TIMER;
+extern int TOTAL_SPEED;
+extern float TOTAL_SPEED_MAX;
+extern float SENSITIVITY;
+extern float DECAY;
+extern double TIME_INTERVAL;
+
+extern const float WIDTH;
+extern const float HEIGHT;
+
+
 typedef struct Honey {
     Texture2D tex;
     Vector2 pos;
@@ -28,25 +41,6 @@ typedef struct {
     size_t capapcity;   // total arr capacity
 } ObstacleArray;
 
-typedef struct {
-    Sound growl1;
-    Sound growl2;
-    Sound growl3;
-    Sound door_slam;
-    Sound stick;
-    Sound drag;
-} SoundBank;
-
-typedef enum {
-    GROWL1,
-    GROWL2,
-    GROWL3,
-    DOOR_SLAM,
-    STICK,
-    DRAG,
-    SOUND_COUNT,
-} SoundID;
-
 enum GAMESTATE {
     START,
     PLAY,
@@ -54,7 +48,8 @@ enum GAMESTATE {
     WIN
 } GAMESTATE;
 
-#define MAX_SOUNDS SOUNDS_COUNT
+// the starting positions of the obstacles
+Rectangle obstacleInit[4];
 
 // declare functions
 void handleStickyJar(Bear *paw, Honey *jar, Sound sb[]);
@@ -63,5 +58,3 @@ void handlePawPushing(Bear *b, Obstacle obs[], size_t arrLen, Vector2 *dt);
 void handleObjectPushing(Obstacle obs[], size_t arrLen, Honey *jar, Vector2 *dt);
 void resetObjects(Honey *jar, Obstacle obs[], size_t arrLen);
 void handleSpeed();
-void randomBearSound(Sound sb[]);
-void loadSounds();
