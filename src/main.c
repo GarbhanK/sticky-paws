@@ -121,9 +121,7 @@ int main()
 
             // handle pushing logic
             // handlePawPushing(&Paw, obstacles, obstaclesLen, &mouseDelta);
-
             handleObjectPushing(&Obs, &Jar, &mouseDelta);
-
             handleSpeed();
 
             // decrease speed total each frame
@@ -134,15 +132,17 @@ int main()
                 TOTAL_SPEED = (int)speedDecrease;
             }
 
-            // win game logic
-            if (Jar.pos.y >= HEIGHT) { GAMESTATE = WIN; }
-
             // sfx triggers
             if (Paw.pos.y > HEIGHT*0.75) PlaySound(sounds[GROWL3]);
+
+            if ( (Paw.pos.y + HEIGHT*0.5) <= (HEIGHT - Paw.nose.height) )
+                PlaySound(sounds[SNIFF]);
+
+            // win game logic
+            if (Jar.pos.y >= HEIGHT) { GAMESTATE = WIN; }
         }
 
-        if (GAMESTATE == FAIL)
-        {
+        if (GAMESTATE == FAIL) {
             PlaySound(sounds[DOOR_SLAM]);
 
             if (IsKeyPressed(KEY_ENTER)) {

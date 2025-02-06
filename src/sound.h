@@ -16,8 +16,9 @@ typedef enum {
     GROWL2,
     GROWL3,
     DOOR_SLAM,
-    STICK,
-    DRAG,
+    SNIFF,
+    // STICK,
+    // DRAG,
     SOUND_COUNT,
 } SoundID;
 
