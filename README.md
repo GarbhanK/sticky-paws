@@ -26,7 +26,7 @@
 
 **sfx**
 - [x] bear growls
-- [ ] sniffing nose
+- [x] sniffing nose
 - [ ] snoring/sleeping
 - [ ] obj movement
 - [ ] sticking noise
