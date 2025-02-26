@@ -154,7 +154,9 @@ int main()
             if (Paw.pos.y > HEIGHT*0.75) PlaySound(sounds[GROWL3]);
 
             if ( (Paw.pos.y + HEIGHT*0.5) <= (HEIGHT - Paw.nose.height) )
-                PlaySound(sounds[SNIFF]);
+                if (!IsSoundPlaying(sounds[SNIFF])) {
+                    PlaySound(sounds[SNIFF]);
+                }
 
             // win game logic
             if (Jar.pos.y >= HEIGHT) { GAMESTATE = WIN; }
@@ -164,6 +166,7 @@ int main()
             // check if we've just eentered the fail state
             if (!failStateEntered) {
                 StartFadeIn(&fade);
+                StopSound(sounds[SNIFF]); // it's a long sound
                 PlaySound(sounds[DOOR_SLAM]);
                 failStateEntered = true;
             }
