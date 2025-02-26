@@ -16,6 +16,13 @@ void unloadTextures(UserInterface *ui, Honey *jar, Bear *paw);
 void flashHappyBear(UserInterface *ui);
 void FadeInFromBlack(float *alpha, float fadeSpeed);
 
+typedef struct {
+    float alpha;
+    bool active;
+} FadeEffect;
+
+void StartFadeIn(FadeEffect *fade);
+void UpdateFadeIn(FadeEffect *fade, float fadeSpeed);
 
 int main()
 {
@@ -26,7 +33,8 @@ int main()
     double currentTime, lastTime, timerPrev;
     float speedDecrease;
     bool warning = false;
-    float alpha = 1.0f;
+    FadeEffect fade = {1.0f, true}; // start active with full black
+    bool failStateEntered = false;
 
     GAMESTATE = START;
 
@@ -86,6 +94,11 @@ int main()
         if (IsKeyPressed(KEY_R)) {
             GAMESTATE = PLAY;
         }
+        if (DEBUG && IsKeyPressed(KEY_SPACE)) {
+            StartFadeIn(&fade);
+        }
+
+        UpdateFadeIn(&fade, 0.01f);
 
         // start screen
         if (GAMESTATE == START) {
@@ -98,7 +111,6 @@ int main()
 
         if (GAMESTATE == PLAY) {
             currentTime = GetTime();
-            FadeInFromBlack(&alpha, 0.01f);
 
             // decrease timer every second (1.0 = 1 sec)
             if ( (currentTime - timerPrev) >= 1.0 ) {
@@ -149,17 +161,26 @@ int main()
         }
 
         if (GAMESTATE == FAIL) {
-            PlaySound(sounds[DOOR_SLAM]);
+            // check if we've just eentered the fail state
+            if (!failStateEntered) {
+                StartFadeIn(&fade);
+                PlaySound(sounds[DOOR_SLAM]);
+                failStateEntered = true;
+            }
 
             if (IsKeyPressed(KEY_ENTER)) {
                 GAMESTATE = START;
+                failStateEntered = false;
             }
 
             if ( IsMouseButtonPressed(0) && CheckCollisionPointRec(GetMousePosition(), GameUI.startButton) )
             {
                 resetObjects(&Jar, &Obs);
                 GAMESTATE = PLAY;
+                failStateEntered = false;
             }
+        } else {
+            failStateEntered = false;
         }
 
         if (GAMESTATE == WIN) {
@@ -182,18 +203,15 @@ int main()
 
             if (GAMESTATE == PLAY) {
                 DrawTexture(GameUI.background, 0, 0, WHITE);
-                DrawRectangle(0, 0, WIDTH, HEIGHT, Fade(BLACK, alpha));
+                if (fade.active) {
+                    DrawRectangle(0, 0, WIDTH, HEIGHT, Fade(BLACK, fade.alpha));
+                }
                 // flashHappyBear(&GameUI);   // draw background image
 
                 for (int i=0; i <= Obs.length; i++) {
                     Obstacle *obs = &Obs.items[i];
                     DrawRectangleRec(obs->rect, BLACK);  // draw obstacles
                 }
-
-                // if (IsKeyPressed(KEY_D)) {
-                //     printf("Pressed D!\n");
-                //     flashHappyBear(&GameUI);
-                // }
 
                 DrawTexture(Jar.tex, Jar.pos.x, Jar.pos.y, WHITE);   // draw honey Jar
                 if (DEBUG)
@@ -207,6 +225,9 @@ int main()
                 DrawTexture(GameUI.failScreen, 0, 0, WHITE);
                 DrawText("FAIL", WIDTH/2, HEIGHT/2, 200, RED);
                 drawButton("RESTART", GameUI.startButton);
+                if (fade.active) {
+                    DrawRectangle(0, 0, WIDTH, HEIGHT, Fade(BLACK, fade.alpha));
+                }
             }
 
             if (GAMESTATE == WIN) {
@@ -239,10 +260,20 @@ void unloadTextures(UserInterface *ui, Honey *jar, Bear *paw) {
         UnloadTexture(ui->wakeStates[i]);
 }
 
-void FadeInFromBlack(float *alpha, float fadeSpeed) {
-    if (*alpha > 0.0f) {
-        *alpha -= fadeSpeed;
-        if (*alpha < 0.0f) *alpha = 0.0f;  // Clamp to 0
+// reset fade-in, can be called any time
+void StartFadeIn(FadeEffect *fade) {
+    fade->alpha = 1.0f;
+    fade->active = true;
+}
+
+// call every frame
+void UpdateFadeIn(FadeEffect *fade, float fadeSpeed) {
+    if (fade->active) {
+        fade->alpha -= fadeSpeed;
+        if (fade->alpha <= 0.0f ) {
+            fade->alpha = 0.0f;
+            fade->alpha = false;    // stop sending once complete
+        }
     }
 }
 
