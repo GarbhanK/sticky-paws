@@ -14,3 +14,4 @@ typedef struct UserInterface {
 
 void drawUI(UserInterface *ui, bool warning, int barWidth);
 void drawButton(char *msg, Rectangle area);
+void drawCenterText(char *msg, Color colour, int fsize, Vector2 pos);

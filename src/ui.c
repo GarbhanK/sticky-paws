@@ -27,8 +27,7 @@ void drawUI(UserInterface *ui, bool warning, int barWidth)
     if (DEBUG) { DrawText(TextFormat("TOTAL_SPEED: %d", scaledSpeed), 20, 60, 20, RED); }
     if (!DEBUG) { DrawText(TextFormat("TIMER: %d", TIMER), 20, 60, 20, RED); }
 
-    if ( warning )
-    {
+    if ( warning ) {
         DrawText("TOO FAST!",
             MeasureText("TOTAL_SPEED: 000", 20)+30, 60, 20, RED);
     }
@@ -52,4 +51,13 @@ void drawButton(char *msg, Rectangle area)
         area.x + (area.width/2 - startButtonTextLen/2),
         area.y + (area.height/2 - 25),
         50, WHITE);
+}
+
+void drawCenterText(char *msg, Color colour, int fsize, Vector2 pos)
+{
+    float msgLen = (float)MeasureText(msg, fsize);
+    DrawText(msg,
+        (pos.x - msgLen/2), pos.y,
+        fsize, colour
+    );
 }

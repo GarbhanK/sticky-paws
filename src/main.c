@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <stdbool.h>
 #include <raylib.h>
 #include <raymath.h>
@@ -187,7 +186,6 @@ int main()
         }
 
         if (GAMESTATE == WIN) {
-            // printf("You Win!");
             if ( IsMouseButtonPressed(0) && CheckCollisionPointRec(GetMousePosition(), GameUI.startButton) )
             {
                 resetObjects(&Jar, &Obs);
@@ -226,7 +224,7 @@ int main()
 
             if (GAMESTATE == FAIL) {
                 DrawTexture(GameUI.failScreen, 0, 0, WHITE);
-                DrawText("FAIL", WIDTH/2, HEIGHT/2, 200, RED);
+                drawCenterText("FAIL", RED, 200, (Vector2){ WIDTH*0.5, HEIGHT*0.6 });
                 drawButton("RESTART", GameUI.startButton);
                 if (fade.active) {
                     DrawRectangle(0, 0, WIDTH, HEIGHT, Fade(BLACK, fade.alpha));
