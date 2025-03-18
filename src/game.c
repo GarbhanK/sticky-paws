@@ -164,3 +164,23 @@ void handlePawPushing(Bear *b, ObstacleArray *obs, Vector2 *dt)
     }
   }
 }
+
+int getOldManState()
+{
+    int state = 0;
+    // Draw old man in the corner
+    if (TOTAL_SPEED >= 0) {
+      state = 0;
+    }
+    if (TOTAL_SPEED >= TOTAL_SPEED_MAX * 0.3) {
+      state = 1;
+    }
+    if (TOTAL_SPEED >= TOTAL_SPEED_MAX * 0.5) {
+      state = 2;
+    }
+    if (TOTAL_SPEED >= TOTAL_SPEED_MAX * 0.8) {
+      state = 3;
+    }
+
+    return state;
+}

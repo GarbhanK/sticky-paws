@@ -17,6 +17,12 @@ typedef enum {
   GROWL3,
   DOOR_SLAM,
   SNIFF,
+  FANFARE,
+  SELECT,
+  SNORE,
+  HUH,
+  MIRANDA,
+  SIREN,
   // STICK,
   // DRAG,
   SOUND_COUNT,
@@ -25,3 +31,4 @@ typedef enum {
 void randomBearSound(Sound sounds[]);
 void loadSounds(Sound sounds[]);
 void unloadSounds(Sound sounds[]);
+void stopAllSounds(Sound sounds[]);

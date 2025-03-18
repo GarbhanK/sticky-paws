@@ -52,3 +52,4 @@ void handlePawPushing(Bear *b, ObstacleArray *obs, Vector2 *dt);
 void handleObjectPushing(ObstacleArray *obs, Honey *jar, Vector2 *dt);
 void resetObjects(Honey *jar, ObstacleArray *obs);
 void handleSpeed();
+int getOldManState();

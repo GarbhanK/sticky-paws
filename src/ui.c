@@ -1,10 +1,11 @@
 #include "ui.h"
+#include "game.h"
 
 #include <raylib.h>
 #include <stdbool.h>
 
 extern int TOTAL_SPEED, TIMER;
-extern float WIDTH, HEIGHT, TOTAL_SPEED_MAX;
+extern float TOTAL_SPEED_MAX;
 extern bool DEBUG;
 
 void drawUI(UserInterface *ui, bool warning, int barWidth)
@@ -37,19 +38,8 @@ void drawUI(UserInterface *ui, bool warning, int barWidth)
     DrawText("TOO FAST!", MeasureText("TOTAL_SPEED: 000", 20) + 30, 60, 20, RED);
   }
 
-  // Draw old man in the corner
-  if (TOTAL_SPEED >= 0) {
-    DrawTexture(ui->wakeStates[0], 0, HEIGHT - 250, WHITE);
-  }
-  if (TOTAL_SPEED >= TOTAL_SPEED_MAX * 0.3) {
-    DrawTexture(ui->wakeStates[1], 0, HEIGHT - 250, WHITE);
-  }
-  if (TOTAL_SPEED >= TOTAL_SPEED_MAX * 0.5) {
-    DrawTexture(ui->wakeStates[2], 0, HEIGHT - 250, WHITE);
-  }
-  if (TOTAL_SPEED >= TOTAL_SPEED_MAX * 0.8) {
-    DrawTexture(ui->wakeStates[3], 0, HEIGHT - 250, WHITE);
-  }
+  // draw the old man in the corner
+  DrawTextureEx(ui->wakeStates[getOldManState()], (Vector2){0,HEIGHT-250}, 0, 1, WHITE);
 }
 
 void drawButton(char *msg, Rectangle area)
@@ -68,4 +58,13 @@ void drawCenterText(char *msg, Color colour, int fsize, Vector2 pos)
 {
   float msgLen = (float)MeasureText(msg, fsize);
   DrawText(msg, (pos.x - msgLen / 2), pos.y, fsize, colour);
+}
+
+bool isButtonPressed(Rectangle button)
+{
+    if (IsMouseButtonPressed(0) &&
+        CheckCollisionPointRec(GetMousePosition(), button)) {
+            return true;
+    }
+    return false;
 }

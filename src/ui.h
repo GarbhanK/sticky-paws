@@ -9,9 +9,11 @@ typedef struct UserInterface {
   Texture2D splashScreen;
   Texture2D failScreen;
   Texture2D title;
+  Texture2D winScreen;
   Texture2D wakeStates[4];
 } UserInterface;
 
 void drawUI(UserInterface *ui, bool warning, int barWidth);
 void drawButton(char *msg, Rectangle area);
 void drawCenterText(char *msg, Color colour, int fsize, Vector2 pos);
+bool isButtonPressed(Rectangle button);

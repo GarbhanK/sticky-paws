@@ -19,18 +19,19 @@
 - [x] some kind of narrative framing around the bear seeing the guy? Periscope?
 - [ ] try raygui for buttons
 - [ ] rules explainer in the main menu
-- [ ] get all of the text in the right place
+- [x] get all of the text in the right place
 - [ ] possibly replace jar of honey with a salmon
 - [ ] add win animations of bear pics moving across screen overlapped
-- [ ] split drawUI() into separate parts
+- [x] split drawUI() into separate parts
 
 **sfx**
 - [x] bear growls
 - [x] sniffing nose
-- [ ] snoring/sleeping
+- [x] snoring/sleeping
 - [ ] obj movement
 - [ ] sticking noise
-- [ ] UI noises (button click)
+- [x] UI noises (button click)
 - [ ] Menu music
 - [ ] Gameplay music
 - [ ] Win/Fail music
+- [x] Win/Fail sfx

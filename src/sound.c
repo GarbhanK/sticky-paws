@@ -16,11 +16,17 @@ void randomBearSound(Sound sounds[])
 
 void loadSounds(Sound sounds[])
 {
-  sounds[GROWL1] = LoadSound("assets/sfx/zapsplat_animals_bear_grunt_001_17143.mp3");
-  sounds[GROWL2] = LoadSound("assets/sfx/zapsplat_animals_bear_grunt_002_17144.mp3");
-  sounds[GROWL3] = LoadSound("assets/sfx/animals_bear_growl_grunt_003.mp3");
+  sounds[GROWL1] = LoadSound("assets/sfx/growl1.mp3");
+  sounds[GROWL2] = LoadSound("assets/sfx/growl2.mp3");
+  sounds[GROWL3] = LoadSound("assets/sfx/growl3.mp3");
   sounds[DOOR_SLAM] = LoadSound("assets/sfx/door_slam.mp3");
   sounds[SNIFF] = LoadSound("assets/sfx/sniff.mp3");
+  sounds[FANFARE] = LoadSound("assets/sfx/ultraman_dyna_fanfare.mp3");
+  sounds[SELECT] = LoadSound("assets/sfx/blip_select.wav");
+  sounds[SNORE] = LoadSound("assets/sfx/base_snore.mp3");
+  sounds[HUH] = LoadSound("assets/sfx/huh.mp3");
+  sounds[MIRANDA] = LoadSound("assets/sfx/miranda.mp3");
+  sounds[SIREN] = LoadSound("assets/sfx/police_siren.mp3");
 }
 
 void unloadSounds(Sound sounds[])
@@ -28,4 +34,12 @@ void unloadSounds(Sound sounds[])
   for (int i = 0; i < SOUND_COUNT; i++) {
     UnloadSound(sounds[i]);
   }
+}
+
+void stopAllSounds(Sound sounds[])
+{
+  for (int i = 0; i < SOUND_COUNT; i++) {
+    if (IsSoundPlaying(sounds[i]))
+      StopSound(sounds[i]);
+    }
 }

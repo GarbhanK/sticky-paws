@@ -1,7 +1,6 @@
 #include <raylib.h>
 #include <raymath.h>
 #include <stdbool.h>
-#include <stdio.h>
 
 #include "game.h"
 #include "sound.h"
@@ -35,6 +34,8 @@ int main()
   bool warning = false;
   FadeEffect fade = {1.0f, true}; // start active with full black
   bool failStateEntered = false;
+  bool winStateEntered = false;
+  bool isSnoring = false;
 
   GAMESTATE = START;
 
@@ -70,6 +71,7 @@ int main()
                           .splashScreen = LoadTexture("assets/bear_splash.jpg"),
                           .failScreen = LoadTexture("assets/bear_jail.png"),
                           .title = LoadTexture("assets/title_card.png"),
+                          .winScreen = LoadTexture("assets/winner_bear.jpg"),
                           .wakeStates = {
                               LoadTexture("assets/tv_asleep.png"),
                               LoadTexture("assets/tv_1.png"),
@@ -94,12 +96,12 @@ int main()
       StartFadeIn(&fade);
     }
 
-    UpdateFadeIn(&fade, 0.01f);
+    UpdateFadeIn(&fade, 0.005f);
 
     // start screen
     if (GAMESTATE == START) {
-      if (IsMouseButtonPressed(0) &&
-          CheckCollisionPointRec(GetMousePosition(), GameUI.startButton)) {
+      if (isButtonPressed(GameUI.startButton)) {
+        PlaySound(sounds[SELECT]);
         resetObjects(&Jar, &Obs);
         GAMESTATE = PLAY;
       }
@@ -143,7 +145,7 @@ int main()
         TOTAL_SPEED = (int)speedDecrease;
       }
 
-      // sfx triggers
+      //  === SFX TRIGGERS ===
       if (Paw.pos.y > HEIGHT * 0.75)
         PlaySound(sounds[GROWL3]);
 
@@ -151,6 +153,17 @@ int main()
         if (!IsSoundPlaying(sounds[SNIFF])) {
           PlaySound(sounds[SNIFF]);
         }
+
+      if (!isSnoring && getOldManState() <= 2) {
+          isSnoring = true;
+          SetSoundVolume(sounds[SNORE], 0.25);
+          SetSoundPan(sounds[SNORE], 0.25);
+          PlaySound(sounds[SNORE]);
+      } else if (isSnoring && getOldManState() == 3) {
+          isSnoring = false;
+          StopSound(sounds[SNORE]);
+          PlaySound(sounds[HUH]);
+      }
 
       // win game logic
       if (Jar.pos.y >= HEIGHT) {
@@ -162,8 +175,10 @@ int main()
       // check if we've just eentered the fail state
       if (!failStateEntered) {
         StartFadeIn(&fade);
-        StopSound(sounds[SNIFF]); // it's a long sound
+        stopAllSounds(sounds);
         PlaySound(sounds[DOOR_SLAM]);
+        PlaySound(sounds[SIREN]);
+        PlaySound(sounds[MIRANDA]);
         failStateEntered = true;
       }
 
@@ -172,8 +187,8 @@ int main()
         failStateEntered = false;
       }
 
-      if (IsMouseButtonPressed(0) &&
-          CheckCollisionPointRec(GetMousePosition(), GameUI.startButton)) {
+      if (isButtonPressed(GameUI.startButton)) {
+        PlaySound(sounds[SELECT]);
         resetObjects(&Jar, &Obs);
         GAMESTATE = PLAY;
         failStateEntered = false;
@@ -183,10 +198,21 @@ int main()
     }
 
     if (GAMESTATE == WIN) {
-      if (IsMouseButtonPressed(0) &&
-          CheckCollisionPointRec(GetMousePosition(), GameUI.startButton)) {
+      if (!winStateEntered) {
+        stopAllSounds(sounds);
+        PlaySound(sounds[FANFARE]);
+        winStateEntered = true;
+      }
+
+      // TODO: play kaiju sound?
+
+      // reset game
+      if (isButtonPressed(GameUI.startButton)) {
+        StopSound(sounds[FANFARE]);
+        PlaySound(sounds[SELECT]);
         resetObjects(&Jar, &Obs);
         GAMESTATE = PLAY;
+        winStateEntered = false;
       }
     }
 
@@ -230,7 +256,9 @@ int main()
 
     if (GAMESTATE == WIN) {
       // picture of a happy bear, sympathy for the devil w/ restart button
-      DrawText("WIN", WIDTH / 2, HEIGHT / 2, 100, RED);
+      // DrawTextureEx(GameUI.winScreen, (Vector2){(0 - GameUI.winScreen.width*0.5),0} , 0, 1, WHITE);
+      DrawTextureEx(GameUI.winScreen, (Vector2){0-200, 0}, 0, 1.15, WHITE);
+      drawCenterText("WIN", RED, 100, (Vector2){WIDTH * 0.5, HEIGHT * 0.3});
       drawButton("RESTART", GameUI.startButton);
     }
 
@@ -251,6 +279,7 @@ void unloadTextures(UserInterface *ui, Honey *jar, Bear *paw)
   UnloadTexture(ui->failScreen);
   UnloadTexture(ui->splashScreen);
   UnloadTexture(ui->title);
+  UnloadTexture(ui->winScreen);
   UnloadTexture(jar->tex);
   UnloadTexture(paw->tex);
   UnloadTexture(paw->nose);
