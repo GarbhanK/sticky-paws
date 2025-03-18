@@ -1,6 +1,7 @@
 #include <raylib.h>
 #include <raymath.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 #include "game.h"
 #include "sound.h"
@@ -193,8 +194,8 @@ int main()
     ClearBackground(RAYWHITE);
 
     if (GAMESTATE == START) {
-      DrawTexture(GameUI.splashScreen, 0, 0, WHITE);
-      DrawTexture(GameUI.title, 0, 0, WHITE);
+      DrawTextureEx(GameUI.splashScreen, (Vector2){0.0} , 0, 1.2, WHITE);
+      DrawTextureEx(GameUI.title, (Vector2){0, 0},0, 0.75, WHITE);
       drawButton("PLAY", GameUI.startButton);
     }
 
