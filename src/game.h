@@ -1,7 +1,7 @@
-#include <stddef.h>
-#include <stdbool.h>
 #include <raylib.h>
 #include <raymath.h>
+#include <stdbool.h>
+#include <stddef.h>
 
 #include "bear.h"
 
@@ -17,36 +17,30 @@ extern double TIME_INTERVAL;
 extern const float WIDTH;
 extern const float HEIGHT;
 
-
 typedef struct Honey {
-    Texture2D tex;
-    Vector2 pos;
-    Rectangle hitbox;
-    bool stuck;
-    int value;
+  Texture2D tex;
+  Vector2 pos;
+  Rectangle hitbox;
+  bool stuck;
+  int value;
 } Honey;
 
 typedef struct Obstacle {
-    Rectangle rect;
-    bool stuck;
-    int value;
-    Texture2D tex;
+  Rectangle rect;
+  bool stuck;
+  int value;
+  Texture2D tex;
 } Obstacle;
 
 // https://youtu.be/_KSKH8C9Gf0?si=mmUkxPDIZce6YNlD
 typedef struct {
-    Rectangle* init;    // array of rect positions to restart/init the game
-    Obstacle* items;    // the Obstacles array
-    size_t length;      // current no. items
-    size_t capapcity;   // total arr capacity
+  Rectangle *init;   // array of rect positions to restart/init the game
+  Obstacle *items;   // the Obstacles array
+  size_t length;     // current no. items
+  size_t capapcity;  // total arr capacity
 } ObstacleArray;
 
-enum GAMESTATE {
-    START,
-    PLAY,
-    FAIL,
-    WIN
-} GAMESTATE;
+enum GAMESTATE { START, PLAY, FAIL, WIN } GAMESTATE;
 
 // the starting positions of the obstacles
 Rectangle obstacleInit[4];

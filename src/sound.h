@@ -3,23 +3,23 @@
 #define MAX_SOUNDS SOUNDS_COUNT
 
 typedef struct {
-    Sound growl1;
-    Sound growl2;
-    Sound growl3;
-    Sound door_slam;
-    Sound stick;
-    Sound drag;
+  Sound growl1;
+  Sound growl2;
+  Sound growl3;
+  Sound door_slam;
+  Sound stick;
+  Sound drag;
 } SoundBank;
 
 typedef enum {
-    GROWL1,
-    GROWL2,
-    GROWL3,
-    DOOR_SLAM,
-    SNIFF,
-    // STICK,
-    // DRAG,
-    SOUND_COUNT,
+  GROWL1,
+  GROWL2,
+  GROWL3,
+  DOOR_SLAM,
+  SNIFF,
+  // STICK,
+  // DRAG,
+  SOUND_COUNT,
 } SoundID;
 
 void randomBearSound(Sound sounds[]);

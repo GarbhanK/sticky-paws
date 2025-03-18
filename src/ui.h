@@ -1,15 +1,15 @@
 #include <raylib.h>
 
 typedef struct UserInterface {
-    Rectangle infoBox;
-    int barWidth;
-    int barMax;
-    Rectangle startButton;
-    Texture2D background;
-    Texture2D splashScreen;
-    Texture2D failScreen;
-    Texture2D title;
-    Texture2D wakeStates[4];
+  Rectangle infoBox;
+  int barWidth;
+  int barMax;
+  Rectangle startButton;
+  Texture2D background;
+  Texture2D splashScreen;
+  Texture2D failScreen;
+  Texture2D title;
+  Texture2D wakeStates[4];
 } UserInterface;
 
 void drawUI(UserInterface *ui, bool warning, int barWidth);
