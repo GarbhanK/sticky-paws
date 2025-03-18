@@ -23,7 +23,8 @@ typedef struct {
 void StartFadeIn(FadeEffect *fade);
 void UpdateFadeIn(FadeEffect *fade, float fadeSpeed);
 
-int main() {
+int main()
+{
   InitWindow(WIDTH, HEIGHT, "Sticky Paws");
   SetTargetFPS(60);
   InitAudioDevice();
@@ -31,7 +32,7 @@ int main() {
   double currentTime, lastTime, timerPrev;
   float speedDecrease;
   bool warning = false;
-  FadeEffect fade = {1.0f, true};  // start active with full black
+  FadeEffect fade = {1.0f, true}; // start active with full black
   bool failStateEntered = false;
 
   GAMESTATE = START;
@@ -61,20 +62,19 @@ int main() {
       .value = 50,
   };
 
-  UserInterface GameUI = {
-      .infoBox = {0, 0, 400, 100},
-      .barMax = (GameUI.infoBox.width - 40),
-      .startButton = {WIDTH / 2 - 200, HEIGHT - 120, 400, 100},
-      .background = LoadTexture("assets/picnic_blanket_grass.png"),
-      .splashScreen = LoadTexture("assets/bear_splash.jpg"),
-      .failScreen = LoadTexture("assets/bear_jail.png"),
-      .title = LoadTexture("assets/title_card.png"),
-      .wakeStates = {
-          LoadTexture("assets/tv_asleep.png"),
-          LoadTexture("assets/tv_1.png"),
-          LoadTexture("assets/tv_2.png"),
-          LoadTexture("assets/tv_3.png"),
-      }};
+  UserInterface GameUI = {.infoBox = {0, 0, 400, 100},
+                          .barMax = (GameUI.infoBox.width - 40),
+                          .startButton = {WIDTH / 2 - 200, HEIGHT - 120, 400, 100},
+                          .background = LoadTexture("assets/picnic_blanket_grass.png"),
+                          .splashScreen = LoadTexture("assets/bear_splash.jpg"),
+                          .failScreen = LoadTexture("assets/bear_jail.png"),
+                          .title = LoadTexture("assets/title_card.png"),
+                          .wakeStates = {
+                              LoadTexture("assets/tv_asleep.png"),
+                              LoadTexture("assets/tv_1.png"),
+                              LoadTexture("assets/tv_2.png"),
+                              LoadTexture("assets/tv_3.png"),
+                          }};
 
   // reset mouse so bear paw isn't in top right
   SetMousePosition(HEIGHT - 50, WIDTH / 2);
@@ -120,12 +120,11 @@ int main() {
       // update paw movement
       Paw.pos.x = GetMouseX() - (float)Paw.tex.width / 2;
       Paw.pos.y = GetMouseY();
-      Paw.hitbox =
-          (Rectangle){Paw.pos.x, Paw.pos.y, Paw.tex.width, Paw.tex.height};
+      Paw.hitbox = (Rectangle){Paw.pos.x, Paw.pos.y, Paw.tex.width, Paw.tex.height};
 
       // update Jar hitbox
-      Jar.hitbox = (Rectangle){Jar.pos.x + 10, Jar.pos.y + 15,
-                               Jar.tex.width - 20, Jar.tex.height - 25};
+      Jar.hitbox =
+          (Rectangle){Jar.pos.x + 10, Jar.pos.y + 15, Jar.tex.width - 20, Jar.tex.height - 25};
 
       // handle sticky logic
       handleStickyJar(&Paw, &Jar, sounds);
@@ -144,7 +143,8 @@ int main() {
       }
 
       // sfx triggers
-      if (Paw.pos.y > HEIGHT * 0.75) PlaySound(sounds[GROWL3]);
+      if (Paw.pos.y > HEIGHT * 0.75)
+        PlaySound(sounds[GROWL3]);
 
       if ((Paw.pos.y + HEIGHT * 0.5) <= (HEIGHT - Paw.nose.height))
         if (!IsSoundPlaying(sounds[SNIFF])) {
@@ -161,7 +161,7 @@ int main() {
       // check if we've just eentered the fail state
       if (!failStateEntered) {
         StartFadeIn(&fade);
-        StopSound(sounds[SNIFF]);  // it's a long sound
+        StopSound(sounds[SNIFF]); // it's a long sound
         PlaySound(sounds[DOOR_SLAM]);
         failStateEntered = true;
       }
@@ -207,13 +207,14 @@ int main() {
 
       for (int i = 0; i <= Obs.length; i++) {
         Obstacle *obs = &Obs.items[i];
-        DrawRectangleRec(obs->rect, BLACK);  // draw obstacles
+        DrawRectangleRec(obs->rect, BLACK); // draw obstacles
       }
 
-      DrawTexture(Jar.tex, Jar.pos.x, Jar.pos.y, WHITE);  // draw honey Jar
-      if (DEBUG) DrawRectangleRec(Jar.hitbox, GREEN);     // DEBUG HONEY HITBOX
+      DrawTexture(Jar.tex, Jar.pos.x, Jar.pos.y, WHITE); // draw honey Jar
+      if (DEBUG)
+        DrawRectangleRec(Jar.hitbox, GREEN); // DEBUG HONEY HITBOX
 
-      drawUI(&GameUI, warning, GameUI.barWidth);  // draw UI
+      drawUI(&GameUI, warning, GameUI.barWidth); // draw UI
       drawBear(&Paw);
     }
 
@@ -242,7 +243,8 @@ int main() {
   return 0;
 }
 
-void unloadTextures(UserInterface *ui, Honey *jar, Bear *paw) {
+void unloadTextures(UserInterface *ui, Honey *jar, Bear *paw)
+{
   // clean up resources
   UnloadTexture(ui->background);
   UnloadTexture(ui->failScreen);
@@ -257,23 +259,26 @@ void unloadTextures(UserInterface *ui, Honey *jar, Bear *paw) {
 }
 
 // reset fade-in, can be called any time
-void StartFadeIn(FadeEffect *fade) {
+void StartFadeIn(FadeEffect *fade)
+{
   fade->alpha = 1.0f;
   fade->active = true;
 }
 
 // call every frame
-void UpdateFadeIn(FadeEffect *fade, float fadeSpeed) {
+void UpdateFadeIn(FadeEffect *fade, float fadeSpeed)
+{
   if (fade->active) {
     fade->alpha -= fadeSpeed;
     if (fade->alpha <= 0.0f) {
       fade->alpha = 0.0f;
-      fade->alpha = false;  // stop sending once complete
+      fade->alpha = false; // stop sending once complete
     }
   }
 }
 
-void flashHappyBear(UserInterface *ui) {
+void flashHappyBear(UserInterface *ui)
+{
   Texture2D image = ui->splashScreen;
   float alpha = 1.0f;
   float fadeSpeed = 1.5f;
@@ -288,9 +293,10 @@ void flashHappyBear(UserInterface *ui) {
 
   if (fading) {
     alpha -= fadeSpeed * GetFrameTime();
-    if (alpha < 0) alpha = 0;  // clamp to 0
+    if (alpha < 0)
+      alpha = 0; // clamp to 0
   }
 
-  DrawTextureRec(image, (Rectangle){0, 0, image.width, image.height},
-                 (Vector2){200, 150}, Fade(WHITE, alpha));
+  DrawTextureRec(image, (Rectangle){0, 0, image.width, image.height}, (Vector2){200, 150},
+                 Fade(WHITE, alpha));
 }

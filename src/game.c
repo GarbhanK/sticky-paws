@@ -26,7 +26,8 @@ Rectangle obstacleInit[] = {
     {800, 500, 80, 110},
 };
 
-void resetObjects(Honey *jar, ObstacleArray *obs) {
+void resetObjects(Honey *jar, ObstacleArray *obs)
+{
   // reset scores
   TOTAL_SPEED = 0;
   SCORE = 0;
@@ -36,8 +37,7 @@ void resetObjects(Honey *jar, ObstacleArray *obs) {
   jar->stuck = false;
   jar->pos = (Vector2){WIDTH / 2 + 50, 100};
   // jar->hitbox = jar->pos;
-  jar->hitbox = (Rectangle){jar->pos.x, jar->pos.y, jar->hitbox.width,
-                            jar->hitbox.height};
+  jar->hitbox = (Rectangle){jar->pos.x, jar->pos.y, jar->hitbox.width, jar->hitbox.height};
 
   // loop through obstacles and set to original x/y
   for (int i = 0; i <= obs->length; i++) {
@@ -47,7 +47,8 @@ void resetObjects(Honey *jar, ObstacleArray *obs) {
   }
 }
 
-void handleSpeed() {
+void handleSpeed()
+{
   Vector2 dt = GetMouseDelta();
   float absMouseDelta, mouseSpeed;
 
@@ -69,7 +70,7 @@ void handleSpeed() {
   // limit the total speed
   if (TOTAL_SPEED > TOTAL_SPEED_MAX) {
     TOTAL_SPEED = TOTAL_SPEED_MAX;
-    if (!DEBUG)  // TEMP: removes fail state for testing
+    if (!DEBUG) // TEMP: removes fail state for testing
       GAMESTATE = FAIL;
   }
 
@@ -79,7 +80,8 @@ void handleSpeed() {
   }
 }
 
-void handleStickyJar(Bear *paw, Honey *jar, Sound sb[]) {
+void handleStickyJar(Bear *paw, Honey *jar, Sound sb[])
+{
   Vector2 dt = GetMouseDelta();
   if (!jar->stuck) {
     if (CheckCollisionRecs(jar->hitbox, paw->hitbox)) {
@@ -95,7 +97,8 @@ void handleStickyJar(Bear *paw, Honey *jar, Sound sb[]) {
   }
 }
 
-void handleStickyObstacle(Bear *paw, ObstacleArray *obs, Sound sb[]) {
+void handleStickyObstacle(Bear *paw, ObstacleArray *obs, Sound sb[])
+{
   Vector2 dt = GetMouseDelta();
   for (int i = 0; i <= obs->length; i++) {
     Obstacle *subject = &obs->items[i];
@@ -116,7 +119,8 @@ void handleStickyObstacle(Bear *paw, ObstacleArray *obs, Sound sb[]) {
   }
 }
 
-void handleObjectPushing(ObstacleArray *obs, Honey *jar, Vector2 *dt) {
+void handleObjectPushing(ObstacleArray *obs, Honey *jar, Vector2 *dt)
+{
   for (int i = 0; i <= obs->length; i++) {
     Obstacle *actor = &obs->items[i];
 
@@ -124,7 +128,7 @@ void handleObjectPushing(ObstacleArray *obs, Honey *jar, Vector2 *dt) {
     for (int j = 0; j <= obs->length; j++) {
       if (i == j) {
         continue;
-      }  // skip if same object or object already stuck to paw
+      } // skip if same object or object already stuck to paw
 
       Obstacle *subject = &obs->items[j];
 
@@ -149,7 +153,8 @@ void handleObjectPushing(ObstacleArray *obs, Honey *jar, Vector2 *dt) {
   }
 }
 
-void handlePawPushing(Bear *b, ObstacleArray *obs, Vector2 *dt) {
+void handlePawPushing(Bear *b, ObstacleArray *obs, Vector2 *dt)
+{
   for (int i = 0; i <= obs->length; i++) {
     Obstacle *subject = &obs->items[i];
 

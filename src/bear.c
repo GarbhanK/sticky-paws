@@ -4,7 +4,8 @@
 
 extern float WIDTH, HEIGHT;
 
-void drawBear(Bear *b) {
+void drawBear(Bear *b)
+{
   // draw bear paw
   DrawTexture(b->tex, b->pos.x, b->pos.y, WHITE);
 

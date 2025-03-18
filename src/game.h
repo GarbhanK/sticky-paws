@@ -34,10 +34,10 @@ typedef struct Obstacle {
 
 // https://youtu.be/_KSKH8C9Gf0?si=mmUkxPDIZce6YNlD
 typedef struct {
-  Rectangle *init;   // array of rect positions to restart/init the game
-  Obstacle *items;   // the Obstacles array
-  size_t length;     // current no. items
-  size_t capapcity;  // total arr capacity
+  Rectangle *init;  // array of rect positions to restart/init the game
+  Obstacle *items;  // the Obstacles array
+  size_t length;    // current no. items
+  size_t capapcity; // total arr capacity
 } ObstacleArray;
 
 enum GAMESTATE { START, PLAY, FAIL, WIN } GAMESTATE;
