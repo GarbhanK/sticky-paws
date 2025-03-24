@@ -109,6 +109,7 @@ int main()
 
     if (GAMESTATE == PLAY) {
       currentTime = GetTime();
+      stopAllSounds(sounds);
 
       // decrease timer every second (1.0 = 1 sec)
       if ((currentTime - timerPrev) >= 1.0) {
