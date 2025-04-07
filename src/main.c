@@ -1,6 +1,7 @@
 #include <raylib.h>
 #include <raymath.h>
 #include <stdbool.h>
+// #include <stdio.h>
 
 #include "game.h"
 #include "sound.h"
@@ -77,7 +78,8 @@ int main()
                               LoadTexture("assets/tv_1.png"),
                               LoadTexture("assets/tv_2.png"),
                               LoadTexture("assets/tv_3.png"),
-                          }};
+                          },
+                          .wakeStatesLen = 4};
 
   // reset mouse so bear paw isn't in top right
   SetMousePosition(HEIGHT - 50, WIDTH / 2);
@@ -221,8 +223,8 @@ int main()
     ClearBackground(RAYWHITE);
 
     if (GAMESTATE == START) {
-      DrawTextureEx(GameUI.splashScreen, (Vector2){0.0} , 0, 1.2, WHITE);
-      DrawTextureEx(GameUI.title, (Vector2){0, 0},0, 0.75, WHITE);
+      DrawTextureEx(GameUI.splashScreen, (Vector2){0.0}, 0, 1.2, WHITE);
+      DrawTextureEx(GameUI.title, (Vector2){0, 0}, 0, 0.75, WHITE);
       drawButton("PLAY", GameUI.startButton);
     }
 
@@ -242,7 +244,7 @@ int main()
       if (DEBUG)
         DrawRectangleRec(Jar.hitbox, GREEN); // DEBUG HONEY HITBOX
 
-      drawUI(&GameUI, warning, GameUI.barWidth); // draw UI
+      drawUI(&GameUI, warning, GameUI.barWidth);
       drawBear(&Paw);
     }
 
@@ -266,9 +268,10 @@ int main()
     EndDrawing();
   }
 
-  unloadTextures(&GameUI, &Jar, &Paw);
   unloadSounds(sounds);
+  CloseAudioDevice();
 
+  unloadTextures(&GameUI, &Jar, &Paw);
   CloseWindow();
   return 0;
 }
@@ -285,7 +288,7 @@ void unloadTextures(UserInterface *ui, Honey *jar, Bear *paw)
   UnloadTexture(paw->tex);
   UnloadTexture(paw->nose);
 
-  for (int i = 0; i <= sizeof(ui->wakeStates); i++)
+  for (int i = 0; i < ui->wakeStatesLen; i++)
     UnloadTexture(ui->wakeStates[i]);
 }
 

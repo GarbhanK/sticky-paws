@@ -1,3 +1,5 @@
+#include <stddef.h>
+
 #include <raylib.h>
 
 typedef struct UserInterface {
@@ -11,6 +13,7 @@ typedef struct UserInterface {
   Texture2D title;
   Texture2D winScreen;
   Texture2D wakeStates[4];
+  size_t wakeStatesLen;
 } UserInterface;
 
 void drawUI(UserInterface *ui, bool warning, int barWidth);
