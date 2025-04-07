@@ -40,7 +40,7 @@ void resetObjects(Honey *jar, ObstacleArray *obs)
   jar->hitbox = (Rectangle){jar->pos.x, jar->pos.y, jar->hitbox.width, jar->hitbox.height};
 
   // loop through obstacles and set to original x/y
-  for (int i = 0; i <= obs->length; i++) {
+  for (int i = 0; i < obs->length; i++) {
     Obstacle *o = &obs->items[i];
     o->stuck = false;
     o->rect = obstacleInit[i];
@@ -100,7 +100,7 @@ void handleStickyJar(Bear *paw, Honey *jar, Sound sb[])
 void handleStickyObstacle(Bear *paw, ObstacleArray *obs, Sound sb[])
 {
   Vector2 dt = GetMouseDelta();
-  for (int i = 0; i <= obs->length; i++) {
+  for (int i = 0; i < obs->length; i++) {
     Obstacle *subject = &obs->items[i];
 
     // obstacle sticky logic
@@ -121,11 +121,11 @@ void handleStickyObstacle(Bear *paw, ObstacleArray *obs, Sound sb[])
 
 void handleObjectPushing(ObstacleArray *obs, Honey *jar, Vector2 *dt)
 {
-  for (int i = 0; i <= obs->length; i++) {
+  for (int i = 0; i < obs->length; i++) {
     Obstacle *actor = &obs->items[i];
 
     // object on object pushing logic
-    for (int j = 0; j <= obs->length; j++) {
+    for (int j = 0; j < obs->length; j++) {
       if (i == j) {
         continue;
       } // skip if same object or object already stuck to paw
@@ -155,7 +155,7 @@ void handleObjectPushing(ObstacleArray *obs, Honey *jar, Vector2 *dt)
 
 void handlePawPushing(Bear *b, ObstacleArray *obs, Vector2 *dt)
 {
-  for (int i = 0; i <= obs->length; i++) {
+  for (int i = 0; i < obs->length; i++) {
     Obstacle *subject = &obs->items[i];
 
     if (CheckCollisionRecs(b->hitbox, subject->rect)) {

@@ -14,15 +14,7 @@ Sound sounds[SOUND_COUNT];
 
 void unloadTextures(UserInterface *ui, Honey *jar, Bear *paw);
 void flashHappyBear(UserInterface *ui);
-void FadeInFromBlack(float *alpha, float fadeSpeed);
 
-typedef struct {
-  float alpha;
-  bool active;
-} FadeEffect;
-
-void StartFadeIn(FadeEffect *fade);
-void UpdateFadeIn(FadeEffect *fade, float fadeSpeed);
 
 int main()
 {
@@ -235,7 +227,7 @@ int main()
       }
       // flashHappyBear(&GameUI);   // draw background image
 
-      for (int i = 0; i <= Obs.length; i++) {
+      for (int i = 0; i < Obs.length; i++) {
         Obstacle *obs = &Obs.items[i];
         DrawRectangleRec(obs->rect, BLACK); // draw obstacles
       }
@@ -276,40 +268,6 @@ int main()
   return 0;
 }
 
-void unloadTextures(UserInterface *ui, Honey *jar, Bear *paw)
-{
-  // clean up resources
-  UnloadTexture(ui->background);
-  UnloadTexture(ui->failScreen);
-  UnloadTexture(ui->splashScreen);
-  UnloadTexture(ui->title);
-  UnloadTexture(ui->winScreen);
-  UnloadTexture(jar->tex);
-  UnloadTexture(paw->tex);
-  UnloadTexture(paw->nose);
-
-  for (int i = 0; i < ui->wakeStatesLen; i++)
-    UnloadTexture(ui->wakeStates[i]);
-}
-
-// reset fade-in, can be called any time
-void StartFadeIn(FadeEffect *fade)
-{
-  fade->alpha = 1.0f;
-  fade->active = true;
-}
-
-// call every frame
-void UpdateFadeIn(FadeEffect *fade, float fadeSpeed)
-{
-  if (fade->active) {
-    fade->alpha -= fadeSpeed;
-    if (fade->alpha <= 0.0f) {
-      fade->alpha = 0.0f;
-      fade->alpha = false; // stop sending once complete
-    }
-  }
-}
 
 void flashHappyBear(UserInterface *ui)
 {

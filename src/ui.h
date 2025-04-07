@@ -16,7 +16,15 @@ typedef struct UserInterface {
   size_t wakeStatesLen;
 } UserInterface;
 
+typedef struct {
+  float alpha;
+  bool active;
+} FadeEffect;
+
+
 void drawUI(UserInterface *ui, bool warning, int barWidth);
 void drawButton(char *msg, Rectangle area);
 void drawCenterText(char *msg, Color colour, int fsize, Vector2 pos);
 bool isButtonPressed(Rectangle button);
+void StartFadeIn(FadeEffect *fade);
+void UpdateFadeIn(FadeEffect *fade, float fadeSpeed);
