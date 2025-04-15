@@ -23,8 +23,8 @@ typedef enum {
   HUH,
   MIRANDA,
   SIREN,
+  CLOTH_RUSTLE,
   // STICK,
-  // DRAG,
   SOUND_COUNT,
 } SoundID;
 

@@ -1,6 +1,7 @@
 #include "sound.h"
 
 #include "raylib.h"
+#include <stdio.h>
 
 void randomBearSound(Sound sounds[])
 {
@@ -27,6 +28,21 @@ void loadSounds(Sound sounds[])
   sounds[HUH] = LoadSound("assets/sfx/huh.mp3");
   sounds[MIRANDA] = LoadSound("assets/sfx/miranda.mp3");
   sounds[SIREN] = LoadSound("assets/sfx/police_siren.mp3");
+  sounds[CLOTH_RUSTLE] = LoadSound("assets/sfx/cloth_rustle.mp3");
+
+  // validate loaded sounds
+  int valid_count = 0;
+  for (int i=0; i < SOUND_COUNT; i++) {
+    bool valid = IsSoundValid(sounds[i]);
+    if (!valid) {
+      printf("WARNING :: Invalid sound loaded!\n");
+    } else {
+      valid_count++;
+    }
+  }
+
+  if (valid_count != SOUND_COUNT)
+    printf("ERROR :: AAHHHHHHHHH!\n");
 }
 
 void unloadSounds(Sound sounds[])

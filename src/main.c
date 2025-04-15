@@ -1,7 +1,6 @@
 #include <raylib.h>
 #include <raymath.h>
 #include <stdbool.h>
-// #include <stdio.h>
 
 #include "game.h"
 #include "sound.h"
@@ -30,6 +29,7 @@ int main()
   bool failStateEntered = false;
   bool winStateEntered = false;
   bool isSnoring = false;
+  // bool paw_moving = false;
 
   GAMESTATE = START;
 
@@ -104,7 +104,6 @@ int main()
 
     if (GAMESTATE == PLAY) {
       currentTime = GetTime();
-      stopAllSounds(sounds);
 
       // decrease timer every second (1.0 = 1 sec)
       if ((currentTime - timerPrev) >= 1.0) {
@@ -152,13 +151,22 @@ int main()
 
       if (!isSnoring && getOldManState() <= 2) {
           isSnoring = true;
-          SetSoundVolume(sounds[SNORE], 0.25);
+          SetSoundVolume(sounds[SNORE], 0.2);
           SetSoundPan(sounds[SNORE], 0.25);
           PlaySound(sounds[SNORE]);
       } else if (isSnoring && getOldManState() == 3) {
           isSnoring = false;
           StopSound(sounds[SNORE]);
           PlaySound(sounds[HUH]);
+      }
+
+      // picnic blanket rustling when paw moving (TODO: change is so when obj is moving?)
+      bool paw_moving = (mouseDelta.x + mouseDelta.y) != 0;
+      Sound cloth = sounds[CLOTH_RUSTLE];
+      if (paw_moving) {
+        ( IsSoundPlaying(cloth) ) ? ResumeSound(cloth) : PlaySound(cloth);
+      } else {
+        if (IsSoundPlaying(cloth)) { PauseSound(cloth); }
       }
 
       // win game logic
@@ -184,6 +192,7 @@ int main()
       }
 
       if (isButtonPressed(GameUI.startButton)) {
+        stopAllSounds(sounds);
         PlaySound(sounds[SELECT]);
         resetObjects(&Jar, &Obs);
         GAMESTATE = PLAY;
@@ -202,7 +211,8 @@ int main()
 
       // reset game
       if (isButtonPressed(GameUI.startButton)) {
-        StopSound(sounds[FANFARE]);
+        // StopSound(sounds[FANFARE]);
+        stopAllSounds(sounds);
         PlaySound(sounds[SELECT]);
         resetObjects(&Jar, &Obs);
         GAMESTATE = PLAY;
