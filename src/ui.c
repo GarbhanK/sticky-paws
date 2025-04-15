@@ -10,6 +10,9 @@ extern bool DEBUG;
 
 void drawUI(UserInterface *ui, bool warning, int barWidth)
 {
+  // draw the old man in the corner
+  DrawTextureEx(ui->wakeStates[getOldManState()], (Vector2){0,HEIGHT-250}, 0, 1, WHITE);
+
   // speed bar update logic
   ui->barWidth = TOTAL_SPEED;
 
@@ -39,20 +42,17 @@ void drawUI(UserInterface *ui, bool warning, int barWidth)
   if (warning) {
     DrawText("TOO FAST!", MeasureText("TOTAL_SPEED: 000", 20) + 30, 60, 20, RED);
   }
-
-  // draw the old man in the corner
-  DrawTextureEx(ui->wakeStates[getOldManState()], (Vector2){0,HEIGHT-250}, 0, 1, WHITE);
 }
 
 void drawButton(char *msg, Rectangle area)
 {
   if (CheckCollisionPointRec(GetMousePosition(), area)) {
-    DrawRectangleRec(area, GRAY);
+    DrawRectangleRec(area, (Color){225, 186, 47, 255});
   } else {
     DrawRectangleRec(area, BLACK);
   }
-  float startButtonTextLen = (float)MeasureText(msg, 50);
-  DrawText(msg, area.x + (area.width / 2 - startButtonTextLen / 2), area.y + (area.height / 2 - 25),
+  float buttonTextLen = (float)MeasureText(msg, 50);
+  DrawText(msg, area.x + (area.width / 2 - buttonTextLen / 2), area.y + (area.height / 2 - 25),
            50, WHITE);
 }
 

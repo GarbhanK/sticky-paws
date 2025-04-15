@@ -9,19 +9,14 @@
 - [x] Ensure sticky members are reset to false when restarted after fail
 - [x] Stuck obj acting on unstuck obj, stuck object acting like it's being moved too. need to investigate/fix
 - [x] Countdown timer until loss state
-- [ ] gameplay options menu
-- [ ] try have just paw be sticky
 
 **visuals**
 - [x] Add bear nose and associated vars to Bear struct
 - [x] add title screen with real image of a bear (make sure start button places paw at the bottom)
 - [x] add art for old man, maybe have him framed in a cool way? Old school TV with the antennas? courage the cowardly dog
 - [x] some kind of narrative framing around the bear seeing the guy? Periscope?
-- [ ] try raygui for buttons
-- [ ] rules explainer in the main menu
+- [x] rules explainer in the main menu
 - [x] get all of the text in the right place
-- [ ] possibly replace jar of honey with a salmon
-- [ ] add win animations of bear pics moving across screen overlapped
 - [x] split drawUI() into separate parts
 
 **sfx**
@@ -33,5 +28,10 @@
 - [x] UI noises (button click)
 - [ ] Menu music
 - [ ] Gameplay music
-- [ ] Win/Fail music
+- [x] Win/Fail music
 - [x] Win/Fail sfx
+
+**maybes**
+- [ ] possibly replace jar of honey with a salmon
+- [ ] add win animations of bear pics moving across screen overlapped
+- [ ] gameplay options menu

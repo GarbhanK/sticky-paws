@@ -22,6 +22,7 @@ int main()
   SetTargetFPS(60);
   InitAudioDevice();
   loadSounds(sounds);
+
   double currentTime, lastTime, timerPrev;
   float speedDecrease;
   bool warning = false;
@@ -59,7 +60,7 @@ int main()
 
   UserInterface GameUI = {.infoBox = {0, 0, 400, 100},
                           .barMax = (GameUI.infoBox.width - 40),
-                          .startButton = {WIDTH / 2 - 200, HEIGHT - 120, 400, 100},
+                          .startButton = {WIDTH / 2 - 200, HEIGHT - 120, 350, 80},
                           .background = LoadTexture("assets/picnic_blanket_grass.png"),
                           .splashScreen = LoadTexture("assets/bear_splash.jpg"),
                           .failScreen = LoadTexture("assets/bear_jail.png"),
@@ -199,8 +200,6 @@ int main()
         winStateEntered = true;
       }
 
-      // TODO: play kaiju sound?
-
       // reset game
       if (isButtonPressed(GameUI.startButton)) {
         StopSound(sounds[FANFARE]);
@@ -216,15 +215,17 @@ int main()
 
     if (GAMESTATE == START) {
       DrawTextureEx(GameUI.splashScreen, (Vector2){0.0}, 0, 1.2, WHITE);
-      DrawTextureEx(GameUI.title, (Vector2){0, 0}, 0, 0.75, WHITE);
+      // DrawTextureEx(GameUI.title, (Vector2){0, 0}, 0, 0.75, WHITE);
       drawButton("PLAY", GameUI.startButton);
+      DrawText("How to Play", 90, 45, 30, BLACK);
+      DrawText(
+          "* Control the Bear paw using the mouse\n* Take as many snacks as you can before time runs out\n* Don't wake up walt.",
+          75, 80, 20, BLACK
+      );
     }
 
     if (GAMESTATE == PLAY) {
       DrawTexture(GameUI.background, 0, 0, WHITE);
-      if (fade.active) {
-        DrawRectangle(0, 0, WIDTH, HEIGHT, Fade(BLACK, fade.alpha));
-      }
       // flashHappyBear(&GameUI);   // draw background image
 
       for (int i = 0; i < Obs.length; i++) {
@@ -236,13 +237,17 @@ int main()
       if (DEBUG)
         DrawRectangleRec(Jar.hitbox, GREEN); // DEBUG HONEY HITBOX
 
-      drawUI(&GameUI, warning, GameUI.barWidth);
       drawBear(&Paw);
+      drawUI(&GameUI, warning, GameUI.barWidth);
+
+      if (fade.active) {
+        DrawRectangle(0, 0, WIDTH, HEIGHT, Fade(BLACK, fade.alpha));
+      }
     }
 
     if (GAMESTATE == FAIL) {
       DrawTexture(GameUI.failScreen, 0, 0, WHITE);
-      drawCenterText("FAIL", RED, 200, (Vector2){WIDTH * 0.5, HEIGHT * 0.6});
+      // drawCenterText("FAIL", RED, 200, (Vector2){WIDTH * 0.5, HEIGHT * 0.6});
       drawButton("RESTART", GameUI.startButton);
       if (fade.active) {
         DrawRectangle(0, 0, WIDTH, HEIGHT, Fade(BLACK, fade.alpha));
@@ -250,10 +255,9 @@ int main()
     }
 
     if (GAMESTATE == WIN) {
-      // picture of a happy bear, sympathy for the devil w/ restart button
       // DrawTextureEx(GameUI.winScreen, (Vector2){(0 - GameUI.winScreen.width*0.5),0} , 0, 1, WHITE);
       DrawTextureEx(GameUI.winScreen, (Vector2){0-200, 0}, 0, 1.15, WHITE);
-      drawCenterText("WIN", RED, 100, (Vector2){WIDTH * 0.5, HEIGHT * 0.3});
+      // drawCenterText("WIN", RED, 100, (Vector2){WIDTH * 0.5, HEIGHT * 0.3});
       drawButton("RESTART", GameUI.startButton);
     }
 
