@@ -26,9 +26,11 @@ void drawUI(UserInterface *ui, bool warning, int barWidth)
   DrawRectangleLinesEx(ui->infoBox, 5, RED);                // red outline
   DrawRectangleGradientH(20, 20, barWidth, 30, GREEN, RED); // moving total bar
 
-  int scaledSpeed = TOTAL_SPEED / 4; // becase max is 400.0f
+  int scaledSpeed = TOTAL_SPEED / 4; // becuase max is 400.0f (TODO: FIX)
   if (DEBUG) {
+    Vector2 mousePos = GetMousePosition();
     DrawText(TextFormat("TOTAL_SPEED: %d", scaledSpeed), 20, 60, 20, RED);
+    DrawText(TextFormat("Mouse Pos: x=%.2f, y=%.2f", mousePos.x, mousePos.y), 650, 10, 20, BLACK);
   }
   if (!DEBUG) {
     DrawText(TextFormat("TIMER: %d", TIMER), 20, 60, 20, RED);
