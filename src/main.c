@@ -8,9 +8,6 @@
 
 #define MAX_SOUNDS SOUNDS_COUNT
 
-// array of sound variables
-Sound sounds[SOUND_COUNT];
-
 void unloadTextures(UserInterface *ui, Honey *jar, Bear *paw);
 void flashHappyBear(UserInterface *ui);
 
@@ -162,7 +159,7 @@ int main()
 
       // picnic blanket rustling when paw moving (TODO: change is so when obj is moving?)
       bool paw_moving = (mouseDelta.x + mouseDelta.y) != 0;
-      Sound cloth = sounds[CLOTH_RUSTLE];
+      const Sound cloth = sounds[CLOTH_RUSTLE];
       if (paw_moving) {
         ( IsSoundPlaying(cloth) ) ? ResumeSound(cloth) : PlaySound(cloth);
       } else {

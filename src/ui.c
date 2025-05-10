@@ -1,12 +1,13 @@
-#include "ui.h"
-#include "game.h"
 
 #include <raylib.h>
 #include <stdbool.h>
 
+#include "ui.h"
+#include "game.h"
+
 extern int TOTAL_SPEED, TIMER;
-extern float TOTAL_SPEED_MAX;
 extern bool DEBUG;
+extern const float TOTAL_SPEED_MAX;
 
 void drawUI(UserInterface *ui, bool warning, int barWidth)
 {

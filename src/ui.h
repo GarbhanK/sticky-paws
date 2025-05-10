@@ -1,5 +1,4 @@
 #include <stddef.h>
-
 #include <raylib.h>
 
 typedef struct UserInterface {

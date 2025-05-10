@@ -1,20 +1,20 @@
-#include "game.h"
 
 #include <raylib.h>
 #include <raymath.h>
 #include <stdbool.h>
 #include <stdio.h>
 
+#include "game.h"
 #include "sound.h"
 
 bool DEBUG = false;
 int SCORE = 0;
 int TIMER = 15;
 int TOTAL_SPEED = 0;
-float TOTAL_SPEED_MAX = 400.0f;
-float SENSITIVITY = 3.0f;
-float DECAY = 15.0f;
-double TIME_INTERVAL = 0.1f;
+const float TOTAL_SPEED_MAX = 400.0f;
+const float SENSITIVITY = 3.0f;
+const float DECAY = 15.0f;
+const double TIME_INTERVAL = 0.1f;
 
 const float WIDTH = 1024.0f;
 const float HEIGHT = 768.0f;
@@ -36,7 +36,6 @@ void resetObjects(Honey *jar, ObstacleArray *obs)
   // reset honey jar
   jar->stuck = false;
   jar->pos = (Vector2){WIDTH / 2 + 50, 100};
-  // jar->hitbox = jar->pos;
   jar->hitbox = (Rectangle){jar->pos.x, jar->pos.y, jar->hitbox.width, jar->hitbox.height};
 
   // loop through obstacles and set to original x/y
@@ -70,7 +69,7 @@ void handleSpeed()
   // limit the total speed
   if (TOTAL_SPEED > TOTAL_SPEED_MAX) {
     TOTAL_SPEED = TOTAL_SPEED_MAX;
-    if (!DEBUG) // TEMP: removes fail state for testing
+    if (!DEBUG)
       GAMESTATE = FAIL;
   }
 

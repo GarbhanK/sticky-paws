@@ -1,7 +1,7 @@
 [
   {
     "directory": "/Users/garbhan/Code/sticky-paws",
-    "command": "clang -Ilib/ -Llib/ -framework CoreVideo -framework IOKit -framework Cocoa -framework GLUT -framework OpenGL lib/libraylib.a -o bin/raylib-pong",
+    "command": "clang -Ilib/ -Llib/ -framework CoreVideo -framework IOKit -framework Cocoa -framework GLUT -framework OpenGL lib/libraylib.a -o bin/sticky_paws",
     "file": "src/main.c"
   }
 ]

@@ -18,7 +18,6 @@ void drawBear(Bear *b)
   // draw bear paw
   DrawTexture(b->tex, b->pos.x, b->pos.y, WHITE);
 
-
   // check if paw pos is between limits
   if ( (b->pos.x - b->nose.width) < leftLimit) {
     noseFollowing = false;

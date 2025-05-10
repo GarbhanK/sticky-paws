@@ -23,7 +23,7 @@
 - [x] bear growls
 - [x] sniffing nose
 - [x] snoring/sleeping
-- [ ] obj movement
+- [x] obj movement
 - [ ] sticking noise
 - [x] UI noises (button click)
 - [ ] Menu music
@@ -35,3 +35,8 @@
 - [ ] possibly replace jar of honey with a salmon
 - [ ] add win animations of bear pics moving across screen overlapped
 - [ ] gameplay options menu
+
+**code**
+- [ ] add const to relevant vars
+- [ ] change to `size_t` instead of `int` where necessary
+- [ ] order struct members smallest to biggest

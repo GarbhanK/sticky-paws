@@ -9,10 +9,10 @@ extern bool DEBUG;
 extern int SCORE;
 extern int TIMER;
 extern int TOTAL_SPEED;
-extern float TOTAL_SPEED_MAX;
-extern float SENSITIVITY;
-extern float DECAY;
-extern double TIME_INTERVAL;
+extern const float TOTAL_SPEED_MAX;
+extern const float SENSITIVITY;
+extern const float DECAY;
+extern const double TIME_INTERVAL;
 
 extern const float WIDTH;
 extern const float HEIGHT;
