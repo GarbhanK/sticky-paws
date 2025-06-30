@@ -33,9 +33,10 @@ int main()
   // additional obsacles, e.g other picnic items
   Obstacle obstacles[] = {
       {obstacleInit[0], false, 10},
-      {obstacleInit[1], false, 10},
+      {obstacleInit[1], false, 10, LoadTexture("assets/baguette.png")},
       {obstacleInit[2], false, 10},
       {obstacleInit[3], false, 10},
+      {obstacleInit[4], false, 10},
   };
 
   // TODO: change for existing obstacles[] array
@@ -235,9 +236,12 @@ int main()
       DrawTexture(GameUI.background, 0, 0, WHITE);
       // flashHappyBear(&GameUI);   // draw background image
 
+      // draw obstacles
       for (int i = 0; i < Obs.length; i++) {
         Obstacle *obs = &Obs.items[i];
         DrawRectangleRec(obs->rect, BLACK); // draw obstacles
+        Vector2 obs_pos = (Vector2){obs->rect.x, obs->rect.y};
+        DrawTextureEx(obs->tex, obs_pos, 0.0f, 1.0f, WHITE);
       }
 
       DrawTexture(Jar.tex, Jar.pos.x, Jar.pos.y, WHITE); // draw honey Jar

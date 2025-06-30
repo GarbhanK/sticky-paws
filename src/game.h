@@ -43,7 +43,7 @@ typedef struct {
 enum GAMESTATE { START, PLAY, FAIL, WIN } GAMESTATE;
 
 // the starting positions of the obstacles
-Rectangle obstacleInit[4];
+Rectangle obstacleInit[5];
 
 // declare functions
 void handleStickyJar(Bear *paw, Honey *jar, Sound sb[]);

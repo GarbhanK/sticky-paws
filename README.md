@@ -27,7 +27,6 @@
 - [ ] sticking noise
 - [x] UI noises (button click)
 - [ ] Menu music
-- [ ] Gameplay music
 - [x] Win/Fail music
 - [x] Win/Fail sfx
 
@@ -40,3 +39,8 @@
 - [ ] add const to relevant vars
 - [ ] change to `size_t` instead of `int` where necessary
 - [ ] order struct members smallest to biggest
+
+**art**
+- [ ] make more things sticky (jammy baguette, cinnamon bun)
+- [ ] turn off the tv
+- [ ] add in the gun (randomly goes off)
