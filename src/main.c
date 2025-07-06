@@ -9,7 +9,7 @@
 #define MAX_SOUNDS SOUNDS_COUNT
 
 void unloadTextures(UserInterface *ui, Honey *jar, Bear *paw);
-void flashHappyBear(UserInterface *ui);
+// void flashHappyBear(UserInterface *ui);
 
 
 int main()
@@ -286,26 +286,26 @@ int main()
 }
 
 
-void flashHappyBear(UserInterface *ui)
-{
-  Texture2D image = ui->splashScreen;
-  float alpha = 1.0f;
-  float fadeSpeed = 1.5f;
-  bool fading = false;
-  float timer = 0.5f;
+// void flashHappyBear(UserInterface *ui)
+// {
+//   Texture2D image = ui->splashScreen;
+//   float alpha = 1.0f;
+//   float fadeSpeed = 1.5f;
+//   bool fading = false;
+//   float timer = 0.5f;
 
-  if (timer > 0) {
-    timer -= GetFrameTime();
-  } else {
-    fading = true;
-  }
+//   if (timer > 0) {
+//     timer -= GetFrameTime();
+//   } else {
+//     fading = true;
+//   }
 
-  if (fading) {
-    alpha -= fadeSpeed * GetFrameTime();
-    if (alpha < 0)
-      alpha = 0; // clamp to 0
-  }
+//   if (fading) {
+//     alpha -= fadeSpeed * GetFrameTime();
+//     if (alpha < 0)
+//       alpha = 0; // clamp to 0
+//   }
 
-  DrawTextureRec(image, (Rectangle){0, 0, image.width, image.height}, (Vector2){200, 150},
-                 Fade(WHITE, alpha));
-}
+//   DrawTextureRec(image, (Rectangle){0, 0, image.width, image.height}, (Vector2){200, 150},
+//                  Fade(WHITE, alpha));
+// }

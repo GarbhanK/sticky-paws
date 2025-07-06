@@ -3,8 +3,6 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-#include "bear.h"
-
 extern bool DEBUG;
 extern int SCORE;
 extern int TIMER;
@@ -25,6 +23,13 @@ typedef struct Honey {
   bool stuck;
   int value;
 } Honey;
+
+typedef struct Bear {
+  Rectangle hitbox;
+  Texture2D tex;
+  Texture2D nose;
+  Vector2 pos;
+} Bear;
 
 typedef struct Obstacle {
   Rectangle rect;
@@ -47,6 +52,7 @@ enum GAMESTATE { START, PLAY, FAIL, WIN } GAMESTATE;
 Rectangle obstacleInit[5];
 
 // declare functions
+void drawBear(Bear *b);
 void handleStickyJar(Bear *paw, Honey *jar, Sound sb[]);
 void handleStickyObstacle(Bear *paw, ObstacleArray *obs, Sound sb[]);
 void handlePawPushing(Bear *b, ObstacleArray *obs, Vector2 *dt);
