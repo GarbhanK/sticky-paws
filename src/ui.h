@@ -6,6 +6,7 @@ typedef struct UserInterface {
   int barWidth;
   int barMax;
   Rectangle startButton;
+  Rectangle resetButton;
   Texture2D background;
   Texture2D splashScreen;
   Texture2D failScreen;

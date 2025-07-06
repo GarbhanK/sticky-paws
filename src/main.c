@@ -59,11 +59,12 @@ int main()
   UserInterface GameUI = {.infoBox = {0, 0, 400, 100},
                           .barMax = (GameUI.infoBox.width - 40),
                           .startButton = {WIDTH / 2 - 200, HEIGHT - 120, 350, 80},
+                          .resetButton = {WIDTH / 2 - 200, 50, 350, 80},
                           .background = LoadTexture("assets/picnic_blanket_grass.png"),
                           .splashScreen = LoadTexture("assets/bear_splash.jpg"),
                           .failScreen = LoadTexture("assets/bear_jail.png"),
                           .title = LoadTexture("assets/title_card.png"),
-                          .winScreen = LoadTexture("assets/winner_bear.jpg"),
+                          .winScreen = LoadTexture("assets/victory_bear.png"),
                           .wakeStates = {
                               LoadTexture("assets/tv_asleep.png"),
                               LoadTexture("assets/tv_1.png"),
@@ -208,12 +209,11 @@ int main()
       }
 
       // reset game
-      if (isButtonPressed(GameUI.startButton)) {
-        // StopSound(sounds[FANFARE]);
+      if (isButtonPressed(GameUI.resetButton)) {
         stopAllSounds(sounds);
         PlaySound(sounds[SELECT]);
         resetObjects(&Jar, &Obs);
-        GAMESTATE = PLAY;
+        GAMESTATE = START;
         winStateEntered = false;
       }
     }
@@ -270,10 +270,8 @@ int main()
     }
 
     if (GAMESTATE == WIN) {
-      // DrawTextureEx(GameUI.winScreen, (Vector2){(0 - GameUI.winScreen.width*0.5),0} , 0, 1, WHITE);
-      DrawTextureEx(GameUI.winScreen, (Vector2){0-200, 0}, 0, 1.15, WHITE);
-      // drawCenterText("WIN", RED, 100, (Vector2){WIDTH * 0.5, HEIGHT * 0.3});
-      drawButton("RESTART", GameUI.startButton);
+      DrawTextureEx(GameUI.winScreen, (Vector2){0, 0}, 0, 1.0f, WHITE);
+      drawButton("RESTART", GameUI.resetButton);
     }
 
     EndDrawing();
