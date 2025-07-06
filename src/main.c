@@ -34,9 +34,9 @@ int main()
   Obstacle obstacles[] = {
       {obstacleInit[0], false, 10, LoadTexture("assets/grapes.png")},
       {obstacleInit[1], false, 10, LoadTexture("assets/baguette.png")},
-      {obstacleInit[2], false, 10},
+      {obstacleInit[2], false, 10, LoadTexture("assets/cheese.png")},
       {obstacleInit[3], false, 10, LoadTexture("assets/cigs.png")},
-      {obstacleInit[4], false, 10},
+      {obstacleInit[4], false, 10, LoadTexture("assets/wine.png")},
   };
 
   // TODO: change for existing obstacles[] array
@@ -239,7 +239,6 @@ int main()
       // draw obstacles
       for (int i = 0; i < Obs.length; i++) {
         Obstacle *obs = &Obs.items[i];
-        DrawRectangleRec(obs->rect, BLACK); // draw obstacles (NOTE: REMOVE ONCE ART IS IN)
         Vector2 obs_pos = (Vector2){obs->rect.x, obs->rect.y};
         DrawTextureEx(obs->tex, obs_pos, 0.0f, 1.0f, WHITE);
 
@@ -251,7 +250,7 @@ int main()
       // draw honey Jar
       DrawTexture(Jar.tex, Jar.pos.x, Jar.pos.y, WHITE);
       if (DEBUG)
-        DrawRectangleRec(Jar.hitbox, GREEN); // DEBUG HONEY HITBOX
+        DrawRectangleLinesEx(Jar.hitbox, 2, GREEN); // DEBUG HONEY HITBOX
 
       drawBear(&Paw);
       drawUI(&GameUI, warning, GameUI.barWidth);

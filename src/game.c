@@ -23,9 +23,9 @@ const float HEIGHT = 768.0f;
 Rectangle obstacleInit[] = {
     {200, HEIGHT / 2, 150, 150},  // grapes
     {500, HEIGHT / 3, 110, 300},  // baguette
-    {300, 250, 100, 90},  // cheese
+    {300, 250, 115, 100},  // cheese
     {800, 450, 90, 130},  // cigs
-    {80, 125, 400, 100},  // wine bottle
+    {80, 115, 400, 100},  // wine bottle
 };
 
 void resetObjects(Honey *jar, ObstacleArray *obs)
