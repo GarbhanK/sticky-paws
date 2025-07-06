@@ -32,10 +32,10 @@ int main()
 
   // additional obsacles, e.g other picnic items
   Obstacle obstacles[] = {
-      {obstacleInit[0], false, 10},
+      {obstacleInit[0], false, 10, LoadTexture("assets/grapes.png")},
       {obstacleInit[1], false, 10, LoadTexture("assets/baguette.png")},
       {obstacleInit[2], false, 10},
-      {obstacleInit[3], false, 10},
+      {obstacleInit[3], false, 10, LoadTexture("assets/cigs.png")},
       {obstacleInit[4], false, 10},
   };
 
