@@ -12,6 +12,7 @@ extern int TOTAL_SPEED;
 extern const float TOTAL_SPEED_MAX;
 extern const float SENSITIVITY;
 extern const float DECAY;
+extern const float HITBOX_SHRINK_PERC;
 extern const double TIME_INTERVAL;
 
 extern const float WIDTH;

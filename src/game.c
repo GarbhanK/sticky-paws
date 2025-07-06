@@ -14,6 +14,7 @@ int TOTAL_SPEED = 0;
 const float TOTAL_SPEED_MAX = 400.0f;
 const float SENSITIVITY = 3.0f;
 const float DECAY = 15.0f;
+const float HITBOX_SHRINK_PERC = 0.15f;
 const double TIME_INTERVAL = 0.1f;
 
 const float WIDTH = 1024.0f;
@@ -105,7 +106,7 @@ void handleStickyObstacle(Bear *paw, ObstacleArray *obs, Sound sb[])
 
     // obstacle sticky logic
     if (!subject->stuck) {
-      if (CheckCollisionRecs(subject->rect, paw->hitbox)) {
+      if (CheckCollisionRecs(rectToHitbox(*subject, HITBOX_SHRINK_PERC), paw->hitbox)) {
         randomBearSound(sb);
         subject->stuck = true;
         SCORE += subject->value;
@@ -132,7 +133,7 @@ void handleObjectPushing(ObstacleArray *obs, Honey *jar, Vector2 *dt)
 
       Obstacle *subject = &obs->items[j];
 
-      if (CheckCollisionRecs(actor->rect, subject->rect)) {
+      if (CheckCollisionRecs(rectToHitbox(*actor, HITBOX_SHRINK_PERC), subject->rect)) {
         if (actor->stuck) {
           subject->rect.x = subject->rect.x + dt->x;
           subject->rect.y = subject->rect.y + dt->y;

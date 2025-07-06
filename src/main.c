@@ -239,13 +239,13 @@ int main()
       // draw obstacles
       for (int i = 0; i < Obs.length; i++) {
         Obstacle *obs = &Obs.items[i];
-        DrawRectangleRec(obs->rect, BLACK); // draw obstacles
+        DrawRectangleRec(obs->rect, BLACK); // draw obstacles (NOTE: REMOVE ONCE ART IS IN)
         Vector2 obs_pos = (Vector2){obs->rect.x, obs->rect.y};
         DrawTextureEx(obs->tex, obs_pos, 0.0f, 1.0f, WHITE);
 
         // NOTE: hitbox testing
         if (DEBUG)
-          DrawRectangleRec(rectToHitbox(*obs, 0.15f), GREEN);
+          DrawRectangleLinesEx(rectToHitbox(*obs, HITBOX_SHRINK_PERC), 2, GREEN);
       }
 
       // draw honey Jar
