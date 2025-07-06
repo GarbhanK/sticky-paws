@@ -53,3 +53,4 @@ void handleObjectPushing(ObstacleArray *obs, Honey *jar, Vector2 *dt);
 void resetObjects(Honey *jar, ObstacleArray *obs);
 void handleSpeed();
 int getOldManState();
+Rectangle rectToHitbox(Obstacle obs, float shrinkFactor);

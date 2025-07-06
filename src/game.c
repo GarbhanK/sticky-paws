@@ -184,3 +184,17 @@ int getOldManState()
 
     return state;
 }
+
+Rectangle rectToHitbox(Obstacle obs, float shrinkFactor)
+{
+  // reduce the object's dimentions down by 25%
+  Rectangle rect = obs.rect;
+
+  float newWidth = rect.width * (1.0f - shrinkFactor);
+  float newHeight = rect.height * (1.0f - shrinkFactor);
+  float newX = rect.x + (rect.width - newWidth) / 2.0f;
+  float newY = rect.y + (rect.height - newHeight) / 2.0f;
+
+  Rectangle hitbox = (Rectangle){ newX, newY, newWidth, newHeight };
+  return hitbox;
+}

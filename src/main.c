@@ -242,9 +242,14 @@ int main()
         DrawRectangleRec(obs->rect, BLACK); // draw obstacles
         Vector2 obs_pos = (Vector2){obs->rect.x, obs->rect.y};
         DrawTextureEx(obs->tex, obs_pos, 0.0f, 1.0f, WHITE);
+
+        // NOTE: hitbox testing
+        if (DEBUG)
+          DrawRectangleRec(rectToHitbox(*obs, 0.15f), GREEN);
       }
 
-      DrawTexture(Jar.tex, Jar.pos.x, Jar.pos.y, WHITE); // draw honey Jar
+      // draw honey Jar
+      DrawTexture(Jar.tex, Jar.pos.x, Jar.pos.y, WHITE);
       if (DEBUG)
         DrawRectangleRec(Jar.hitbox, GREEN); // DEBUG HONEY HITBOX
 
