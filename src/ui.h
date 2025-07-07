@@ -7,6 +7,7 @@ typedef struct UserInterface {
   int barMax;
   Rectangle startButton;
   Rectangle resetButton;
+  Rectangle tutorialButton;
   Texture2D background;
   Texture2D splashScreen;
   Texture2D failScreen;
@@ -28,3 +29,4 @@ void drawCenterText(char *msg, Color colour, int fsize, Vector2 pos);
 bool isButtonPressed(Rectangle button);
 void StartFadeIn(FadeEffect *fade);
 void UpdateFadeIn(FadeEffect *fade, float fadeSpeed);
+void drawTutorial();

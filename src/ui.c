@@ -1,4 +1,4 @@
-
+#include <string.h>
 #include <raylib.h>
 #include <stdbool.h>
 
@@ -7,6 +7,7 @@
 
 extern int TOTAL_SPEED, TIMER;
 extern bool DEBUG;
+extern bool SHOW_TUTORIAL;
 extern const float TOTAL_SPEED_MAX;
 
 void drawUI(UserInterface *ui, bool warning, int barWidth)
@@ -105,4 +106,23 @@ void UpdateFadeIn(FadeEffect *fade, float fadeSpeed)
       fade->alpha = false; // stop sending once complete
     }
   }
+}
+
+void drawTutorial()
+{
+  // create variables for the box
+  Vector2 boxSize = {610.0f, 150.0f};
+  Vector2 boxPos = {WIDTH/2 - boxSize.x/2, 200};
+  Rectangle tutorialBox = {boxPos.x, boxPos.y, boxSize.x, boxSize.y};
+
+  // create tutorial text
+  char tut[1024];
+  strcpy(tut, "* Control the Bear paw using the mouse\n");
+  strcat(tut, "* Take as many snacks as you can before time runs out\n");
+  strcat(tut, "* Don't wake up walt.");
+
+  // draw tutorial box elements
+  DrawRectangleRec(tutorialBox, GRAY);
+  DrawText("How to Play", boxPos.x + 15, boxPos.y + 15, 30, BLACK);
+  DrawText(tut, boxPos.x + 15, boxPos.y + 50, 20, BLACK);
 }

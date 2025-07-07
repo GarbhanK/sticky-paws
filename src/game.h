@@ -4,6 +4,7 @@
 #include <stddef.h>
 
 extern bool DEBUG;
+extern bool SHOW_TUTORIAL;
 extern int SCORE;
 extern int TIMER;
 extern int TOTAL_SPEED;
@@ -30,6 +31,13 @@ typedef struct Bear {
   Texture2D nose;
   Vector2 pos;
 } Bear;
+
+// TODO: Add stage hazards, instant fail when touched
+// typedef struct Hazard {
+//   Texture2D tex;
+//   Rectangle hitbox;
+//   Vector2 pos;
+// } Hazard;
 
 typedef struct Obstacle {
   Rectangle rect;

@@ -8,6 +8,7 @@
 #include "sound.h"
 
 bool DEBUG = false;
+bool SHOW_TUTORIAL = false;
 int SCORE = 0;
 int TIMER = 15;
 int TOTAL_SPEED = 0;

@@ -56,10 +56,17 @@ int main()
       .value = 50,
   };
 
+  // Hazard Gun = {
+  //   .hitbox = { 0, 0, 100, 100 },
+  //   .tex = LoadTexture("assets/gun.png"),
+  //   .pos = { 0, 0 },
+  // };
+
   UserInterface GameUI = {.infoBox = {0, 0, 400, 100},
                           .barMax = (GameUI.infoBox.width - 40),
                           .startButton = {WIDTH / 2 - 200, HEIGHT - 120, 350, 80},
                           .resetButton = {WIDTH / 2 - 200, 50, 350, 80},
+                          .tutorialButton = {WIDTH /2 + 165, HEIGHT - 120, 80, 80},
                           .background = LoadTexture("assets/picnic_blanket_grass.png"),
                           .splashScreen = LoadTexture("assets/bear_splash.jpg"),
                           .failScreen = LoadTexture("assets/bear_jail.png"),
@@ -98,6 +105,14 @@ int main()
         PlaySound(sounds[SELECT]);
         resetObjects(&Jar, &Obs);
         GAMESTATE = PLAY;
+      }
+      if (isButtonPressed(GameUI.tutorialButton)) {
+        PlaySound(sounds[SELECT]);
+        if (SHOW_TUTORIAL) {
+          SHOW_TUTORIAL = false;
+        } else {
+          SHOW_TUTORIAL = true;
+        }
       }
     }
 
@@ -225,11 +240,9 @@ int main()
       DrawTextureEx(GameUI.splashScreen, (Vector2){0.0}, 0, 1.2, WHITE);
       // DrawTextureEx(GameUI.title, (Vector2){0, 0}, 0, 0.75, WHITE);
       drawButton("PLAY", GameUI.startButton);
-      DrawText("How to Play", 90, 45, 30, BLACK);
-      DrawText(
-          "* Control the Bear paw using the mouse\n* Take as many snacks as you can before time runs out\n* Don't wake up walt.",
-          75, 80, 20, BLACK
-      );
+      drawButton("?", GameUI.tutorialButton);
+      if (SHOW_TUTORIAL)
+        drawTutorial();
     }
 
     if (GAMESTATE == PLAY) {
