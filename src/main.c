@@ -9,8 +9,6 @@
 #define MAX_SOUNDS SOUNDS_COUNT
 
 void unloadTextures(UserInterface *ui, Honey *jar, Bear *paw);
-// void flashHappyBear(UserInterface *ui);
-
 
 int main()
 {
@@ -82,6 +80,11 @@ int main()
 
   // reset mouse so bear paw isn't in top right
   SetMousePosition(HEIGHT - 50, WIDTH / 2);
+
+  const float bobAmplitude = 10.0f;
+  const float duration = 1.0f;
+  const float frequency = 1.0f / (duration * 2);
+  const float bobSpeed = 2 * PI * frequency;
 
   while (!WindowShouldClose()) {
     // mouse position diff used to stuck object movement
@@ -237,8 +240,11 @@ int main()
     ClearBackground(RAYWHITE);
 
     if (GAMESTATE == START) {
+      float bobOffset = sinf(GetTime() * bobSpeed) * bobAmplitude;
+      Vector2 titlePos = {0, 0-(int)bobOffset};
+
       DrawTextureEx(GameUI.splashScreen, (Vector2){0.0}, 0, 1.2, WHITE);
-      // DrawTextureEx(GameUI.title, (Vector2){0, 0}, 0, 0.75, WHITE);
+      DrawTextureEx(GameUI.title, titlePos, 0, 0.75, WHITE);
       drawButton("PLAY", GameUI.startButton);
       drawButton("?", GameUI.tutorialButton);
       if (SHOW_TUTORIAL)
@@ -247,7 +253,6 @@ int main()
 
     if (GAMESTATE == PLAY) {
       DrawTexture(GameUI.background, 0, 0, WHITE);
-      // flashHappyBear(&GameUI);   // draw background image
 
       // draw obstacles
       for (int i = 0; i < Obs.length; i++) {
@@ -297,28 +302,3 @@ int main()
   CloseWindow();
   return 0;
 }
-
-
-// void flashHappyBear(UserInterface *ui)
-// {
-//   Texture2D image = ui->splashScreen;
-//   float alpha = 1.0f;
-//   float fadeSpeed = 1.5f;
-//   bool fading = false;
-//   float timer = 0.5f;
-
-//   if (timer > 0) {
-//     timer -= GetFrameTime();
-//   } else {
-//     fading = true;
-//   }
-
-//   if (fading) {
-//     alpha -= fadeSpeed * GetFrameTime();
-//     if (alpha < 0)
-//       alpha = 0; // clamp to 0
-//   }
-
-//   DrawTextureRec(image, (Rectangle){0, 0, image.width, image.height}, (Vector2){200, 150},
-//                  Fade(WHITE, alpha));
-// }
