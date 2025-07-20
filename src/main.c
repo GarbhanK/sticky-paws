@@ -187,7 +187,7 @@ int main()
       }
 
       // win game logic
-      if (Jar.pos.y >= HEIGHT) {
+      if (Jar.pos.y >= (HEIGHT-15) ) {
         GAMESTATE = WIN;
       }
     }
