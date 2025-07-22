@@ -32,28 +32,30 @@ int main()
 
   // additional obsacles, e.g other picnic items
   Obstacle obstacles[] = {
-      {obstacleInit[0], false, 10, LoadTexture("assets/grapes.png")},
-      {obstacleInit[1], false, 10, LoadTexture("assets/baguette.png")},
-      {obstacleInit[2], false, 10, LoadTexture("assets/cheese.png")},
-      {obstacleInit[3], false, 10, LoadTexture("assets/cigs.png")},
-      {obstacleInit[4], false, 10, LoadTexture("assets/wine.png")},
+    {obstacleInit[0], false, 10, LoadTexture("assets/grapes.png")},
+    {obstacleInit[1], false, 10, LoadTexture("assets/baguette.png")},
+    {obstacleInit[2], false, 10, LoadTexture("assets/cheese.png")},
+    {obstacleInit[3], false, 10, LoadTexture("assets/cigs.png")},
+    {obstacleInit[4], false, 10, LoadTexture("assets/wine.png")},
   };
 
   // TODO: change for existing obstacles[] array
   ObstacleArray Obs = {
-      .init = obstacleInit,
-      .items = obstacles,
-      .length = sizeof(obstacles) / sizeof(Obstacle),
+    .init = obstacleInit,
+    .items = obstacles,
+    .length = sizeof(obstacles) / sizeof(Obstacle),
   };
 
-  Bear Paw = {.tex = LoadTexture("assets/sticky_paw.png"),
-              .nose = LoadTexture("assets/bear_nose.png")};
+  Bear Paw = {
+    .tex = LoadTexture("assets/sticky_paw.png"),
+    .nose = LoadTexture("assets/bear_nose.png")
+  };
 
   Target Jar = {
-      .tex = LoadTexture("assets/honey.png"),
-      .pos = {WIDTH / 2 - 200, 100},
-      .stuck = false,
-      .value = 50,
+    .tex = LoadTexture("assets/honey.png"),
+    .pos = {WIDTH / 2 - 200, 100},
+    .stuck = false,
+    .value = 50,
   };
 
   // Hazard Gun = {
@@ -62,23 +64,25 @@ int main()
   //   .pos = { 0, 0 },
   // };
 
-  UserInterface GameUI = {.infoBox = {0, 0, 400, 100},
-                          .barMax = (GameUI.infoBox.width - 40),
-                          .startButton = {WIDTH / 2 - 200, HEIGHT - 120, 350, 80},
-                          .resetButton = {WIDTH / 2 - 200, 50, 350, 80},
-                          .tutorialButton = {WIDTH /2 + 165, HEIGHT - 120, 80, 80},
-                          .background = LoadTexture("assets/picnic_blanket_grass.png"),
-                          .splashScreen = LoadTexture("assets/bear_splash.jpg"),
-                          .failScreen = LoadTexture("assets/bear_jail.png"),
-                          .title = LoadTexture("assets/title_card.png"),
-                          .winScreen = LoadTexture("assets/victory_bear.png"),
-                          .wakeStates = {
-                              LoadTexture("assets/tv_asleep.png"),
-                              LoadTexture("assets/tv_1.png"),
-                              LoadTexture("assets/tv_2.png"),
-                              LoadTexture("assets/tv_3.png"),
-                          },
-                          .wakeStatesLen = 4};
+  UserInterface GameUI = {
+    .infoBox = {0, 0, 400, 100},
+    .barMax = (GameUI.infoBox.width - 40),
+    .startButton = {WIDTH / 2 - 200, HEIGHT - 120, 350, 80},
+    .resetButton = {WIDTH / 2 - 200, 50, 350, 80},
+    .tutorialButton = {WIDTH /2 + 165, HEIGHT - 120, 80, 80},
+    .background = LoadTexture("assets/picnic_blanket_grass.png"),
+    .splashScreen = LoadTexture("assets/bear_splash.jpg"),
+    .failScreen = LoadTexture("assets/bear_jail.png"),
+    .title = LoadTexture("assets/title_card.png"),
+    .winScreen = LoadTexture("assets/victory_bear.png"),
+    .wakeStates = {
+      LoadTexture("assets/tv_asleep.png"),
+      LoadTexture("assets/tv_1.png"),
+      LoadTexture("assets/tv_2.png"),
+      LoadTexture("assets/tv_3.png"),
+    },
+    .wakeStatesLen = 4
+  };
 
   // reset mouse so bear paw isn't in top right
   SetMousePosition(HEIGHT - 50, WIDTH / 2);
