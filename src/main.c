@@ -8,7 +8,7 @@
 
 #define MAX_SOUNDS SOUNDS_COUNT
 
-void unloadTextures(UserInterface *ui, Honey *jar, Bear *paw);
+void unloadTextures(UserInterface *ui, Target *jar, Bear *paw);
 
 int main()
 {
@@ -24,7 +24,6 @@ int main()
   bool failStateEntered = false;
   bool winStateEntered = false;
   bool isSnoring = false;
-  // bool paw_moving = false;
 
   GAMESTATE = START;
 
@@ -47,7 +46,7 @@ int main()
   Bear Paw = {.tex = LoadTexture("assets/sticky_paw.png"),
               .nose = LoadTexture("assets/bear_nose.png")};
 
-  Honey Jar = {
+  Target Jar = {
       .tex = LoadTexture("assets/honey.png"),
       .pos = {WIDTH / 2 - 200, 100},
       .stuck = false,

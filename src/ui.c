@@ -73,7 +73,7 @@ bool isButtonPressed(Rectangle button)
     return false;
 }
 
-void unloadTextures(UserInterface *ui, Honey *jar, Bear *paw)
+void unloadTextures(UserInterface *ui, Target *jar, Bear *paw)
 {
   // clean up resources
   UnloadTexture(ui->background);

@@ -1,4 +1,3 @@
-
 #include <raylib.h>
 #include <raymath.h>
 #include <stdbool.h>
@@ -65,7 +64,7 @@ void drawBear(Bear *b)
   DrawTextureV(b->nose, nosePos, WHITE);
 }
 
-void resetObjects(Honey *jar, ObstacleArray *obs)
+void resetObjects(Target *jar, ObstacleArray *obs)
 {
   // reset scores
   TOTAL_SPEED = 0;
@@ -118,7 +117,7 @@ void handleSpeed()
   }
 }
 
-void handleStickyJar(Bear *paw, Honey *jar, Sound sb[])
+void handleStickyJar(Bear *paw, Target *jar, Sound sb[])
 {
   Vector2 dt = GetMouseDelta();
   if (!jar->stuck) {
@@ -157,7 +156,7 @@ void handleStickyObstacle(Bear *paw, ObstacleArray *obs, Sound sb[])
   }
 }
 
-void handleObjectPushing(ObstacleArray *obs, Honey *jar, Vector2 *dt)
+void handleObjectPushing(ObstacleArray *obs, Target *jar, Vector2 *dt)
 {
   for (int i = 0; i < obs->length; i++) {
     Obstacle *actor = &obs->items[i];

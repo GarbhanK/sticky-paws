@@ -17,13 +17,13 @@ extern const double TIME_INTERVAL;
 extern const float WIDTH;
 extern const float HEIGHT;
 
-typedef struct Honey {
+typedef struct Target {
   Texture2D tex;
   Vector2 pos;
   Rectangle hitbox;
   bool stuck;
   int value;
-} Honey;
+} Target;
 
 typedef struct Bear {
   Rectangle hitbox;
@@ -61,11 +61,11 @@ Rectangle obstacleInit[5];
 
 // declare functions
 void drawBear(Bear *b);
-void handleStickyJar(Bear *paw, Honey *jar, Sound sb[]);
+void handleStickyJar(Bear *paw, Target *jar, Sound sb[]);
 void handleStickyObstacle(Bear *paw, ObstacleArray *obs, Sound sb[]);
 void handlePawPushing(Bear *b, ObstacleArray *obs, Vector2 *dt);
-void handleObjectPushing(ObstacleArray *obs, Honey *jar, Vector2 *dt);
-void resetObjects(Honey *jar, ObstacleArray *obs);
+void handleObjectPushing(ObstacleArray *obs, Target *jar, Vector2 *dt);
+void resetObjects(Target *jar, ObstacleArray *obs);
 void handleSpeed();
 int getOldManState();
 Rectangle rectToHitbox(Obstacle obs, float shrinkFactor);
