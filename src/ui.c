@@ -118,8 +118,9 @@ void drawTutorial()
   // create tutorial text
   char tut[1024];
   strcpy(tut, "* Control the Bear paw using the mouse\n");
-  strcat(tut, "* Take as many snacks as you can before time runs out\n");
-  strcat(tut, "* Don't wake up walt.");
+  strcat(tut, "* Steal the Honey jar before time runs out\n");
+  strcat(tut, "* Don't wake up walt.\n");
+  strcat(tut, "* Press SPACE to toggle fullscreen, ESC to Exit.");
 
   // draw tutorial box elements
   DrawRectangleRec(tutorialBox, GRAY);

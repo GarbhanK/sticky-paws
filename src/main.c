@@ -13,9 +13,12 @@ void unloadTextures(UserInterface *ui, Target *jar, Bear *paw);
 int main()
 {
   InitWindow(WIDTH, HEIGHT, "Sticky Paws");
-  SetTargetFPS(60);
+  SetTargetFPS(GetMonitorRefreshRate(GetCurrentMonitor()));
   InitAudioDevice();
   loadSounds(sounds);
+
+  Image icon = LoadImage("assets/honey.png");
+  SetWindowIcon(icon);
 
   double currentTime, lastTime, timerPrev;
   float speedDecrease;
@@ -108,6 +111,7 @@ int main()
         resetObjects(&Jar, &Obs);
         GAMESTATE = PLAY;
       }
+
       if (isButtonPressed(GameUI.tutorialButton)) {
         PlaySound(sounds[SELECT]);
         if (SHOW_TUTORIAL) {
@@ -115,6 +119,10 @@ int main()
         } else {
           SHOW_TUTORIAL = true;
         }
+      }
+
+      if (IsKeyPressed(KEY_SPACE)) {
+        ToggleFullscreen();
       }
     }
 
@@ -185,9 +193,12 @@ int main()
         if (IsSoundPlaying(cloth)) { PauseSound(cloth); }
       }
 
-      // win game logic
-      if (Jar.pos.y >= (HEIGHT-15) ) {
-        GAMESTATE = WIN;
+      // win game logic (win condition different for fullscreen because mouse can't go below HEIGHT)
+      if (IsWindowFullscreen()) {
+        if (GetMouseY() >= (HEIGHT-5)) { GAMESTATE = WIN; }
+      }
+      else {
+        if (Jar.pos.y >= (HEIGHT-15) ) { GAMESTATE = WIN; }
       }
     }
 
@@ -295,9 +306,9 @@ int main()
   }
 
   unloadSounds(sounds);
-  CloseAudioDevice();
-
   unloadTextures(&GameUI, &Jar, &Paw);
+
+  CloseAudioDevice();
   CloseWindow();
   return 0;
 }
