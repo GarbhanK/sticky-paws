@@ -54,7 +54,7 @@ typedef struct {
   size_t capapcity; // total arr capacity
 } ObstacleArray;
 
-enum GAMESTATE { START, PLAY, FAIL, WIN } GAMESTATE;
+enum GameState { START, PLAY, FAIL, WIN } GAMESTATE;
 
 // the starting positions of the obstacles
 Rectangle obstacleInit[5];

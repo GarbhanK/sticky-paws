@@ -7,6 +7,7 @@
 #include "ui.h"
 
 #define MAX_SOUNDS SOUNDS_COUNT
+#define FADE_SPEED 0.005f
 
 void unloadTextures(UserInterface *ui, Target *jar, Bear *paw);
 
@@ -20,7 +21,7 @@ int main()
   Image icon = LoadImage("assets/honey.png");
   SetWindowIcon(icon);
 
-  double currentTime, lastTime, timerPrev;
+  double currentTime = 0.0, lastTime = 0.0, timerPrev = 0.0;
   float speedDecrease;
   bool warning = false;
   FadeEffect fade = {1.0f, true}; // start active with full black
@@ -66,7 +67,7 @@ int main()
 
   UserInterface GameUI = {
     .infoBox = {0, 0, 400, 100},
-    .barMax = (GameUI.infoBox.width - 40),
+    .barMax = (360),  // calculate directly (infoBox.width - 40)
     .startButton = {WIDTH / 2 - 200, HEIGHT - 120, 350, 80},
     .resetButton = {WIDTH / 2 - 200, 50, 350, 80},
     .tutorialButton = {WIDTH /2 + 165, HEIGHT - 120, 80, 80},
@@ -85,7 +86,7 @@ int main()
   };
 
   // reset mouse so bear paw isn't in top right
-  SetMousePosition(HEIGHT - 50, WIDTH / 2);
+  SetMousePosition(WIDTH / 2, HEIGHT - 50);
 
   const float bobAmplitude = 10.0f;
   const float duration = 1.0f;
@@ -106,7 +107,7 @@ int main()
       StartFadeIn(&fade);
     }
 
-    UpdateFadeIn(&fade, 0.005f);
+    UpdateFadeIn(&fade, FADE_SPEED);
 
     // start screen
     if (GAMESTATE == START) {
