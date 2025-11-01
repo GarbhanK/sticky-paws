@@ -1,13 +1,16 @@
+#ifndef GAME_H
+#define GAME_H
+
 #include <raylib.h>
 #include <raymath.h>
 #include <stdbool.h>
 #include <stddef.h>
 
-extern bool DEBUG;
-extern bool SHOW_TUTORIAL;
+// extern bool DEBUG;
+// extern bool SHOW_TUTORIAL;
 extern int SCORE;
-extern int TIMER;
-extern int TOTAL_SPEED;
+// extern int TIMER;
+// extern int TOTAL_SPEED;
 extern const float TOTAL_SPEED_MAX;
 extern const float SENSITIVITY;
 extern const float DECAY;
@@ -54,18 +57,53 @@ typedef struct {
   size_t capapcity; // total arr capacity
 } ObstacleArray;
 
-enum GameState { START, PLAY, FAIL, WIN } GAMESTATE;
+// enum GAMESTATE { START, PLAY, FAIL, WIN } GAMESTATE;
+typedef enum {
+  START,
+  PLAY,
+  FAIL,
+  WIN
+} GameState;
+
+typedef struct {
+  // time tracking
+  double currentTime;
+  double lastTime;
+  double timerPrev;
+
+  // game state
+  GameState state;
+  int timer;
+  int totalSpeed;
+
+  // flags
+  bool failStateEntered;
+  bool winStateEntered;
+  bool isSnoring;
+  bool showTutorial;
+  bool showWarning;
+  bool debug;
+} GameContext;
 
 // the starting positions of the obstacles
 Rectangle obstacleInit[5];
 
-// declare functions
+// initialisation
+void initGameContext(GameContext *ctx);
+
+// rendering
 void drawBear(Bear *b);
+
+// game logic
 void handleStickyJar(Bear *paw, Target *jar, Sound sb[]);
 void handleStickyObstacle(Bear *paw, ObstacleArray *obs, Sound sb[]);
 void handlePawPushing(Bear *b, ObstacleArray *obs, Vector2 *dt);
 void handleObjectPushing(ObstacleArray *obs, Target *jar, Vector2 *dt);
-void resetObjects(Target *jar, ObstacleArray *obs);
-void handleSpeed();
-int getOldManState();
+void resetObjects(GameContext *ctx, Target *jar, ObstacleArray *obs);
+void handleSpeed(GameContext *ctx);
+
+// queries
+int getOldManState(int speed);
 Rectangle rectToHitbox(Obstacle obs, float shrinkFactor);
+
+#endif // GAME_H

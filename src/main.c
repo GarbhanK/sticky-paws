@@ -8,8 +8,235 @@
 
 #define MAX_SOUNDS SOUNDS_COUNT
 #define FADE_SPEED 0.005f
+#define BOB_AMPLITUDE 10.0f
+#define DURATION 1.0f
+#define FREQUENCY 0.5f  // 1.0f / (duration * 2);
+#define BOB_SPEED 3.0f
+
+// Initialize with sensible defaults
+void initGameContext(GameContext *ctx) {
+    ctx->currentTime = 0.0;
+    ctx->lastTime = 0.0;
+    ctx->timerPrev = 0.0;
+    ctx->state = START;
+    ctx->timer = 60;  // or whatever your starting timer is
+    ctx->totalSpeed = 0.0f;
+    ctx->failStateEntered = false;
+    ctx->winStateEntered = false;
+    ctx->isSnoring = false;
+    ctx->showTutorial = false;
+    ctx->showWarning = false;
+    ctx->debug = false;
+}
 
 void unloadTextures(UserInterface *ui, Target *jar, Bear *paw);
+
+static void handleStartState(GameContext *ctx, UserInterface *ui, Target *jar, ObstacleArray *obs);
+static void handlePlayState(GameContext *ctx, UserInterface *ui, Bear *paw, Target *jar, ObstacleArray *obs);
+static void handleFailState(GameContext *ctx, UserInterface *ui, Target *jar, ObstacleArray *obs);
+static void handleWinState(GameContext *ctx, UserInterface *ui, Target *jar, ObstacleArray *obs);
+
+static void handleStartState(GameContext *ctx, UserInterface *ui, Target *jar, ObstacleArray *obs) {
+  if (isButtonPressed(ui->startButton)) {
+    PlaySound(sounds[SELECT]);
+    resetObjects(ctx, jar, obs);
+    ctx->state = PLAY;
+  }
+
+  if (isButtonPressed(ui->tutorialButton)) {
+    PlaySound(sounds[SELECT]);
+    if (ctx->showTutorial) {
+      ctx->showTutorial = false;
+    } else {
+      ctx->showTutorial = true;
+    }
+  }
+
+  if (IsKeyPressed(KEY_SPACE)) {
+    ToggleFullscreen();
+  }
+}
+
+static void handlePlayState(GameContext *ctx, UserInterface *ui, Bear *paw, Target *jar, ObstacleArray *obs) {
+  if (IsKeyPressed(KEY_TAB)) {
+    (ctx->debug) ? (ctx->debug = false) : (ctx->debug = true);
+  }
+
+  // mouse position diff used to stuck object movement
+  Vector2 mouseDelta = GetMouseDelta();
+  double currentTime = GetTime();
+
+  // decrease timer every second (1.0 = 1 sec)
+  if ((currentTime - ctx->timerPrev) >= 1.0) {
+    ctx->timerPrev = currentTime;
+    ctx->timer = ctx->timer - 1;
+  }
+
+  if (ctx->timer == 0) {
+    ctx->state = FAIL;
+  }
+
+  // update paw movement
+  paw->pos.x = GetMouseX() - (float)paw->tex.width / 2;
+  paw->pos.y = GetMouseY();
+  paw->hitbox = (Rectangle){paw->pos.x, paw->pos.y, paw->tex.width, paw->tex.height};
+
+  // update Jar hitbox
+  jar->hitbox =
+      (Rectangle){jar->pos.x + 10, jar->pos.y + 15, jar->tex.width - 20, jar->tex.height - 25};
+
+  // handle sticky logic
+  handleStickyJar(paw, jar, sounds);
+  handleStickyObstacle(paw, obs, sounds);
+
+  // handle pushing logic
+  // handlePawPushing(&Paw, obstacles, obstaclesLen, &mouseDelta);
+  handleObjectPushing(obs, jar, &mouseDelta);
+  handleSpeed(ctx);
+
+  // decrease speed total each frame
+  if (ctx->totalSpeed > 0 && ((currentTime - ctx->lastTime) >= TIME_INTERVAL)) {
+    ctx->lastTime = currentTime;
+    float speedDecrease = fabs(ctx->totalSpeed - DECAY);
+    ctx->totalSpeed = (int)speedDecrease;
+  }
+
+  //  === SFX TRIGGERS ===
+  if (paw->pos.y > HEIGHT * 0.75)
+    PlaySound(sounds[GROWL3]);
+
+  if ((paw->pos.y + HEIGHT * 0.5) <= (HEIGHT - paw->nose.height))
+    if (!IsSoundPlaying(sounds[SNIFF])) {
+      PlaySound(sounds[SNIFF]);
+    }
+
+  if (!ctx->isSnoring && getOldManState(ctx->totalSpeed) <= 2) {
+      ctx->isSnoring = true;
+      SetSoundVolume(sounds[SNORE], 0.2);
+      SetSoundPan(sounds[SNORE], 0.25);
+      PlaySound(sounds[SNORE]);
+  } else if (ctx->isSnoring && getOldManState(ctx->totalSpeed) == 3) {
+      ctx->isSnoring = false;
+      StopSound(sounds[SNORE]);
+      PlaySound(sounds[HUH]);
+  }
+
+  // picnic blanket rustling when paw moving (TODO: change is so when obj is moving?)
+  bool paw_moving = (mouseDelta.x + mouseDelta.y) != 0;
+  const Sound cloth = sounds[CLOTH_RUSTLE];
+  if (paw_moving) {
+    ( IsSoundPlaying(cloth) ) ? ResumeSound(cloth) : PlaySound(cloth);
+  } else {
+    if (IsSoundPlaying(cloth)) { PauseSound(cloth); }
+  }
+
+  // win game logic (win condition different for fullscreen because mouse can't go below HEIGHT)
+  const bool winConditionMet = IsWindowFullscreen()
+    ? (GetMouseY() >= HEIGHT - 5)
+    : (jar->pos.y >= HEIGHT - 15);
+
+  if (winConditionMet) {
+    ctx->state = WIN;
+  }
+}
+
+static void handleFailState(GameContext *ctx, UserInterface *ui, Target *jar, ObstacleArray *obs) {
+  // check if we've just eentered the fail state
+  if (!ctx->failStateEntered) {
+    // StartFadeIn(&fade);
+    stopAllSounds(sounds);
+    PlaySound(sounds[DOOR_SLAM]);
+    PlaySound(sounds[SIREN]);
+    PlaySound(sounds[MIRANDA]);
+    ctx->failStateEntered = true;
+  }
+
+  if (IsKeyPressed(KEY_ENTER)) {
+    ctx->state = START;
+    ctx->failStateEntered = false;
+  }
+
+  if (isButtonPressed(ui->startButton)) {
+    stopAllSounds(sounds);
+    PlaySound(sounds[SELECT]);
+    resetObjects(ctx, jar, obs);
+    ctx->state = PLAY;
+    ctx->failStateEntered = false;
+  }
+}
+
+static void handleWinState(GameContext *ctx, UserInterface *ui, Target *jar, ObstacleArray *obs) {
+  if (!ctx->winStateEntered) {
+    stopAllSounds(sounds);
+    PlaySound(sounds[FANFARE]);
+    ctx->winStateEntered = true;
+  }
+
+  // reset game
+  if (isButtonPressed(ui->resetButton)) {
+    stopAllSounds(sounds);
+    PlaySound(sounds[SELECT]);
+    resetObjects(ctx, jar, obs);
+    ctx->state = START;
+    ctx->winStateEntered = false;
+  }
+}
+
+static void renderCurrentState(GameContext *ctx, UserInterface *ui, Bear *paw, Target *jar, ObstacleArray *obs) {
+  if (ctx->state == START) {
+    float bobOffset = sinf(GetTime() * BOB_SPEED) * BOB_AMPLITUDE;
+    Vector2 titlePos = {0, 0-(int)bobOffset};
+
+    DrawTextureEx(ui->splashScreen, (Vector2){0.0}, 0, 1.2, WHITE);
+    DrawTextureEx(ui->title, titlePos, 0, 0.75, WHITE);
+    drawButton("PLAY", ui->startButton);
+    drawButton("?", ui->tutorialButton);
+    if (ctx->showTutorial)
+      drawTutorial();
+  }
+
+  if (ctx->state == PLAY) {
+    DrawTexture(ui->background, 0, 0, WHITE);
+
+    // draw obstacles
+    for (int i = 0; i < obs->length; i++) {
+      Obstacle* arr = obs->items;
+      Obstacle obs = arr[i];
+      Vector2 obs_pos = (Vector2){obs.rect.x, obs.rect.y};
+      DrawTextureEx(obs.tex, obs_pos, 0.0f, 1.0f, WHITE);
+
+      // NOTE: hitbox testing
+      if (ctx->debug)
+        DrawRectangleLinesEx(rectToHitbox(obs, HITBOX_SHRINK_PERC), 2, GREEN);
+    }
+
+    // draw honey Jar
+    DrawTexture(jar->tex, jar->pos.x, jar->pos.y, WHITE);
+    if (ctx->debug)
+      DrawRectangleLinesEx(jar->hitbox, 2, GREEN); // DEBUG HONEY HITBOX
+
+    drawBear(paw);
+    drawUI(ctx, ui, ctx->showWarning, ui->barWidth);
+
+    if (ui->fade.active) {
+      DrawRectangle(0, 0, WIDTH, HEIGHT, Fade(BLACK, ui->fade.alpha));
+    }
+  }
+
+  if (ctx->state == FAIL) {
+    DrawTexture(ui->failScreen, 0, 0, WHITE);
+    // drawCenterText("FAIL", RED, 200, (Vector2){WIDTH * 0.5, HEIGHT * 0.6});
+    drawButton("RESTART", ui->startButton);
+    if (ui->fade.active) {
+      DrawRectangle(0, 0, WIDTH, HEIGHT, Fade(BLACK, ui->fade.alpha));
+    }
+  }
+
+  if (ctx->state == WIN) {
+    DrawTextureEx(ui->winScreen, (Vector2){0, 0}, 0, 1.0f, WHITE);
+    drawButton("RESTART", ui->resetButton);
+  }
+}
 
 int main()
 {
@@ -21,15 +248,18 @@ int main()
   Image icon = LoadImage("assets/honey.png");
   SetWindowIcon(icon);
 
-  double currentTime = 0.0, lastTime = 0.0, timerPrev = 0.0;
-  float speedDecrease;
-  bool warning = false;
-  FadeEffect fade = {1.0f, true}; // start active with full black
-  bool failStateEntered = false;
-  bool winStateEntered = false;
-  bool isSnoring = false;
+  // double lastTime = 0.0, timerPrev = 0.0;
+  // float speedDecrease;
+  // bool warning = false;
+  // FadeEffect fade = {1.0f, true}; // start active with full black
+  // bool failStateEntered = false;
+  // bool winStateEntered = false;
+  // bool isSnoring = false;
 
-  GAMESTATE = START;
+  // GAMESTATE = START;
+
+  GameContext ctx;
+  initGameContext(&ctx);
 
   // additional obsacles, e.g other picnic items
   Obstacle obstacles[] = {
@@ -66,6 +296,7 @@ int main()
   // };
 
   UserInterface GameUI = {
+    .fade = {1.0f, true},
     .infoBox = {0, 0, 400, 100},
     .barMax = (360),  // calculate directly (infoBox.width - 40)
     .startButton = {WIDTH / 2 - 200, HEIGHT - 120, 350, 80},
@@ -88,224 +319,20 @@ int main()
   // reset mouse so bear paw isn't in top right
   SetMousePosition(WIDTH / 2, HEIGHT - 50);
 
-  const float bobAmplitude = 10.0f;
-  const float duration = 1.0f;
-  const float frequency = 1.0f / (duration * 2);
-  const float bobSpeed = 2 * PI * frequency;
-
   while (!WindowShouldClose()) {
-    // mouse position diff used to stuck object movement
-    Vector2 mouseDelta = GetMouseDelta();
+    UpdateFadeIn(&GameUI.fade, FADE_SPEED);
 
-    if (IsKeyPressed(KEY_TAB)) {
-      (DEBUG) ? (DEBUG = false) : (DEBUG = true);
-    }
-    if (IsKeyPressed(KEY_R)) {
-      GAMESTATE = PLAY;
-    }
-    if (DEBUG && IsKeyPressed(KEY_SPACE)) {
-      StartFadeIn(&fade);
-    }
-
-    UpdateFadeIn(&fade, FADE_SPEED);
-
-    // start screen
-    if (GAMESTATE == START) {
-      if (isButtonPressed(GameUI.startButton)) {
-        PlaySound(sounds[SELECT]);
-        resetObjects(&Jar, &Obs);
-        GAMESTATE = PLAY;
-      }
-
-      if (isButtonPressed(GameUI.tutorialButton)) {
-        PlaySound(sounds[SELECT]);
-        if (SHOW_TUTORIAL) {
-          SHOW_TUTORIAL = false;
-        } else {
-          SHOW_TUTORIAL = true;
-        }
-      }
-
-      if (IsKeyPressed(KEY_SPACE)) {
-        ToggleFullscreen();
-      }
-    }
-
-    if (GAMESTATE == PLAY) {
-      currentTime = GetTime();
-
-      // decrease timer every second (1.0 = 1 sec)
-      if ((currentTime - timerPrev) >= 1.0) {
-        timerPrev = currentTime;
-        TIMER = TIMER - 1;
-      }
-
-      if (TIMER == 0) {
-        GAMESTATE = FAIL;
-      }
-
-      // update paw movement
-      Paw.pos.x = GetMouseX() - (float)Paw.tex.width / 2;
-      Paw.pos.y = GetMouseY();
-      Paw.hitbox = (Rectangle){Paw.pos.x, Paw.pos.y, Paw.tex.width, Paw.tex.height};
-
-      // update Jar hitbox
-      Jar.hitbox =
-          (Rectangle){Jar.pos.x + 10, Jar.pos.y + 15, Jar.tex.width - 20, Jar.tex.height - 25};
-
-      // handle sticky logic
-      handleStickyJar(&Paw, &Jar, sounds);
-      handleStickyObstacle(&Paw, &Obs, sounds);
-
-      // handle pushing logic
-      // handlePawPushing(&Paw, obstacles, obstaclesLen, &mouseDelta);
-      handleObjectPushing(&Obs, &Jar, &mouseDelta);
-      handleSpeed();
-
-      // decrease speed total each frame
-      if (TOTAL_SPEED > 0 && ((currentTime - lastTime) >= TIME_INTERVAL)) {
-        lastTime = currentTime;
-        speedDecrease = fabs(TOTAL_SPEED - DECAY);
-        TOTAL_SPEED = (int)speedDecrease;
-      }
-
-      //  === SFX TRIGGERS ===
-      if (Paw.pos.y > HEIGHT * 0.75)
-        PlaySound(sounds[GROWL3]);
-
-      if ((Paw.pos.y + HEIGHT * 0.5) <= (HEIGHT - Paw.nose.height))
-        if (!IsSoundPlaying(sounds[SNIFF])) {
-          PlaySound(sounds[SNIFF]);
-        }
-
-      if (!isSnoring && getOldManState() <= 2) {
-          isSnoring = true;
-          SetSoundVolume(sounds[SNORE], 0.2);
-          SetSoundPan(sounds[SNORE], 0.25);
-          PlaySound(sounds[SNORE]);
-      } else if (isSnoring && getOldManState() == 3) {
-          isSnoring = false;
-          StopSound(sounds[SNORE]);
-          PlaySound(sounds[HUH]);
-      }
-
-      // picnic blanket rustling when paw moving (TODO: change is so when obj is moving?)
-      bool paw_moving = (mouseDelta.x + mouseDelta.y) != 0;
-      const Sound cloth = sounds[CLOTH_RUSTLE];
-      if (paw_moving) {
-        ( IsSoundPlaying(cloth) ) ? ResumeSound(cloth) : PlaySound(cloth);
-      } else {
-        if (IsSoundPlaying(cloth)) { PauseSound(cloth); }
-      }
-
-      // win game logic (win condition different for fullscreen because mouse can't go below HEIGHT)
-      if (IsWindowFullscreen()) {
-        if (GetMouseY() >= (HEIGHT-5)) { GAMESTATE = WIN; }
-      }
-      else {
-        if (Jar.pos.y >= (HEIGHT-15) ) { GAMESTATE = WIN; }
-      }
-    }
-
-    if (GAMESTATE == FAIL) {
-      // check if we've just eentered the fail state
-      if (!failStateEntered) {
-        StartFadeIn(&fade);
-        stopAllSounds(sounds);
-        PlaySound(sounds[DOOR_SLAM]);
-        PlaySound(sounds[SIREN]);
-        PlaySound(sounds[MIRANDA]);
-        failStateEntered = true;
-      }
-
-      if (IsKeyPressed(KEY_ENTER)) {
-        GAMESTATE = START;
-        failStateEntered = false;
-      }
-
-      if (isButtonPressed(GameUI.startButton)) {
-        stopAllSounds(sounds);
-        PlaySound(sounds[SELECT]);
-        resetObjects(&Jar, &Obs);
-        GAMESTATE = PLAY;
-        failStateEntered = false;
-      }
-    } else {
-      failStateEntered = false;
-    }
-
-    if (GAMESTATE == WIN) {
-      if (!winStateEntered) {
-        stopAllSounds(sounds);
-        PlaySound(sounds[FANFARE]);
-        winStateEntered = true;
-      }
-
-      // reset game
-      if (isButtonPressed(GameUI.resetButton)) {
-        stopAllSounds(sounds);
-        PlaySound(sounds[SELECT]);
-        resetObjects(&Jar, &Obs);
-        GAMESTATE = START;
-        winStateEntered = false;
-      }
+    switch (ctx.state) {
+      case START: handleStartState(&ctx, &GameUI, &Jar, &Obs); break;
+      case PLAY: handlePlayState(&ctx, &GameUI, &Paw, &Jar, &Obs); break;
+      case FAIL: handleFailState(&ctx, &GameUI, &Jar, &Obs); break;
+      case WIN: handleWinState(&ctx, &GameUI, &Jar, &Obs); break;
     }
 
     BeginDrawing();
+
     ClearBackground(RAYWHITE);
-
-    if (GAMESTATE == START) {
-      float bobOffset = sinf(GetTime() * bobSpeed) * bobAmplitude;
-      Vector2 titlePos = {0, 0-(int)bobOffset};
-
-      DrawTextureEx(GameUI.splashScreen, (Vector2){0.0}, 0, 1.2, WHITE);
-      DrawTextureEx(GameUI.title, titlePos, 0, 0.75, WHITE);
-      drawButton("PLAY", GameUI.startButton);
-      drawButton("?", GameUI.tutorialButton);
-      if (SHOW_TUTORIAL)
-        drawTutorial();
-    }
-
-    if (GAMESTATE == PLAY) {
-      DrawTexture(GameUI.background, 0, 0, WHITE);
-
-      // draw obstacles
-      for (int i = 0; i < Obs.length; i++) {
-        Obstacle *obs = &Obs.items[i];
-        Vector2 obs_pos = (Vector2){obs->rect.x, obs->rect.y};
-        DrawTextureEx(obs->tex, obs_pos, 0.0f, 1.0f, WHITE);
-
-        // NOTE: hitbox testing
-        if (DEBUG)
-          DrawRectangleLinesEx(rectToHitbox(*obs, HITBOX_SHRINK_PERC), 2, GREEN);
-      }
-
-      // draw honey Jar
-      DrawTexture(Jar.tex, Jar.pos.x, Jar.pos.y, WHITE);
-      if (DEBUG)
-        DrawRectangleLinesEx(Jar.hitbox, 2, GREEN); // DEBUG HONEY HITBOX
-
-      drawBear(&Paw);
-      drawUI(&GameUI, warning, GameUI.barWidth);
-
-      if (fade.active) {
-        DrawRectangle(0, 0, WIDTH, HEIGHT, Fade(BLACK, fade.alpha));
-      }
-    }
-
-    if (GAMESTATE == FAIL) {
-      DrawTexture(GameUI.failScreen, 0, 0, WHITE);
-      // drawCenterText("FAIL", RED, 200, (Vector2){WIDTH * 0.5, HEIGHT * 0.6});
-      drawButton("RESTART", GameUI.startButton);
-      if (fade.active) {
-        DrawRectangle(0, 0, WIDTH, HEIGHT, Fade(BLACK, fade.alpha));
-      }
-    }
-
-    if (GAMESTATE == WIN) {
-      DrawTextureEx(GameUI.winScreen, (Vector2){0, 0}, 0, 1.0f, WHITE);
-      drawButton("RESTART", GameUI.resetButton);
-    }
+    renderCurrentState(&ctx, &GameUI, &Paw, &Jar, &Obs);
 
     EndDrawing();
   }

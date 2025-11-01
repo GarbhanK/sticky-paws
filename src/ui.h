@@ -1,7 +1,15 @@
 #include <stddef.h>
 #include <raylib.h>
 
+#include "game.h"
+
+typedef struct {
+  float alpha;
+  bool active;
+} FadeEffect;
+
 typedef struct UserInterface {
+  FadeEffect fade;
   Rectangle infoBox;
   int barWidth;
   int barMax;
@@ -17,13 +25,8 @@ typedef struct UserInterface {
   size_t wakeStatesLen;
 } UserInterface;
 
-typedef struct {
-  float alpha;
-  bool active;
-} FadeEffect;
 
-
-void drawUI(UserInterface *ui, bool warning, int barWidth);
+void drawUI(GameContext *ctx, UserInterface *ui, bool warning, int barWidth);
 void drawButton(char *msg, Rectangle area);
 void drawCenterText(char *msg, Color colour, int fsize, Vector2 pos);
 bool isButtonPressed(Rectangle button);

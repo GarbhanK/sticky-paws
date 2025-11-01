@@ -5,18 +5,18 @@
 #include "ui.h"
 #include "game.h"
 
-extern int TOTAL_SPEED, TIMER;
-extern bool DEBUG;
-extern bool SHOW_TUTORIAL;
+// extern int TOTAL_SPEED, TIMER;
+// extern bool DEBUG;
+// extern bool SHOW_TUTORIAL;
 extern const float TOTAL_SPEED_MAX;
 
-void drawUI(UserInterface *ui, bool warning, int barWidth)
+void drawUI(GameContext *ctx, UserInterface *ui, bool warning, int barWidth)
 {
   // draw the old man in the corner
-  DrawTextureEx(ui->wakeStates[getOldManState()], (Vector2){0,HEIGHT-250}, 0, 1, WHITE);
+  DrawTextureEx(ui->wakeStates[getOldManState(ctx->totalSpeed)], (Vector2){0,HEIGHT-250}, 0, 1, WHITE);
 
   // speed bar update logic
-  ui->barWidth = TOTAL_SPEED;
+  ui->barWidth = ctx->totalSpeed;
 
   // put max limit on the width
   if (ui->barWidth > ui->barMax) {
@@ -24,21 +24,21 @@ void drawUI(UserInterface *ui, bool warning, int barWidth)
   }
 
   // set flag for warning message
-  (TOTAL_SPEED >= ui->barMax / 2) ? (warning = true) : (warning = false);
+  (ctx->totalSpeed >= ui->barMax / 2) ? (warning = true) : (warning = false);
 
   // draw speed indicator in top left
   DrawRectangleRec(ui->infoBox, WHITE);                     // background box
   DrawRectangleLinesEx(ui->infoBox, 5, RED);                // red outline
   DrawRectangleGradientH(20, 20, barWidth, 30, GREEN, RED); // moving total bar
 
-  int scaledSpeed = TOTAL_SPEED / 4; // becuase max is 400.0f (TODO: FIX)
-  if (DEBUG) {
+  int scaledSpeed = ctx->totalSpeed / 4; // becuase max is 400.0f (TODO: FIX)
+  if (ctx->debug) {
     Vector2 mousePos = GetMousePosition();
     DrawText(TextFormat("TOTAL_SPEED: %d", scaledSpeed), 20, 60, 20, RED);
     DrawText(TextFormat("Mouse Pos: x=%.2f, y=%.2f", mousePos.x, mousePos.y), 650, 10, 20, BLACK);
   }
-  if (!DEBUG) {
-    DrawText(TextFormat("TIMER: %d", TIMER), 20, 60, 20, RED);
+  if (!ctx->debug) {
+    DrawText(TextFormat("TIMER: %d", ctx->timer), 20, 60, 20, RED);
   }
 
   if (warning) {

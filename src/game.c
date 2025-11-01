@@ -6,11 +6,11 @@
 #include "game.h"
 #include "sound.h"
 
-bool DEBUG = false;
-bool SHOW_TUTORIAL = false;
+// bool DEBUG = false;
+// bool SHOW_TUTORIAL = false;
 int SCORE = 0;
-int TIMER = 15;
-int TOTAL_SPEED = 0;
+// int TIMER = 15;
+// int TOTAL_SPEED = 0;
 const float TOTAL_SPEED_MAX = 400.0f;
 const float SENSITIVITY = 3.0f;
 const float DECAY = 15.0f;
@@ -64,12 +64,12 @@ void drawBear(Bear *b)
   DrawTextureV(b->nose, nosePos, WHITE);
 }
 
-void resetObjects(Target *jar, ObstacleArray *obs)
+void resetObjects(GameContext *ctx, Target *jar, ObstacleArray *obs)
 {
   // reset scores
-  TOTAL_SPEED = 0;
+  ctx->totalSpeed = 0;
+  ctx->timer = 30;
   SCORE = 0;
-  TIMER = 30;
 
   // reset honey jar
   jar->stuck = false;
@@ -84,7 +84,7 @@ void resetObjects(Target *jar, ObstacleArray *obs)
   }
 }
 
-void handleSpeed()
+void handleSpeed(GameContext *ctx)
 {
   Vector2 dt = GetMouseDelta();
   float absMouseDelta, mouseSpeed;
@@ -93,27 +93,27 @@ void handleSpeed()
   if (dt.x != 0 && dt.y != 0) {
     absMouseDelta = fabs(dt.x) + fabs(dt.y);
     mouseSpeed = absMouseDelta;
-    TOTAL_SPEED = TOTAL_SPEED + ((int)mouseSpeed * SENSITIVITY);
+    ctx->totalSpeed = ctx->totalSpeed + ((int)mouseSpeed * SENSITIVITY);
   } else if (dt.x == 0 && dt.y != 0) {
     absMouseDelta = fabs(dt.y);
     mouseSpeed = absMouseDelta;
-    TOTAL_SPEED = TOTAL_SPEED + ((int)mouseSpeed * 2 * SENSITIVITY);
+    ctx->totalSpeed = ctx->totalSpeed + ((int)mouseSpeed * 2 * SENSITIVITY);
   } else if (dt.x != 0 && dt.y == 0) {
     absMouseDelta = fabs(dt.x);
     mouseSpeed = absMouseDelta;
-    TOTAL_SPEED = TOTAL_SPEED + ((int)mouseSpeed * 2 * SENSITIVITY);
+    ctx->totalSpeed = ctx->totalSpeed + ((int)mouseSpeed * 2 * SENSITIVITY);
   }
 
   // limit the total speed
-  if (TOTAL_SPEED > TOTAL_SPEED_MAX) {
-    TOTAL_SPEED = TOTAL_SPEED_MAX;
-    if (!DEBUG)
-      GAMESTATE = FAIL;
+  if (ctx->totalSpeed > TOTAL_SPEED_MAX) {
+    ctx->totalSpeed = TOTAL_SPEED_MAX;
+    if (!ctx->debug)
+      ctx->state = FAIL;
   }
 
   // get rid of that issue where score flashes back and forth at idle
-  if (TOTAL_SPEED <= 3) {
-    TOTAL_SPEED = 0;
+  if (ctx->totalSpeed <= 3) {
+    ctx->totalSpeed = 0;
   }
 }
 
@@ -202,20 +202,20 @@ void handlePawPushing(Bear *b, ObstacleArray *obs, Vector2 *dt)
   }
 }
 
-int getOldManState()
+int getOldManState(int speed)
 {
     int state = 0;
     // Draw old man in the corner
-    if (TOTAL_SPEED >= 0) {
+    if (speed >= 0) {
       state = 0;
     }
-    if (TOTAL_SPEED >= TOTAL_SPEED_MAX * 0.3) {
+    if (speed >= TOTAL_SPEED_MAX * 0.3) {
       state = 1;
     }
-    if (TOTAL_SPEED >= TOTAL_SPEED_MAX * 0.5) {
+    if (speed >= TOTAL_SPEED_MAX * 0.5) {
       state = 2;
     }
-    if (TOTAL_SPEED >= TOTAL_SPEED_MAX * 0.8) {
+    if (speed >= TOTAL_SPEED_MAX * 0.8) {
       state = 3;
     }
 
