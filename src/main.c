@@ -141,7 +141,7 @@ static void handlePlayState(GameContext *ctx, UserInterface *ui, Bear *paw, Targ
 }
 
 static void handleFailState(GameContext *ctx, UserInterface *ui, Target *jar, ObstacleArray *obs) {
-  // check if we've just eentered the fail state
+  // check if we've just entered the fail state
   if (!ctx->failStateEntered) {
     // StartFadeIn(&fade);
     stopAllSounds(sounds);
