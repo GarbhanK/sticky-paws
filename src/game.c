@@ -6,11 +6,7 @@
 #include "game.h"
 #include "sound.h"
 
-// bool DEBUG = false;
-// bool SHOW_TUTORIAL = false;
 int SCORE = 0;
-// int TIMER = 15;
-// int TOTAL_SPEED = 0;
 const float TOTAL_SPEED_MAX = 400.0f;
 const float SENSITIVITY = 3.0f;
 const float DECAY = 15.0f;

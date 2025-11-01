@@ -6,11 +6,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-// extern bool DEBUG;
-// extern bool SHOW_TUTORIAL;
 extern int SCORE;
-// extern int TIMER;
-// extern int TOTAL_SPEED;
 extern const float TOTAL_SPEED_MAX;
 extern const float SENSITIVITY;
 extern const float DECAY;

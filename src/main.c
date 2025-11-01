@@ -248,16 +248,6 @@ int main()
   Image icon = LoadImage("assets/honey.png");
   SetWindowIcon(icon);
 
-  // double lastTime = 0.0, timerPrev = 0.0;
-  // float speedDecrease;
-  // bool warning = false;
-  // FadeEffect fade = {1.0f, true}; // start active with full black
-  // bool failStateEntered = false;
-  // bool winStateEntered = false;
-  // bool isSnoring = false;
-
-  // GAMESTATE = START;
-
   GameContext ctx;
   initGameContext(&ctx);
 

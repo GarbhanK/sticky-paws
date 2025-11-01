@@ -5,9 +5,6 @@
 #include "ui.h"
 #include "game.h"
 
-// extern int TOTAL_SPEED, TIMER;
-// extern bool DEBUG;
-// extern bool SHOW_TUTORIAL;
 extern const float TOTAL_SPEED_MAX;
 
 void drawUI(GameContext *ctx, UserInterface *ui, bool warning, int barWidth)
