@@ -6,7 +6,7 @@
 #include "game.h"
 #include "sound.h"
 
-int SCORE = 0;
+// int SCORE = 0;
 const float TOTAL_SPEED_MAX = 400.0f;
 const float SENSITIVITY = 3.0f;
 const float DECAY = 15.0f;
@@ -57,7 +57,7 @@ void resetObjects(GameContext *ctx, Target *jar, ObstacleArray *obs)
   // reset scores
   ctx->totalSpeed = 0;
   ctx->timer = 30;
-  SCORE = 0;
+  ctx->score = 0;
 
   // reset honey jar
   jar->stuck = false;
@@ -105,15 +105,15 @@ void handleSpeed(GameContext *ctx)
   }
 }
 
-void handleStickyJar(Bear *paw, Target *jar, Sound sb[])
+void handleStickyJar(GameContext *ctx, Bear *paw, Target *jar, Sound sb[])
 {
   Vector2 dt = GetMouseDelta();
   if (!jar->stuck) {
     if (CheckCollisionRecs(jar->hitbox, paw->hitbox)) {
       randomBearSound(sb);
       jar->stuck = true;
-      SCORE += jar->value;
-      printf("SCORE: %d\n", SCORE);
+      ctx->score += jar->value;
+      printf("SCORE: %d\n", ctx->score);
     }
   } else {
     // update Jar pos by adding mouse delta
@@ -122,7 +122,7 @@ void handleStickyJar(Bear *paw, Target *jar, Sound sb[])
   }
 }
 
-void handleStickyObstacle(Bear *paw, ObstacleArray *obs, Sound sb[])
+void handleStickyObstacle(GameContext *ctx, Bear *paw, ObstacleArray *obs, Sound sb[])
 {
   Vector2 dt = GetMouseDelta();
   for (int i = 0; i < obs->length; i++) {
@@ -133,8 +133,8 @@ void handleStickyObstacle(Bear *paw, ObstacleArray *obs, Sound sb[])
       if (CheckCollisionRecs(rectToHitbox(*subject, HITBOX_SHRINK_PERC), paw->hitbox)) {
         randomBearSound(sb);
         subject->stuck = true;
-        SCORE += subject->value;
-        printf("SCORE: %d\n", SCORE);
+        ctx->score += subject->value;
+        printf("SCORE: %d\n", ctx->score);
       }
     } else {
       // update Jar pos by adding mouse delta

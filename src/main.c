@@ -86,8 +86,8 @@ static void handlePlayState(GameContext *ctx, UserInterface *ui, Bear *paw, Targ
       (Rectangle){jar->pos.x + 10, jar->pos.y + 15, jar->tex.width - 20, jar->tex.height - 25};
 
   // handle sticky logic
-  handleStickyJar(paw, jar, sounds);
-  handleStickyObstacle(paw, obs, sounds);
+  handleStickyJar(ctx, paw, jar, sounds);
+  handleStickyObstacle(ctx, paw, obs, sounds);
 
   // handle pushing logic
   // handlePawPushing(&Paw, obstacles, obstaclesLen, &mouseDelta);

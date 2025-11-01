@@ -24,7 +24,7 @@ typedef enum {
 } SoundID;
 
 // array of sounds
-Sound sounds[SOUND_COUNT];
+extern Sound sounds[SOUND_COUNT];
 
 void randomBearSound(Sound sounds[]);
 void loadSounds(Sound sounds[]);

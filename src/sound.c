@@ -3,6 +3,8 @@
 #include "raylib.h"
 #include <stdio.h>
 
+Sound sounds[SOUND_COUNT];
+
 void randomBearSound(Sound sounds[])
 {
   switch (GetRandomValue(1, 2)) {

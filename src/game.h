@@ -6,7 +6,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-extern int SCORE;
+// extern int SCORE;
 extern const float TOTAL_SPEED_MAX;
 extern const float SENSITIVITY;
 extern const float DECAY;
@@ -70,6 +70,7 @@ typedef struct {
 
   // game state
   GameState state;
+  int score;
   int timer;
   int totalSpeed;
 
@@ -89,8 +90,8 @@ void initGameContext(GameContext *ctx);
 void drawBear(Bear *b);
 
 // game logic
-void handleStickyJar(Bear *paw, Target *jar, Sound sb[]);
-void handleStickyObstacle(Bear *paw, ObstacleArray *obs, Sound sb[]);
+void handleStickyJar(GameContext *ctx, Bear *paw, Target *jar, Sound sb[]);
+void handleStickyObstacle(GameContext *ctx, Bear *paw, ObstacleArray *obs, Sound sb[]);
 void handlePawPushing(Bear *b, ObstacleArray *obs, Vector2 *dt);
 void handleObjectPushing(ObstacleArray *obs, Target *jar, Vector2 *dt);
 void resetObjects(GameContext *ctx, Target *jar, ObstacleArray *obs);
