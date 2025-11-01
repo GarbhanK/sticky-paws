@@ -253,11 +253,11 @@ int main()
 
   // additional obsacles, e.g other picnic items
   Obstacle obstacles[] = {
-    {obstacleInit[0], false, 10, LoadTexture("assets/grapes.png")},
-    {obstacleInit[1], false, 10, LoadTexture("assets/baguette.png")},
-    {obstacleInit[2], false, 10, LoadTexture("assets/cheese.png")},
-    {obstacleInit[3], false, 10, LoadTexture("assets/cigs.png")},
-    {obstacleInit[4], false, 10, LoadTexture("assets/wine.png")},
+    {obstacleInit[0], false, 10, LoadTexture("src/assets/grapes.png")},
+    {obstacleInit[1], false, 10, LoadTexture("src/assets/baguette.png")},
+    {obstacleInit[2], false, 10, LoadTexture("src/assets/cheese.png")},
+    {obstacleInit[3], false, 10, LoadTexture("src/assets/cigs.png")},
+    {obstacleInit[4], false, 10, LoadTexture("src/assets/wine.png")},
   };
 
   // TODO: change for existing obstacles[] array
@@ -268,12 +268,12 @@ int main()
   };
 
   Bear Paw = {
-    .tex = LoadTexture("assets/sticky_paw.png"),
-    .nose = LoadTexture("assets/bear_nose.png")
+    .tex = LoadTexture("src/assets/sticky_paw.png"),
+    .nose = LoadTexture("src/assets/bear_nose.png")
   };
 
   Target Jar = {
-    .tex = LoadTexture("assets/honey.png"),
+    .tex = LoadTexture("src/assets/honey.png"),
     .pos = {WIDTH / 2 - 200, 100},
     .stuck = false,
     .value = 50,
@@ -292,16 +292,16 @@ int main()
     .startButton = {WIDTH / 2 - 200, HEIGHT - 120, 350, 80},
     .resetButton = {WIDTH / 2 - 200, 50, 350, 80},
     .tutorialButton = {WIDTH /2 + 165, HEIGHT - 120, 80, 80},
-    .background = LoadTexture("assets/picnic_blanket_grass.png"),
-    .splashScreen = LoadTexture("assets/bear_splash.jpg"),
-    .failScreen = LoadTexture("assets/bear_jail.png"),
-    .title = LoadTexture("assets/title_card.png"),
-    .winScreen = LoadTexture("assets/victory_bear.png"),
+    .background = LoadTexture("src/assets/picnic_blanket_grass.png"),
+    .splashScreen = LoadTexture("src/assets/bear_splash.jpg"),
+    .failScreen = LoadTexture("src/assets/bear_jail.png"),
+    .title = LoadTexture("src/assets/title_card.png"),
+    .winScreen = LoadTexture("src/assets/victory_bear.png"),
     .wakeStates = {
-      LoadTexture("assets/tv_asleep.png"),
-      LoadTexture("assets/tv_1.png"),
-      LoadTexture("assets/tv_2.png"),
-      LoadTexture("assets/tv_3.png"),
+      LoadTexture("src/assets/tv_asleep.png"),
+      LoadTexture("src/assets/tv_1.png"),
+      LoadTexture("src/assets/tv_2.png"),
+      LoadTexture("src/assets/tv_3.png"),
     },
     .wakeStatesLen = 4
   };
