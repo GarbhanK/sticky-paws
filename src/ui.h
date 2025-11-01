@@ -1,3 +1,6 @@
+#ifndef UI_H
+#define UI_H
+
 #include <stddef.h>
 #include <raylib.h>
 
@@ -33,3 +36,5 @@ bool isButtonPressed(Rectangle button);
 void StartFadeIn(FadeEffect *fade);
 void UpdateFadeIn(FadeEffect *fade, float fadeSpeed);
 void drawTutorial();
+
+#endif // UI_H

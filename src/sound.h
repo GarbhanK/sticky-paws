@@ -1,3 +1,6 @@
+#ifndef SOUND_H
+#define SOUND_H
+
 #include "raylib.h"
 
 #define MAX_SOUNDS SOUNDS_COUNT
@@ -27,3 +30,5 @@ void randomBearSound(Sound sounds[]);
 void loadSounds(Sound sounds[]);
 void unloadSounds(Sound sounds[]);
 void stopAllSounds(Sound sounds[]);
+
+#endif // SOUND_H
