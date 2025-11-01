@@ -253,16 +253,15 @@ int main()
 
   // additional obsacles, e.g other picnic items
   Obstacle obstacles[] = {
-    {obstacleInit[0], false, 10, LoadTexture("src/assets/grapes.png")},
-    {obstacleInit[1], false, 10, LoadTexture("src/assets/baguette.png")},
-    {obstacleInit[2], false, 10, LoadTexture("src/assets/cheese.png")},
-    {obstacleInit[3], false, 10, LoadTexture("src/assets/cigs.png")},
-    {obstacleInit[4], false, 10, LoadTexture("src/assets/wine.png")},
+    {{200, HEIGHT / 2, 150, 150}, {}, false, 10, LoadTexture("src/assets/grapes.png")},
+    {{500, HEIGHT / 3, 110, 300}, {}, false, 10, LoadTexture("src/assets/baguette.png")},
+    {{300, 250, 115, 100}, {}, false, 10, LoadTexture("src/assets/cheese.png")},
+    {{800, 450, 90, 130}, {}, false, 10, LoadTexture("src/assets/cigs.png")},
+    {{80, 115, 400, 100}, {}, false, 10, LoadTexture("src/assets/wine.png")},
   };
 
   // TODO: change for existing obstacles[] array
   ObstacleArray Obs = {
-    .init = obstacleInit,
     .items = obstacles,
     .length = sizeof(obstacles) / sizeof(Obstacle),
   };
