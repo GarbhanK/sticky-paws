@@ -16,22 +16,6 @@ const double TIME_INTERVAL = 0.1f;
 const float WIDTH = 1024.0f;
 const float HEIGHT = 768.0f;
 
-// Rectangle obstacleInit[NUM_OBSTACLES] = {
-//   {200, HEIGHT / 2, 150, 150},  // grapes
-//   {500, HEIGHT / 3, 110, 300},  // baguette
-//   {300, 250, 115, 100},  // cheese
-//   {800, 450, 90, 130},  // cigs
-//   {80, 115, 400, 100},  // wine bottle
-// };
-
-// obstaclePositions obstacleInit = {
-//   .grapes = {200, HEIGHT / 2, 150, 150},
-//   .baguette = {500, HEIGHT / 3, 110, 300},
-//   .cheese = {300, 250, 115, 100},
-//   .cigs = {800, 450, 90, 130},
-//   .wine = {80, 115, 400, 100}
-// };
-
 void drawBear(Bear *b)
 {
   const float noseOffset = 150;
@@ -80,18 +64,12 @@ void resetObjects(GameContext *ctx, Target *jar, ObstacleArray *obs)
   jar->pos = (Vector2){WIDTH / 2 + 50, 100};
   jar->hitbox = (Rectangle){jar->pos.x, jar->pos.y, jar->hitbox.width, jar->hitbox.height};
 
-  // loop through obstacles and reset 'stuck' attribute
+  // loop through obstacles and reset the position and 'stuck' attribute
   for (int i = 0; i < obs->length; i++) {
     Obstacle *o = &obs->items[i];
-    // obs->items[i].stuck = false;
     o->stuck = false;
     o->rect = o->init;
   }
-
-  // obs->items[1].rect = (Rectangle){200, HEIGHT / 2, 150, 150};
-  // obs->items[2].rect = (Rectangle){200, HEIGHT / 2, 150, 150};
-  // obs->items[3].rect = (Rectangle){200, HEIGHT / 2, 150, 150};
-  // obs->items[4].rect = (Rectangle){200, HEIGHT / 2, 150, 150};
 }
 
 void handleSpeed(GameContext *ctx)

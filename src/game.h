@@ -6,8 +6,6 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-// #define NUM_OBSTACLES 5
-
 extern int SCORE;
 extern const float TOTAL_SPEED_MAX;
 extern const float SENSITIVITY;
@@ -83,9 +81,6 @@ typedef struct {
   bool showWarning;
   bool debug;
 } GameContext;
-
-// the starting positions of the obstacles
-// Rectangle obstacleInit[NUM_OBSTACLES];
 
 // initialisation
 void initGameContext(GameContext *ctx);
