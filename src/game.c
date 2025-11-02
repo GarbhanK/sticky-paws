@@ -75,31 +75,21 @@ void resetObjects(GameContext *ctx, Target *jar, ObstacleArray *obs)
 void handleSpeed(GameContext *ctx)
 {
   Vector2 dt = GetMouseDelta();
-  float absMouseDelta, mouseSpeed;
+  // float absMouseDelta, mouseSpeed;
 
-  // speed increase
-  if (dt.x != 0 && dt.y != 0) {
-    absMouseDelta = fabs(dt.x) + fabs(dt.y);
-    mouseSpeed = absMouseDelta;
-    ctx->totalSpeed = ctx->totalSpeed + ((int)mouseSpeed * SENSITIVITY);
-  } else if (dt.x == 0 && dt.y != 0) {
-    absMouseDelta = fabs(dt.y);
-    mouseSpeed = absMouseDelta;
-    ctx->totalSpeed = ctx->totalSpeed + ((int)mouseSpeed * 2 * SENSITIVITY);
-  } else if (dt.x != 0 && dt.y == 0) {
-    absMouseDelta = fabs(dt.x);
-    mouseSpeed = absMouseDelta;
-    ctx->totalSpeed = ctx->totalSpeed + ((int)mouseSpeed * 2 * SENSITIVITY);
-  }
+  float mouseSpeed = Vector2Length(dt);
 
-  // limit the total speed
+  // Scale by sensitivity and add to total speed
+  ctx->totalSpeed += (int)(mouseSpeed * SENSITIVITY);
+
+  // Clamp the total speed
   if (ctx->totalSpeed > TOTAL_SPEED_MAX) {
     ctx->totalSpeed = TOTAL_SPEED_MAX;
-    if (!ctx->debug)
-      ctx->state = FAIL;
+    if (!ctx->debug) ctx->state = FAIL;
   }
 
-  // get rid of that issue where score flashes back and forth at idle
+
+  // Prevent tiny jitter from registering as movement
   if (ctx->totalSpeed <= 3) {
     ctx->totalSpeed = 0;
   }
