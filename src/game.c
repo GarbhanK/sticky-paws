@@ -84,29 +84,35 @@ void handleSpeed(GameContext *ctx)
   Vector2 dt = GetMouseDelta();
   float absMouseDelta, mouseSpeed;
 
-  // speed increase
+  // Calculate speed increase based on mouse movement
+  // Diagonal movement (both x and y) gets normal sensitivity
+  // Pure horizontal or vertical movement gets 2x sensitivity to encourage diagonal paths
   if (dt.x != 0 && dt.y != 0) {
+    // Diagonal movement
     absMouseDelta = fabs(dt.x) + fabs(dt.y);
     mouseSpeed = absMouseDelta;
     ctx->totalSpeed = ctx->totalSpeed + ((int)mouseSpeed * SENSITIVITY);
   } else if (dt.x == 0 && dt.y != 0) {
+    // Vertical movement only (higher penalty)
     absMouseDelta = fabs(dt.y);
     mouseSpeed = absMouseDelta;
     ctx->totalSpeed = ctx->totalSpeed + ((int)mouseSpeed * 2 * SENSITIVITY);
   } else if (dt.x != 0 && dt.y == 0) {
+    // Horizontal movement only (higher penalty)
     absMouseDelta = fabs(dt.x);
     mouseSpeed = absMouseDelta;
     ctx->totalSpeed = ctx->totalSpeed + ((int)mouseSpeed * 2 * SENSITIVITY);
   }
 
-  // limit the total speed
+  // Enforce speed limit and trigger fail state if exceeded
   if (ctx->totalSpeed > TOTAL_SPEED_MAX) {
     ctx->totalSpeed = TOTAL_SPEED_MAX;
-    if (!ctx->debug)
-      ctx->state = FAIL;
+    if (!ctx->debug) {
+      ctx->state = FAIL; // Too fast! Old man woke up
+    }
   }
 
-  // get rid of that issue where score flashes back and forth at idle
+  // Clamp near-zero speeds to prevent flickering
   if (ctx->totalSpeed <= 3) {
     ctx->totalSpeed = 0;
   }
@@ -153,17 +159,19 @@ void handleStickyObstacle(GameContext *ctx, Bear *paw, ObstacleArray *obs, Sound
 
 void handleObjectPushing(ObstacleArray *obs, Target *jar, Vector2 *dt)
 {
+  // Check each obstacle against others to handle pushing interactions
   for (int i = 0; i < obs->length; i++) {
     Obstacle *actor = &obs->items[i];
 
-    // object on object pushing logic
+    // Check collisions with other obstacles
     for (int j = 0; j < obs->length; j++) {
       if (i == j) {
-        continue;
-      } // skip if same object or object already stuck to paw
+        continue; // Skip self-collision check
+      }
 
       Obstacle *subject = &obs->items[j];
 
+      // If a stuck object collides with another, push it
       if (CheckCollisionRecs(rectToHitbox(*actor, HITBOX_SHRINK_PERC), subject->rect)) {
         if (actor->stuck) {
           subject->rect.x = subject->rect.x + dt->x;
@@ -172,12 +180,14 @@ void handleObjectPushing(ObstacleArray *obs, Target *jar, Vector2 *dt)
       }
     }
 
-    // object on honey jar logic
+    // Handle obstacle-jar interactions
     if (CheckCollisionRecs(jar->hitbox, actor->rect)) {
       if (!jar->stuck) {
+        // Obstacle pushes the unstuck jar
         jar->pos.x = jar->pos.x + dt->x;
         jar->pos.y = jar->pos.y + dt->y;
       } else {
+        // Stuck jar pushes the obstacle
         actor->rect.x = actor->rect.x + dt->x;
         actor->rect.y = actor->rect.y + dt->y;
       }
@@ -199,19 +209,21 @@ void handlePawPushing(Bear *b, ObstacleArray *obs, Vector2 *dt)
 
 int getOldManState(int speed)
 {
+  // Determine old man's wake state based on current speed
+  // States: 0 = Asleep, 1 = Stirring, 2 = Alert, 3 = Awake
   int state = 0;
-  // Draw old man in the corner
+
   if (speed >= 0) {
-    state = 0;
+    state = 0; // Asleep (0-30% of max speed)
   }
   if (speed >= TOTAL_SPEED_MAX * 0.3) {
-    state = 1;
+    state = 1; // Starting to wake (30-50% of max speed)
   }
   if (speed >= TOTAL_SPEED_MAX * 0.5) {
-    state = 2;
+    state = 2; // Alert (50-80% of max speed)
   }
   if (speed >= TOTAL_SPEED_MAX * 0.8) {
-    state = 3;
+    state = 3; // Fully awake (80%+ of max speed - triggers fail)
   }
 
   return state;
@@ -219,11 +231,15 @@ int getOldManState(int speed)
 
 Rectangle rectToHitbox(Obstacle obs, float shrinkFactor)
 {
-  // reduce the object's dimentions down by 25%
+  // Create a smaller hitbox centered within the obstacle's visual bounds
+  // This makes collision feel more forgiving and natural to the player
   Rectangle rect = obs.rect;
 
+  // Calculate new dimensions (shrink by the specified factor)
   float newWidth = rect.width * (1.0f - shrinkFactor);
   float newHeight = rect.height * (1.0f - shrinkFactor);
+
+  // Center the shrunken hitbox within the original rectangle
   float newX = rect.x + (rect.width - newWidth) / 2.0f;
   float newY = rect.y + (rect.height - newHeight) / 2.0f;
 

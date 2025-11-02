@@ -1,12 +1,77 @@
-
-# macos files
+# === Operating System ===
+# macOS
 *.DS_Store
+.AppleDouble
+.LSOverride
+._*
 
-# c files
-.cache
+# Linux
+*~
+.directory
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# === Build Artifacts ===
 build/
+bin/
 *.o
+*.obj
+*.a
+*.lib
+*.exe
+*.out
+*.so
+*.dylib
+*.dll
 
-# binaries
-bin
+# === IDE and Editor ===
+# VSCode
+.vscode/
+*.code-workspace
 
+# CLion / IntelliJ
+.idea/
+cmake-build-*/
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+.\#*
+
+# Xcode
+*.xcodeproj
+*.xcworkspace
+xcuserdata/
+
+# Zed
+.zed/
+
+# === C/C++ Specific ===
+.cache/
+compile_commands.json.bak
+
+# === Temporary Files ===
+*.tmp
+*.temp
+*.log
+*.bak
+
+# === CMake ===
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+CTestTestfile.cmake
+_deps/
+
+# === Web Build (Emscripten) ===
+*.wasm
+*.js.mem
+*.data
