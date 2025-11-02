@@ -4,8 +4,9 @@
 
 # c files
 .cache
+build/
+*.o
 
 # binaries
 bin
-
 

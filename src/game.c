@@ -6,11 +6,7 @@
 #include "game.h"
 #include "sound.h"
 
-bool DEBUG = false;
-bool SHOW_TUTORIAL = false;
-int SCORE = 0;
-int TIMER = 15;
-int TOTAL_SPEED = 0;
+// int SCORE = 0;
 const float TOTAL_SPEED_MAX = 400.0f;
 const float SENSITIVITY = 3.0f;
 const float DECAY = 15.0f;
@@ -19,14 +15,6 @@ const double TIME_INTERVAL = 0.1f;
 
 const float WIDTH = 1024.0f;
 const float HEIGHT = 768.0f;
-
-Rectangle obstacleInit[] = {
-  {200, HEIGHT / 2, 150, 150},  // grapes
-  {500, HEIGHT / 3, 110, 300},  // baguette
-  {300, 250, 115, 100},  // cheese
-  {800, 450, 90, 130},  // cigs
-  {80, 115, 400, 100},  // wine bottle
-};
 
 void drawBear(Bear *b)
 {
@@ -64,27 +52,27 @@ void drawBear(Bear *b)
   DrawTextureV(b->nose, nosePos, WHITE);
 }
 
-void resetObjects(Target *jar, ObstacleArray *obs)
+void resetObjects(GameContext *ctx, Target *jar, ObstacleArray *obs)
 {
   // reset scores
-  TOTAL_SPEED = 0;
-  SCORE = 0;
-  TIMER = 30;
+  ctx->totalSpeed = 0;
+  ctx->timer = 30;
+  ctx->score = 0;
 
   // reset honey jar
   jar->stuck = false;
   jar->pos = (Vector2){WIDTH / 2 + 50, 100};
   jar->hitbox = (Rectangle){jar->pos.x, jar->pos.y, jar->hitbox.width, jar->hitbox.height};
 
-  // loop through obstacles and set to original x/y
+  // loop through obstacles and reset position, rect, and stuck attribute
   for (int i = 0; i < obs->length; i++) {
     Obstacle *o = &obs->items[i];
     o->stuck = false;
-    o->rect = obstacleInit[i];
+    o->rect = o->init;
   }
 }
 
-void handleSpeed()
+void handleSpeed(GameContext *ctx)
 {
   Vector2 dt = GetMouseDelta();
   float absMouseDelta, mouseSpeed;
@@ -93,39 +81,39 @@ void handleSpeed()
   if (dt.x != 0 && dt.y != 0) {
     absMouseDelta = fabs(dt.x) + fabs(dt.y);
     mouseSpeed = absMouseDelta;
-    TOTAL_SPEED = TOTAL_SPEED + ((int)mouseSpeed * SENSITIVITY);
+    ctx->totalSpeed = ctx->totalSpeed + ((int)mouseSpeed * SENSITIVITY);
   } else if (dt.x == 0 && dt.y != 0) {
     absMouseDelta = fabs(dt.y);
     mouseSpeed = absMouseDelta;
-    TOTAL_SPEED = TOTAL_SPEED + ((int)mouseSpeed * 2 * SENSITIVITY);
+    ctx->totalSpeed = ctx->totalSpeed + ((int)mouseSpeed * 2 * SENSITIVITY);
   } else if (dt.x != 0 && dt.y == 0) {
     absMouseDelta = fabs(dt.x);
     mouseSpeed = absMouseDelta;
-    TOTAL_SPEED = TOTAL_SPEED + ((int)mouseSpeed * 2 * SENSITIVITY);
+    ctx->totalSpeed = ctx->totalSpeed + ((int)mouseSpeed * 2 * SENSITIVITY);
   }
 
   // limit the total speed
-  if (TOTAL_SPEED > TOTAL_SPEED_MAX) {
-    TOTAL_SPEED = TOTAL_SPEED_MAX;
-    if (!DEBUG)
-      GAMESTATE = FAIL;
+  if (ctx->totalSpeed > TOTAL_SPEED_MAX) {
+    ctx->totalSpeed = TOTAL_SPEED_MAX;
+    if (!ctx->debug)
+      ctx->state = FAIL;
   }
 
   // get rid of that issue where score flashes back and forth at idle
-  if (TOTAL_SPEED <= 3) {
-    TOTAL_SPEED = 0;
+  if (ctx->totalSpeed <= 3) {
+    ctx->totalSpeed = 0;
   }
 }
 
-void handleStickyJar(Bear *paw, Target *jar, Sound sb[])
+void handleStickyJar(GameContext *ctx, Bear *paw, Target *jar, Sound sb[])
 {
   Vector2 dt = GetMouseDelta();
   if (!jar->stuck) {
     if (CheckCollisionRecs(jar->hitbox, paw->hitbox)) {
       randomBearSound(sb);
       jar->stuck = true;
-      SCORE += jar->value;
-      printf("SCORE: %d\n", SCORE);
+      ctx->score += jar->value;
+      printf("SCORE: %d\n", ctx->score);
     }
   } else {
     // update Jar pos by adding mouse delta
@@ -134,7 +122,7 @@ void handleStickyJar(Bear *paw, Target *jar, Sound sb[])
   }
 }
 
-void handleStickyObstacle(Bear *paw, ObstacleArray *obs, Sound sb[])
+void handleStickyObstacle(GameContext *ctx, Bear *paw, ObstacleArray *obs, Sound sb[])
 {
   Vector2 dt = GetMouseDelta();
   for (int i = 0; i < obs->length; i++) {
@@ -145,8 +133,8 @@ void handleStickyObstacle(Bear *paw, ObstacleArray *obs, Sound sb[])
       if (CheckCollisionRecs(rectToHitbox(*subject, HITBOX_SHRINK_PERC), paw->hitbox)) {
         randomBearSound(sb);
         subject->stuck = true;
-        SCORE += subject->value;
-        printf("SCORE: %d\n", SCORE);
+        ctx->score += subject->value;
+        printf("SCORE: %d\n", ctx->score);
       }
     } else {
       // update Jar pos by adding mouse delta
@@ -202,20 +190,20 @@ void handlePawPushing(Bear *b, ObstacleArray *obs, Vector2 *dt)
   }
 }
 
-int getOldManState()
+int getOldManState(int speed)
 {
     int state = 0;
     // Draw old man in the corner
-    if (TOTAL_SPEED >= 0) {
+    if (speed >= 0) {
       state = 0;
     }
-    if (TOTAL_SPEED >= TOTAL_SPEED_MAX * 0.3) {
+    if (speed >= TOTAL_SPEED_MAX * 0.3) {
       state = 1;
     }
-    if (TOTAL_SPEED >= TOTAL_SPEED_MAX * 0.5) {
+    if (speed >= TOTAL_SPEED_MAX * 0.5) {
       state = 2;
     }
-    if (TOTAL_SPEED >= TOTAL_SPEED_MAX * 0.8) {
+    if (speed >= TOTAL_SPEED_MAX * 0.8) {
       state = 3;
     }
 

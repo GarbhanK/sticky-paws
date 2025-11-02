@@ -3,6 +3,8 @@
 #include "raylib.h"
 #include <stdio.h>
 
+Sound sounds[SOUND_COUNT];
+
 void randomBearSound(Sound sounds[])
 {
   switch (GetRandomValue(1, 2)) {
@@ -17,18 +19,18 @@ void randomBearSound(Sound sounds[])
 
 void loadSounds(Sound sounds[])
 {
-  sounds[GROWL1] = LoadSound("assets/sfx/growl1.mp3");
-  sounds[GROWL2] = LoadSound("assets/sfx/growl2.mp3");
-  sounds[GROWL3] = LoadSound("assets/sfx/growl3.mp3");
-  sounds[DOOR_SLAM] = LoadSound("assets/sfx/door_slam.mp3");
-  sounds[SNIFF] = LoadSound("assets/sfx/sniff.mp3");
-  sounds[FANFARE] = LoadSound("assets/sfx/ultraman_dyna_fanfare.mp3");
-  sounds[SELECT] = LoadSound("assets/sfx/blip_select.wav");
-  sounds[SNORE] = LoadSound("assets/sfx/base_snore.mp3");
-  sounds[HUH] = LoadSound("assets/sfx/huh.mp3");
-  sounds[MIRANDA] = LoadSound("assets/sfx/miranda.mp3");
-  sounds[SIREN] = LoadSound("assets/sfx/police_siren.mp3");
-  sounds[CLOTH_RUSTLE] = LoadSound("assets/sfx/cloth_rustle.mp3");
+  sounds[GROWL1] = LoadSound("src/assets/sfx/growl1.mp3");
+  sounds[GROWL2] = LoadSound("src/assets/sfx/growl2.mp3");
+  sounds[GROWL3] = LoadSound("src/assets/sfx/growl3.mp3");
+  sounds[DOOR_SLAM] = LoadSound("src/assets/sfx/door_slam.mp3");
+  sounds[SNIFF] = LoadSound("src/assets/sfx/sniff.mp3");
+  sounds[FANFARE] = LoadSound("src/assets/sfx/ultraman_dyna_fanfare.mp3");
+  sounds[SELECT] = LoadSound("src/assets/sfx/blip_select.wav");
+  sounds[SNORE] = LoadSound("src/assets/sfx/base_snore.mp3");
+  sounds[HUH] = LoadSound("src/assets/sfx/huh.mp3");
+  sounds[MIRANDA] = LoadSound("src/assets/sfx/miranda.mp3");
+  sounds[SIREN] = LoadSound("src/assets/sfx/police_siren.mp3");
+  sounds[CLOTH_RUSTLE] = LoadSound("src/assets/sfx/cloth_rustle.mp3");
 
   // validate loaded sounds
   int valid_count = 0;
