@@ -64,7 +64,7 @@ void resetObjects(GameContext *ctx, Target *jar, ObstacleArray *obs)
   jar->pos = (Vector2){WIDTH / 2 + 50, 100};
   jar->hitbox = (Rectangle){jar->pos.x, jar->pos.y, jar->hitbox.width, jar->hitbox.height};
 
-  // loop through obstacles and reset the position and 'stuck' attribute
+  // loop through obstacles and reset position, rect, and stuck attribute
   for (int i = 0; i < obs->length; i++) {
     Obstacle *o = &obs->items[i];
     o->stuck = false;

@@ -28,7 +28,7 @@ void drawUI(GameContext *ctx, UserInterface *ui, bool warning, int barWidth)
   DrawRectangleLinesEx(ui->infoBox, 5, RED);                // red outline
   DrawRectangleGradientH(20, 20, barWidth, 30, GREEN, RED); // moving total bar
 
-  int scaledSpeed = ctx->totalSpeed / 4; // becuase max is 400.0f (TODO: FIX)
+  int scaledSpeed = ctx->totalSpeed / 4; // because max is 400.0f (TODO: FIX)
   if (ctx->debug) {
     Vector2 mousePos = GetMousePosition();
     DrawText(TextFormat("TOTAL_SPEED: %d", scaledSpeed), 20, 60, 20, RED);

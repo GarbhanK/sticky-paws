@@ -252,6 +252,7 @@ int main()
   initGameContext(&ctx);
 
   // additional obsacles, e.g other picnic items
+  // NOTE: the `rect` field gets set to the `init` value when the game starts
   Obstacle obstacles[] = {
     {{200, HEIGHT / 2, 150, 150}, {}, false, 10, LoadTexture("src/assets/grapes.png")},
     {{500, HEIGHT / 3, 110, 300}, {}, false, 10, LoadTexture("src/assets/baguette.png")},
