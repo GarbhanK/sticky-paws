@@ -1,3 +1,10 @@
+/**
+ * @file game.c
+ * @brief Implementation of core game logic and mechanics
+ *
+ * Handles physics, collision detection, object interactions,
+ * and game state updates for Sticky Paws.
+ */
 #include <raylib.h>
 #include <raymath.h>
 #include <stdbool.h>
@@ -6,7 +13,7 @@
 #include "game.h"
 #include "sound.h"
 
-// int SCORE = 0;
+// Game configuration constants
 const float TOTAL_SPEED_MAX = 400.0f;
 const float SENSITIVITY = 3.0f;
 const float DECAY = 15.0f;
@@ -25,22 +32,22 @@ void drawBear(Bear *b)
 
   bool noseFollowing = true;
   float noseHeight = b->pos.y + (HEIGHT * 0.5);
-  Vector2 nosePos = { b->pos.x-noseOffset, noseHeight };
+  Vector2 nosePos = {b->pos.x - noseOffset, noseHeight};
 
   // draw bear paw
   DrawTexture(b->tex, b->pos.x, b->pos.y, WHITE);
 
   // check if paw pos is between limits
-  if ( (b->pos.x - b->nose.width) < leftLimit) {
+  if ((b->pos.x - b->nose.width) < leftLimit) {
     noseFollowing = false;
-    nosePos = (Vector2){ leftLimit, noseHeight };
-  } else if ( (b->pos.x - b->nose.width) > rightLimit) {
+    nosePos = (Vector2){leftLimit, noseHeight};
+  } else if ((b->pos.x - b->nose.width) > rightLimit) {
     noseFollowing = false;
-    nosePos = (Vector2){ rightLimit, noseHeight };
+    nosePos = (Vector2){rightLimit, noseHeight};
   }
 
   if (noseFollowing) {
-    nosePos = (Vector2){ b->pos.x-noseOffset, noseHeight };
+    nosePos = (Vector2){b->pos.x - noseOffset, noseHeight};
   }
 
   // limit nose position past the bottom of the texture
@@ -192,22 +199,22 @@ void handlePawPushing(Bear *b, ObstacleArray *obs, Vector2 *dt)
 
 int getOldManState(int speed)
 {
-    int state = 0;
-    // Draw old man in the corner
-    if (speed >= 0) {
-      state = 0;
-    }
-    if (speed >= TOTAL_SPEED_MAX * 0.3) {
-      state = 1;
-    }
-    if (speed >= TOTAL_SPEED_MAX * 0.5) {
-      state = 2;
-    }
-    if (speed >= TOTAL_SPEED_MAX * 0.8) {
-      state = 3;
-    }
+  int state = 0;
+  // Draw old man in the corner
+  if (speed >= 0) {
+    state = 0;
+  }
+  if (speed >= TOTAL_SPEED_MAX * 0.3) {
+    state = 1;
+  }
+  if (speed >= TOTAL_SPEED_MAX * 0.5) {
+    state = 2;
+  }
+  if (speed >= TOTAL_SPEED_MAX * 0.8) {
+    state = 3;
+  }
 
-    return state;
+  return state;
 }
 
 Rectangle rectToHitbox(Obstacle obs, float shrinkFactor)
@@ -220,6 +227,6 @@ Rectangle rectToHitbox(Obstacle obs, float shrinkFactor)
   float newX = rect.x + (rect.width - newWidth) / 2.0f;
   float newY = rect.y + (rect.height - newHeight) / 2.0f;
 
-  Rectangle hitbox = (Rectangle){ newX, newY, newWidth, newHeight };
+  Rectangle hitbox = (Rectangle){newX, newY, newWidth, newHeight};
   return hitbox;
 }

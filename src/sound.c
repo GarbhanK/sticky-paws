@@ -1,3 +1,10 @@
+/**
+ * @file sound.c
+ * @brief Implementation of sound loading and playback
+ *
+ * Manages all audio effects and music for the game including
+ * loading, validation, and playback control.
+ */
 #include "sound.h"
 
 #include "raylib.h"
@@ -34,7 +41,7 @@ void loadSounds(Sound sounds[])
 
   // validate loaded sounds
   int valid_count = 0;
-  for (int i=0; i < SOUND_COUNT; i++) {
+  for (int i = 0; i < SOUND_COUNT; i++) {
     bool valid = IsSoundValid(sounds[i]);
     if (!valid) {
       printf("WARNING :: Invalid sound loaded!\n");
@@ -59,5 +66,5 @@ void stopAllSounds(Sound sounds[])
   for (int i = 0; i < SOUND_COUNT; i++) {
     if (IsSoundPlaying(sounds[i]))
       StopSound(sounds[i]);
-    }
+  }
 }

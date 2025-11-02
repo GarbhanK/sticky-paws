@@ -1,16 +1,24 @@
-#include <string.h>
+/**
+ * @file ui.c
+ * @brief Implementation of user interface rendering
+ *
+ * Handles drawing of UI elements, buttons, text overlays,
+ * and visual feedback for the player.
+ */
 #include <raylib.h>
 #include <stdbool.h>
+#include <string.h>
 
-#include "ui.h"
 #include "game.h"
+#include "ui.h"
 
 extern const float TOTAL_SPEED_MAX;
 
 void drawUI(GameContext *ctx, UserInterface *ui, bool warning, int barWidth)
 {
   // draw the old man in the corner
-  DrawTextureEx(ui->wakeStates[getOldManState(ctx->totalSpeed)], (Vector2){0,HEIGHT-250}, 0, 1, WHITE);
+  DrawTextureEx(ui->wakeStates[getOldManState(ctx->totalSpeed)], (Vector2){0, HEIGHT - 250}, 0, 1,
+                WHITE);
 
   // speed bar update logic
   ui->barWidth = ctx->totalSpeed;
@@ -51,8 +59,8 @@ void drawButton(char *msg, Rectangle area)
     DrawRectangleRec(area, BLACK);
   }
   float buttonTextLen = (float)MeasureText(msg, 50);
-  DrawText(msg, area.x + (area.width / 2 - buttonTextLen / 2), area.y + (area.height / 2 - 25),
-           50, WHITE);
+  DrawText(msg, area.x + (area.width / 2 - buttonTextLen / 2), area.y + (area.height / 2 - 25), 50,
+           WHITE);
 }
 
 void drawCenterText(char *msg, Color colour, int fsize, Vector2 pos)
@@ -63,11 +71,10 @@ void drawCenterText(char *msg, Color colour, int fsize, Vector2 pos)
 
 bool isButtonPressed(Rectangle button)
 {
-    if (IsMouseButtonPressed(0) &&
-        CheckCollisionPointRec(GetMousePosition(), button)) {
-            return true;
-    }
-    return false;
+  if (IsMouseButtonPressed(0) && CheckCollisionPointRec(GetMousePosition(), button)) {
+    return true;
+  }
+  return false;
 }
 
 void unloadTextures(UserInterface *ui, Target *jar, Bear *paw)
@@ -100,7 +107,7 @@ void UpdateFadeIn(FadeEffect *fade, float fadeSpeed)
     fade->alpha -= fadeSpeed;
     if (fade->alpha <= 0.0f) {
       fade->alpha = 0.0f;
-      fade->alpha = false; // stop sending once complete
+      fade->active = false; // stop sending once complete
     }
   }
 }
@@ -109,7 +116,7 @@ void drawTutorial()
 {
   // create variables for the box
   Vector2 boxSize = {610.0f, 150.0f};
-  Vector2 boxPos = {WIDTH/2 - boxSize.x/2, 200};
+  Vector2 boxPos = {WIDTH / 2 - boxSize.x / 2, 200};
   Rectangle tutorialBox = {boxPos.x, boxPos.y, boxSize.x, boxSize.y};
 
   // create tutorial text
