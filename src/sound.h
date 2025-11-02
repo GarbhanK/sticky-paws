@@ -3,7 +3,7 @@
 
 #include "raylib.h"
 
-#define MAX_SOUNDS SOUNDS_COUNT
+#define MAX_SOUNDS SOUND_COUNT
 
 
 typedef enum {

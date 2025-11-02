@@ -6,11 +6,11 @@
 #include "sound.h"
 #include "ui.h"
 
-#define MAX_SOUNDS SOUNDS_COUNT
+#define MAX_SOUNDS SOUND_COUNT
 #define FADE_SPEED 0.005f
 #define BOB_AMPLITUDE 10.0f
 #define DURATION 1.0f
-#define FREQUENCY 0.5f  // 1.0f / (duration * 2);
+#define FREQUENCY 0.5f // 1.0f / (duration * 2);
 #define BOB_SPEED 3.0f
 
 // Initialize with sensible defaults
@@ -46,11 +46,7 @@ static void handleStartState(GameContext *ctx, UserInterface *ui, Target *jar, O
 
   if (isButtonPressed(ui->tutorialButton)) {
     PlaySound(sounds[SELECT]);
-    if (ctx->showTutorial) {
-      ctx->showTutorial = false;
-    } else {
-      ctx->showTutorial = true;
-    }
+    ctx->showTutorial = !ctx->showTutorial;
   }
 
   if (IsKeyPressed(KEY_SPACE)) {
@@ -60,7 +56,7 @@ static void handleStartState(GameContext *ctx, UserInterface *ui, Target *jar, O
 
 static void handlePlayState(GameContext *ctx, UserInterface *ui, Bear *paw, Target *jar, ObstacleArray *obs) {
   if (IsKeyPressed(KEY_TAB)) {
-    (ctx->debug) ? (ctx->debug = false) : (ctx->debug = true);
+    ctx->debug = !ctx->debug;
   }
 
   // mouse position diff used to stuck object movement
@@ -113,7 +109,7 @@ static void handlePlayState(GameContext *ctx, UserInterface *ui, Bear *paw, Targ
 
   if (!ctx->isSnoring && getOldManState(ctx->totalSpeed) <= 2) {
       ctx->isSnoring = true;
-      SetSoundVolume(sounds[SNORE], 0.2);
+    SetSoundVolume(sounds[SNORE], 0.2);
       SetSoundPan(sounds[SNORE], 0.25);
       PlaySound(sounds[SNORE]);
   } else if (ctx->isSnoring && getOldManState(ctx->totalSpeed) == 3) {
@@ -132,9 +128,7 @@ static void handlePlayState(GameContext *ctx, UserInterface *ui, Bear *paw, Targ
   }
 
   // win game logic (win condition different for fullscreen because mouse can't go below HEIGHT)
-  const bool winConditionMet = IsWindowFullscreen()
-    ? (GetMouseY() >= HEIGHT - 5)
-    : (jar->pos.y >= HEIGHT - 15);
+  const bool winConditionMet = GetMouseY() >= HEIGHT - 15;
 
   if (winConditionMet) {
     ctx->state = WIN;
@@ -201,7 +195,7 @@ static void renderCurrentState(GameContext *ctx, UserInterface *ui, Bear *paw, T
 
     // draw obstacles
     for (int i = 0; i < obs->length; i++) {
-      Obstacle* arr = obs->items;
+      Obstacle *arr = obs->items;
       Obstacle obs = arr[i];
       Vector2 obs_pos = (Vector2){obs.rect.x, obs.rect.y};
       DrawTextureEx(obs.tex, obs_pos, 0.0f, 1.0f, WHITE);

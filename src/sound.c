@@ -59,5 +59,5 @@ void stopAllSounds(Sound sounds[])
   for (int i = 0; i < SOUND_COUNT; i++) {
     if (IsSoundPlaying(sounds[i]))
       StopSound(sounds[i]);
-    }
+  }
 }

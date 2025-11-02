@@ -6,7 +6,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-// extern int SCORE;
+// Game configuration constants
 extern const float TOTAL_SPEED_MAX;
 extern const float SENSITIVITY;
 extern const float DECAY;
@@ -39,16 +39,15 @@ typedef struct Bear {
 // } Hazard;
 
 typedef struct Obstacle {
-  Rectangle init;
-  Rectangle rect;
-  bool stuck;
-  int value;
+  Rectangle init;   // Initial pos for game reset
+  Rectangle rect;   // Current position and size
+  bool stuck;       // Whether stuck to the paw
+  int value;        // Score value when collided
   Texture2D tex;
 } Obstacle;
 
 // https://youtu.be/_KSKH8C9Gf0?si=mmUkxPDIZce6YNlD
 typedef struct {
-  Rectangle *init;  // array of rect positions to restart/init the game
   Obstacle *items;  // the Obstacles array
   size_t length;    // current no. items
   size_t capapcity; // total arr capacity

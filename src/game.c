@@ -6,7 +6,7 @@
 #include "game.h"
 #include "sound.h"
 
-// int SCORE = 0;
+// Game configuration constants
 const float TOTAL_SPEED_MAX = 400.0f;
 const float SENSITIVITY = 3.0f;
 const float DECAY = 15.0f;
@@ -25,22 +25,22 @@ void drawBear(Bear *b)
 
   bool noseFollowing = true;
   float noseHeight = b->pos.y + (HEIGHT * 0.5);
-  Vector2 nosePos = { b->pos.x-noseOffset, noseHeight };
+  Vector2 nosePos = {b->pos.x - noseOffset, noseHeight};
 
   // draw bear paw
   DrawTexture(b->tex, b->pos.x, b->pos.y, WHITE);
 
   // check if paw pos is between limits
-  if ( (b->pos.x - b->nose.width) < leftLimit) {
+  if ((b->pos.x - b->nose.width) < leftLimit) {
     noseFollowing = false;
-    nosePos = (Vector2){ leftLimit, noseHeight };
+    nosePos = (Vector2){leftLimit, noseHeight};
   } else if ( (b->pos.x - b->nose.width) > rightLimit) {
     noseFollowing = false;
-    nosePos = (Vector2){ rightLimit, noseHeight };
+    nosePos = (Vector2){rightLimit, noseHeight};
   }
 
   if (noseFollowing) {
-    nosePos = (Vector2){ b->pos.x-noseOffset, noseHeight };
+    nosePos = (Vector2){b->pos.x - noseOffset, noseHeight};
   }
 
   // limit nose position past the bottom of the texture
@@ -75,8 +75,8 @@ void resetObjects(GameContext *ctx, Target *jar, ObstacleArray *obs)
 void handleSpeed(GameContext *ctx)
 {
   Vector2 dt = GetMouseDelta();
-  // float absMouseDelta, mouseSpeed;
 
+  // get the magnitude so diagonals aren't faster
   float mouseSpeed = Vector2Length(dt);
 
   // Scale by sensitivity and add to total speed
@@ -87,7 +87,6 @@ void handleSpeed(GameContext *ctx)
     ctx->totalSpeed = TOTAL_SPEED_MAX;
     if (!ctx->debug) ctx->state = FAIL;
   }
-
 
   // Prevent tiny jitter from registering as movement
   if (ctx->totalSpeed <= 3) {
@@ -136,6 +135,7 @@ void handleStickyObstacle(GameContext *ctx, Bear *paw, ObstacleArray *obs, Sound
 
 void handleObjectPushing(ObstacleArray *obs, Target *jar, Vector2 *dt)
 {
+  // check each obstacle against others to handle pushing interactions
   for (int i = 0; i < obs->length; i++) {
     Obstacle *actor = &obs->items[i];
 
@@ -143,10 +143,11 @@ void handleObjectPushing(ObstacleArray *obs, Target *jar, Vector2 *dt)
     for (int j = 0; j < obs->length; j++) {
       if (i == j) {
         continue;
-      } // skip if same object or object already stuck to paw
+      } // Skip self-collision check
 
       Obstacle *subject = &obs->items[j];
 
+      // If a stuck object collides with another, push it
       if (CheckCollisionRecs(rectToHitbox(*actor, HITBOX_SHRINK_PERC), subject->rect)) {
         if (actor->stuck) {
           subject->rect.x = subject->rect.x + dt->x;
@@ -183,7 +184,8 @@ void handlePawPushing(Bear *b, ObstacleArray *obs, Vector2 *dt)
 int getOldManState(int speed)
 {
     int state = 0;
-    // Draw old man in the corner
+    // Determine old man's wake state based on current speed
+    // States: 0 = Asleep, 1 = Stirring, 2 = Alert, 3 = Awake
     if (speed >= 0) {
       state = 0;
     }
@@ -202,14 +204,18 @@ int getOldManState(int speed)
 
 Rectangle rectToHitbox(Obstacle obs, float shrinkFactor)
 {
-  // reduce the object's dimentions down by 25%
+  // Create a smaller hitbox centered within the obstacles visual bounds
+  // This makes collision feel more forgiving an natural
   Rectangle rect = obs.rect;
 
   float newWidth = rect.width * (1.0f - shrinkFactor);
   float newHeight = rect.height * (1.0f - shrinkFactor);
+
+  // Center the shrunken hitbox within original rectangle
   float newX = rect.x + (rect.width - newWidth) / 2.0f;
   float newY = rect.y + (rect.height - newHeight) / 2.0f;
 
-  Rectangle hitbox = (Rectangle){ newX, newY, newWidth, newHeight };
+  Rectangle hitbox = (Rectangle){newX, newY, newWidth, newHeight};
   return hitbox;
 }
+
