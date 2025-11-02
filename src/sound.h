@@ -14,19 +14,19 @@
  * @brief Sound effect identifiers
  */
 typedef enum {
-  GROWL1,        // Bear growl variant 1
-  GROWL2,        // Bear growl variant 2
-  GROWL3,        // Bear growl variant 3 (when paw near bottom)
-  DOOR_SLAM,     // Door slam on fail
-  SNIFF,         // Bear sniffing
-  FANFARE,       // Victory music
-  SELECT,        // UI button selection
-  SNORE,         // Old man snoring
-  HUH,           // Old man waking up
-  MIRANDA,       // Miranda rights (fail state)
-  SIREN,         // Police siren (fail state)
-  CLOTH_RUSTLE,  // Picnic blanket rustling
-  SOUND_COUNT,   // Total number of sounds (must be last)
+  GROWL1,       // Bear growl variant 1
+  GROWL2,       // Bear growl variant 2
+  GROWL3,       // Bear growl variant 3 (when paw near bottom)
+  DOOR_SLAM,    // Door slam on fail
+  SNIFF,        // Bear sniffing
+  FANFARE,      // Victory music
+  SELECT,       // UI button selection
+  SNORE,        // Old man snoring
+  HUH,          // Old man waking up
+  MIRANDA,      // Miranda rights (fail state)
+  SIREN,        // Police siren (fail state)
+  CLOTH_RUSTLE, // Picnic blanket rustling
+  SOUND_COUNT,  // Total number of sounds (must be last)
 } SoundID;
 
 #define MAX_SOUNDS SOUND_COUNT

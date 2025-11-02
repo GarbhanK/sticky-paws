@@ -44,14 +44,18 @@ void loadSounds(Sound sounds[])
   for (int i = 0; i < SOUND_COUNT; i++) {
     bool valid = IsSoundValid(sounds[i]);
     if (!valid) {
-      printf("WARNING :: Invalid sound loaded!\n");
+      printf("WARNING: Sound at index %d failed to load!\n", i);
     } else {
       valid_count++;
     }
   }
 
-  if (valid_count != SOUND_COUNT)
-    printf("ERROR :: AAHHHHHHHHH!\n");
+  if (valid_count != SOUND_COUNT) {
+    printf("ERROR: Failed to load %d sound(s). Game audio may not work correctly.\n",
+           SOUND_COUNT - valid_count);
+  } else {
+    printf("Successfully loaded all %d sounds.\n", SOUND_COUNT);
+  }
 }
 
 void unloadSounds(Sound sounds[])

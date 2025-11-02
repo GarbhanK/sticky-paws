@@ -29,7 +29,7 @@ void drawUI(GameContext *ctx, UserInterface *ui, bool warning, int barWidth)
   }
 
   // set flag for warning message
-  (ctx->totalSpeed >= ui->barMax / 2) ? (warning = true) : (warning = false);
+  warning = (ctx->totalSpeed >= ui->barMax / 2);
 
   // draw speed indicator in top left
   DrawRectangleRec(ui->infoBox, WHITE);                     // background box
@@ -51,7 +51,7 @@ void drawUI(GameContext *ctx, UserInterface *ui, bool warning, int barWidth)
   }
 }
 
-void drawButton(char *msg, Rectangle area)
+void drawButton(const char *msg, Rectangle area)
 {
   if (CheckCollisionPointRec(GetMousePosition(), area)) {
     DrawRectangleRec(area, (Color){225, 186, 47, 255});
@@ -63,7 +63,7 @@ void drawButton(char *msg, Rectangle area)
            WHITE);
 }
 
-void drawCenterText(char *msg, Color colour, int fsize, Vector2 pos)
+void drawCenterText(const char *msg, Color colour, int fsize, Vector2 pos)
 {
   float msgLen = (float)MeasureText(msg, fsize);
   DrawText(msg, (pos.x - msgLen / 2), pos.y, fsize, colour);

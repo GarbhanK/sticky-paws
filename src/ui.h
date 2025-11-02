@@ -55,7 +55,7 @@ void drawUI(GameContext *ctx, UserInterface *ui, bool warning, int barWidth);
  * @param msg Button text
  * @param area Button rectangle area
  */
-void drawButton(char *msg, Rectangle area);
+void drawButton(const char *msg, Rectangle area);
 
 /**
  * @brief Draw centered text on screen
@@ -64,7 +64,7 @@ void drawButton(char *msg, Rectangle area);
  * @param fsize Font size
  * @param pos Center position
  */
-void drawCenterText(char *msg, Color colour, int fsize, Vector2 pos);
+void drawCenterText(const char *msg, Color colour, int fsize, Vector2 pos);
 
 /**
  * @brief Check if a button was clicked

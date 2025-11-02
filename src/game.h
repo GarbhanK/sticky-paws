@@ -59,9 +59,9 @@ typedef struct Obstacle {
  * @brief Dynamic array of obstacles
  */
 typedef struct {
-  Rectangle *init; // Array of rect positions to restart/init the game
-  Obstacle *items; // The Obstacles array
-  size_t length;   // Current number of items
+  Rectangle *init;  // Array of rect positions to restart/init the game
+  Obstacle *items;  // The Obstacles array
+  size_t length;    // Current number of items
   size_t capapcity; // Total array capacity (NOTE: typo in original, kept for compatibility)
 } ObstacleArray;
 

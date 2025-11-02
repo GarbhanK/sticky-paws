@@ -13,12 +13,27 @@
 #include "sound.h"
 #include "ui.h"
 
+// UI and animation constants
 #define MAX_SOUNDS SOUND_COUNT
 #define FADE_SPEED 0.005f
 #define BOB_AMPLITUDE 10.0f
 #define DURATION 1.0f
 #define FREQUENCY 0.5f // 1.0f / (duration * 2);
 #define BOB_SPEED 3.0f
+
+// Game mechanics constants
+#define JAR_HITBOX_OFFSET_X 10
+#define JAR_HITBOX_OFFSET_Y 15
+#define JAR_HITBOX_SHRINK_X 20
+#define JAR_HITBOX_SHRINK_Y 25
+#define WIN_THRESHOLD_FULLSCREEN 5
+#define WIN_THRESHOLD_WINDOWED 15
+#define GROWL_TRIGGER_HEIGHT 0.75f
+#define SNIFF_TRIGGER_HEIGHT 0.5f
+#define SNORE_VOLUME 0.2f
+#define SNORE_PAN 0.25f
+#define AWAKE_THRESHOLD 2
+#define FULLY_AWAKE_STATE 3
 
 // Initialize with sensible defaults
 void initGameContext(GameContext *ctx)
@@ -55,11 +70,7 @@ static void handleStartState(GameContext *ctx, UserInterface *ui, Target *jar, O
 
   if (isButtonPressed(ui->tutorialButton)) {
     PlaySound(sounds[SELECT]);
-    if (ctx->showTutorial) {
-      ctx->showTutorial = false;
-    } else {
-      ctx->showTutorial = true;
-    }
+    ctx->showTutorial = !ctx->showTutorial;
   }
 
   if (IsKeyPressed(KEY_SPACE)) {
@@ -71,7 +82,7 @@ static void handlePlayState(GameContext *ctx, UserInterface *ui, Bear *paw, Targ
                             ObstacleArray *obs)
 {
   if (IsKeyPressed(KEY_TAB)) {
-    (ctx->debug) ? (ctx->debug = false) : (ctx->debug = true);
+    ctx->debug = !ctx->debug;
   }
 
   // mouse position diff used to stuck object movement
@@ -95,7 +106,8 @@ static void handlePlayState(GameContext *ctx, UserInterface *ui, Bear *paw, Targ
 
   // update Jar hitbox
   jar->hitbox =
-      (Rectangle){jar->pos.x + 10, jar->pos.y + 15, jar->tex.width - 20, jar->tex.height - 25};
+      (Rectangle){jar->pos.x + JAR_HITBOX_OFFSET_X, jar->pos.y + JAR_HITBOX_OFFSET_Y,
+                  jar->tex.width - JAR_HITBOX_SHRINK_X, jar->tex.height - JAR_HITBOX_SHRINK_Y};
 
   // handle sticky logic
   handleStickyJar(ctx, paw, jar, sounds);
@@ -114,20 +126,20 @@ static void handlePlayState(GameContext *ctx, UserInterface *ui, Bear *paw, Targ
   }
 
   //  === SFX TRIGGERS ===
-  if (paw->pos.y > HEIGHT * 0.75)
+  if (paw->pos.y > HEIGHT * GROWL_TRIGGER_HEIGHT)
     PlaySound(sounds[GROWL3]);
 
-  if ((paw->pos.y + HEIGHT * 0.5) <= (HEIGHT - paw->nose.height))
+  if ((paw->pos.y + HEIGHT * SNIFF_TRIGGER_HEIGHT) <= (HEIGHT - paw->nose.height))
     if (!IsSoundPlaying(sounds[SNIFF])) {
       PlaySound(sounds[SNIFF]);
     }
 
-  if (!ctx->isSnoring && getOldManState(ctx->totalSpeed) <= 2) {
+  if (!ctx->isSnoring && getOldManState(ctx->totalSpeed) <= AWAKE_THRESHOLD) {
     ctx->isSnoring = true;
-    SetSoundVolume(sounds[SNORE], 0.2);
-    SetSoundPan(sounds[SNORE], 0.25);
+    SetSoundVolume(sounds[SNORE], SNORE_VOLUME);
+    SetSoundPan(sounds[SNORE], SNORE_PAN);
     PlaySound(sounds[SNORE]);
-  } else if (ctx->isSnoring && getOldManState(ctx->totalSpeed) == 3) {
+  } else if (ctx->isSnoring && getOldManState(ctx->totalSpeed) == FULLY_AWAKE_STATE) {
     ctx->isSnoring = false;
     StopSound(sounds[SNORE]);
     PlaySound(sounds[HUH]);
@@ -137,7 +149,11 @@ static void handlePlayState(GameContext *ctx, UserInterface *ui, Bear *paw, Targ
   bool paw_moving = (mouseDelta.x + mouseDelta.y) != 0;
   const Sound cloth = sounds[CLOTH_RUSTLE];
   if (paw_moving) {
-    (IsSoundPlaying(cloth)) ? ResumeSound(cloth) : PlaySound(cloth);
+    if (IsSoundPlaying(cloth)) {
+      ResumeSound(cloth);
+    } else {
+      PlaySound(cloth);
+    }
   } else {
     if (IsSoundPlaying(cloth)) {
       PauseSound(cloth);
@@ -145,8 +161,9 @@ static void handlePlayState(GameContext *ctx, UserInterface *ui, Bear *paw, Targ
   }
 
   // win game logic (win condition different for fullscreen because mouse can't go below HEIGHT)
-  const bool winConditionMet =
-      IsWindowFullscreen() ? (GetMouseY() >= HEIGHT - 5) : (jar->pos.y >= HEIGHT - 15);
+  const bool winConditionMet = IsWindowFullscreen()
+                                   ? (GetMouseY() >= HEIGHT - WIN_THRESHOLD_FULLSCREEN)
+                                   : (jar->pos.y >= HEIGHT - WIN_THRESHOLD_WINDOWED);
 
   if (winConditionMet) {
     ctx->state = WIN;
