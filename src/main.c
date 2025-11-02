@@ -14,7 +14,8 @@
 #define BOB_SPEED 3.0f
 
 // Initialize with sensible defaults
-void initGameContext(GameContext *ctx) {
+void initGameContext(GameContext *ctx)
+{
     ctx->currentTime = 0.0;
     ctx->lastTime = 0.0;
     ctx->timerPrev = 0.0;
@@ -254,11 +255,11 @@ int main()
   // additional obsacles, e.g other picnic items
   // NOTE: the `rect` field gets set to the `init` value when the game starts
   Obstacle obstacles[] = {
-    {{200, HEIGHT / 2, 150, 150}, {}, false, 10, LoadTexture("src/assets/grapes.png")},
-    {{500, HEIGHT / 3, 110, 300}, {}, false, 10, LoadTexture("src/assets/baguette.png")},
-    {{300, 250, 115, 100}, {}, false, 10, LoadTexture("src/assets/cheese.png")},
-    {{800, 450, 90, 130}, {}, false, 10, LoadTexture("src/assets/cigs.png")},
-    {{80, 115, 400, 100}, {}, false, 10, LoadTexture("src/assets/wine.png")},
+    {{200, HEIGHT / 2, 150, 150}, {}, false, 10, LoadTexture("assets/grapes.png")},
+    {{500, HEIGHT / 3, 110, 300}, {}, false, 10, LoadTexture("assets/baguette.png")},
+    {{300, 250, 115, 100}, {}, false, 10, LoadTexture("assets/cheese.png")},
+    {{800, 450, 90, 130}, {}, false, 10, LoadTexture("assets/cigs.png")},
+    {{80, 115, 400, 100}, {}, false, 10, LoadTexture("assets/wine.png")},
   };
 
   // TODO: change for existing obstacles[] array
@@ -268,12 +269,12 @@ int main()
   };
 
   Bear Paw = {
-    .tex = LoadTexture("src/assets/sticky_paw.png"),
-    .nose = LoadTexture("src/assets/bear_nose.png")
+    .tex = LoadTexture("assets/sticky_paw.png"),
+    .nose = LoadTexture("assets/bear_nose.png")
   };
 
   Target Jar = {
-    .tex = LoadTexture("src/assets/honey.png"),
+    .tex = LoadTexture("assets/honey.png"),
     .pos = {WIDTH / 2 - 200, 100},
     .stuck = false,
     .value = 50,
@@ -292,16 +293,16 @@ int main()
     .startButton = {WIDTH / 2 - 200, HEIGHT - 120, 350, 80},
     .resetButton = {WIDTH / 2 - 200, 50, 350, 80},
     .tutorialButton = {WIDTH /2 + 165, HEIGHT - 120, 80, 80},
-    .background = LoadTexture("src/assets/picnic_blanket_grass.png"),
-    .splashScreen = LoadTexture("src/assets/bear_splash.jpg"),
-    .failScreen = LoadTexture("src/assets/bear_jail.png"),
-    .title = LoadTexture("src/assets/title_card.png"),
-    .winScreen = LoadTexture("src/assets/victory_bear.png"),
+    .background = LoadTexture("assets/picnic_blanket_grass.png"),
+    .splashScreen = LoadTexture("assets/bear_splash.jpg"),
+    .failScreen = LoadTexture("assets/bear_jail.png"),
+    .title = LoadTexture("assets/title_card.png"),
+    .winScreen = LoadTexture("assets/victory_bear.png"),
     .wakeStates = {
-      LoadTexture("src/assets/tv_asleep.png"),
-      LoadTexture("src/assets/tv_1.png"),
-      LoadTexture("src/assets/tv_2.png"),
-      LoadTexture("src/assets/tv_3.png"),
+      LoadTexture("assets/tv_asleep.png"),
+      LoadTexture("assets/tv_1.png"),
+      LoadTexture("assets/tv_2.png"),
+      LoadTexture("assets/tv_3.png"),
     },
     .wakeStatesLen = 4
   };
