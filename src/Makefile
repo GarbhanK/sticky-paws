@@ -36,7 +36,8 @@ PROJECT_SOURCE_FILES  ?= \
     main.c \
     game.c \
     sound.c \
-    ui.c
+    ui.c \
+    utils.c
 
 # raylib library variables
 RAYLIB_SRC_PATH       ?= ../../raylib/src
