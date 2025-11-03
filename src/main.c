@@ -1,6 +1,7 @@
 #include <raylib.h>
 #include <raymath.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 #include "game.h"
 #include "sound.h"
@@ -240,7 +241,7 @@ int main()
   InitAudioDevice();
   loadSounds(sounds);
 
-  Image icon = LoadImage("assets/honey.png");
+  Image icon = LoadImage(getAssetPath("honey.png"));
   SetWindowIcon(icon);
 
   GameContext ctx;
@@ -249,7 +250,7 @@ int main()
   // additional obsacles, e.g other picnic items
   // NOTE: the `rect` field gets set to the `init` value when the game starts
   Obstacle obstacles[] = {
-    {{200, HEIGHT / 2, 150, 150}, {}, false, 10, LoadTexture("assets/grapes.png")},
+    {{200, HEIGHT / 2, 150, 150}, {}, false, 10, LoadTexture(getAssetPath("grapes.png"))},
     {{500, HEIGHT / 3, 110, 300}, {}, false, 10, LoadTexture("assets/baguette.png")},
     {{300, 250, 115, 100}, {}, false, 10, LoadTexture("assets/cheese.png")},
     {{800, 450, 90, 130}, {}, false, 10, LoadTexture("assets/cigs.png")},
@@ -263,7 +264,7 @@ int main()
   };
 
   Bear Paw = {
-    .tex = LoadTexture("assets/sticky_paw.png"),
+    .tex = LoadTexture(getAssetPath("sticky_paw.png")),
     .nose = LoadTexture("assets/bear_nose.png")
   };
 
@@ -288,7 +289,7 @@ int main()
     .resetButton = {WIDTH / 2 - 200, 50, 350, 80},
     .tutorialButton = {WIDTH /2 + 165, HEIGHT - 120, 80, 80},
     .background = LoadTexture("assets/picnic_blanket_grass.png"),
-    .splashScreen = LoadTexture("assets/bear_splash.jpg"),
+    .splashScreen = LoadTexture(getAssetPath("bear_splash.jpg")),
     .failScreen = LoadTexture("assets/bear_jail.png"),
     .title = LoadTexture("assets/title_card.png"),
     .winScreen = LoadTexture("assets/victory_bear.png"),

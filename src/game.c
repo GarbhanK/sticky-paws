@@ -2,6 +2,8 @@
 #include <raymath.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
+#include <limits.h>
 
 #include "game.h"
 #include "sound.h"
@@ -219,3 +221,26 @@ Rectangle rectToHitbox(Obstacle obs, float shrinkFactor)
   return hitbox;
 }
 
+const char *getAssetPath(const char *filename)
+{
+  static char fullPath[PATH_MAX];
+  static char basePath[PATH_MAX];
+  static bool initialized = false;
+  static bool inBundle = false;
+
+  if (!initialized) {
+#ifdef __APPLE__
+    const char *appDir = GetApplicationDirectory();
+    snprintf(fullPath, sizeof(fullPath), "%s../Resources/assets/", basePath);
+    inBundle = DirectoryExists(basePath);
+#endif
+    if (!inBundle) {
+      strcpy(basePath, "assets/");
+    }
+    initialized = true;
+  }
+
+  snprintf(fullPath, sizeof(fullPath), "%s%s", basePath, filename);
+  printf("fullpath: %s", fullPath);
+  return fullPath;
+}

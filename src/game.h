@@ -84,6 +84,7 @@ typedef struct {
 
 // initialisation
 void initGameContext(GameContext *ctx);
+const char *getAssetPath(const char *filename);
 
 // rendering
 void drawBear(Bear *b);

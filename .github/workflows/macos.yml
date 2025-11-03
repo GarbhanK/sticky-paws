@@ -57,54 +57,6 @@ jobs:
           ls
         shell: bash
 
-      # Generating static library, note that i386 architecture is deprecated
-      # Defining GL_SILENCE_DEPRECATION because OpenGL is deprecated on macOS
-      # - name: Build raylib Library
-      #   run: |
-      #     cd raylib/src
-      #     clang --version
-
-      #     # Extract version numbers from Makefile
-      #     brew install grep
-      #     RAYLIB_API_VERSION=`ggrep -Po 'RAYLIB_API_VERSION\s*=\s\K(.*)' Makefile`
-      #     RAYLIB_VERSION=`ggrep -Po 'RAYLIB_VERSION\s*=\s\K(.*)' Makefile`
-
-      #     # Build raylib x86_64 static
-      #     make PLATFORM=PLATFORM_DESKTOP RAYLIB_LIBTYPE=STATIC CUSTOM_CFLAGS="-target x86_64-apple-macos10.12 -DGL_SILENCE_DEPRECATION"
-      #     mv -v -f libraylib.a libraylib_x86_64.a
-      #     make clean
-
-      #     # Build raylib arm64 static
-      #     make PLATFORM=PLATFORM_DESKTOP RAYLIB_LIBTYPE=STATIC CUSTOM_CFLAGS="-target arm64-apple-macos11 -DGL_SILENCE_DEPRECATION" -B
-      #     mv -v -f libraylib.a libraylib_arm64.a
-      #     make clean
-
-      #     # Join x86_64 and arm64 static
-      #     lipo -create -output libraylib.a libraylib_x86_64.a libraylib_arm64.a
-      #     lipo libraylib.a -detailed_info
-      #     cd ../..
-
-      # - name: Build Product
-      #   run: |
-      #     cd ${{ env.PROJECT_NAME }}/src
-
-      #     # Build project x86_64 binary
-      #     # TODO: Link with x86_64 raylib library: libraylib_x86_64.a
-      #     make PLATFORM=PLATFORM_DESKTOP BUILD_MODE=RELEASE PROJECT_CUSTOM_FLAGS=${{ env.PROJECT_CUSTOM_FLAGS }} PROJECT_BUILD_PATH=. RAYLIB_SRC_PATH=../../raylib/src PROJECT_CUSTOM_FLAGS="-target x86_64-apple-macos10.12"
-      #     mv -v -f ${{ env.PROJECT_NAME }} ${{ env.PROJECT_NAME }}_x86_64
-      #     make clean
-
-      #     # Build project arm64 binary
-      #     # TODO: Link with arm64 raylib library: libraylib_arm.a
-      #     make PLATFORM=PLATFORM_DESKTOP BUILD_MODE=RELEASE PROJECT_CUSTOM_FLAGS=${{ env.PROJECT_CUSTOM_FLAGS }} PROJECT_BUILD_PATH=. RAYLIB_SRC_PATH=../../raylib/src PROJECT_CUSTOM_FLAGS="-target arm64-apple-macos11"
-      #     mv -v -f ${{ env.PROJECT_NAME }} ${{ env.PROJECT_NAME }}_arm64
-      #     make clean
-
-      #     # Join x86_64 and arm64 binaries
-      #     lipo -create -output ${{ env.PROJECT_NAME }} ${{ env.PROJECT_NAME }}_x86_64 ${{ env.PROJECT_NAME }}_arm64
-      #     lipo ${{ env.PROJECT_NAME }} -detailed_info
-      #     cd ..
-
       - name: Build Game
         run: |
           cd ${{ env.PROJECT_NAME }}
@@ -123,30 +75,6 @@ jobs:
           lipo -create -output sticky-paws sticky-paws_x86_64 sticky-paws_arm64
           lipo -detailed_info sticky-paws
 
-      # - name: Generate Artifacts
-      #   run: |
-      #     ls ${{ env.PROJECT_BUILD_PATH }}
-
-      #     # copy universal binary into .app bundle
-      #     cp sticky-paws/sticky-paws ${{ env.PROJECT_RELEASE_PATH }}/${{ env.PROJECT_NAME }}.app/Contents/MacOS
-
-      #     # copy icon
-      #     cp ${{ env.PROJECT_NAME }}/src/${{ env.PROJECT_NAME }}.icns ${{ env.PROJECT_RELEASE_PATH }}/${{ env.PROJECT_NAME }}.app/Contents/Resources
-
-      #     # copy Info.plit
-      #     cp ${{ env.PROJECT_NAME }}/src/Info.plist ${{ env.PROJECT_RELEASE_PATH }}/${{ env.PROJECT_NAME }}.app/Contents
-
-      #     # copy resources
-      #     cp -r ${{ env.PROJECT_NAME }}/${{ env.PROJECT_RESOURCES_PATH }} ${{ env.PROJECT_RELEASE_PATH }}/${{ env.PROJECT_NAME }}.app/Contents
-
-      #     # copy README and LICENSE
-      #     cp ${{ env.PROJECT_NAME }}/README.md ${{ env.PROJECT_RELEASE_PATH }}
-      #     cp ${{ env.PROJECT_NAME }}/LICENSE ${{ env.PROJECT_RELEASE_PATH }}
-      #     ls ${{ env.PROJECT_RELEASE_PATH }}
-
-      #     # Zip the app bundle
-      #     7z a ./${{ env.PROJECT_RELEASE_PATH }}.zip ./${{ env.PROJECT_RELEASE_PATH }}
-
       - name: Generate Artifacts
         run: |
           # Variables
@@ -155,7 +83,7 @@ jobs:
           APP_MACOS="$APP_CONTENTS/MacOS"
           APP_RESOURCES="$APP_CONTENTS/Resources"
           APP_BUILD_BINARY="sticky-paws/sticky-paws"
-          ICON_FILE="sticky-paws/src/assets/${{ env.PROJECT_NAME }}.icns"
+          ICON_FILE="sticky-paws/src//${{ env.PROJECT_NAME }}.icns"
           INFO_PLIST="sticky-paws/src/Info.plist"
 
           # Copy universal binary
@@ -176,7 +104,7 @@ jobs:
           fi
 
           # Copy resources
-          cp -r sticky-paws/src/assets "$APP_CONTENTS"
+          cp -r sticky-paws/src/assets "$APP_RESOURCES"
 
           # Copy README and LICENSE
           cp sticky-paws/README.md "$APP_BUNDLE/../"
