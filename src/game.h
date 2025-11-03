@@ -84,10 +84,6 @@ typedef struct {
 
 // initialisation
 void initGameContext(GameContext *ctx);
-const char *getAssetPath(const char *filename);
-
-// rendering
-void drawBear(Bear *b);
 
 // game logic
 void handleStickyJar(GameContext *ctx, Bear *paw, Target *jar, Sound sb[]);
@@ -99,6 +95,5 @@ void handleSpeed(GameContext *ctx);
 
 // queries
 int getOldManState(int speed);
-Rectangle rectToHitbox(Obstacle obs, float shrinkFactor);
 
 #endif // GAME_H

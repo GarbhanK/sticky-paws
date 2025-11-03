@@ -6,6 +6,7 @@
 #include "game.h"
 #include "sound.h"
 #include "ui.h"
+#include "utils.h"
 
 #define MAX_SOUNDS SOUND_COUNT
 #define FADE_SPEED 0.005f
@@ -31,7 +32,7 @@ void initGameContext(GameContext *ctx)
     ctx->debug = false;
 }
 
-void unloadTextures(UserInterface *ui, Target *jar, Bear *paw);
+// void unloadTextures(UserInterface *ui, Target *jar, Bear *paw);
 
 static void handleStartState(GameContext *ctx, UserInterface *ui, Target *jar, ObstacleArray *obs);
 static void handlePlayState(GameContext *ctx, UserInterface *ui, Bear *paw, Target *jar, ObstacleArray *obs);
@@ -88,7 +89,6 @@ static void handlePlayState(GameContext *ctx, UserInterface *ui, Bear *paw, Targ
   handleStickyObstacle(ctx, paw, obs, sounds);
 
   // handle pushing logic
-  // handlePawPushing(&Paw, obstacles, obstaclesLen, &mouseDelta);
   handleObjectPushing(obs, jar, &mouseDelta);
   handleSpeed(ctx);
 
@@ -277,7 +277,7 @@ int main()
 
   // Hazard Gun = {
   //   .hitbox = { 0, 0, 100, 100 },
-  //   .tex = LoadTexture(getAssetPath("gun.png"),
+  //   .tex = LoadTexture(getAssetPath("gun.png")),
   //   .pos = { 0, 0 },
   // };
 
