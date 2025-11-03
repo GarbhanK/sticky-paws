@@ -1,4 +1,5 @@
 #include "sound.h"
+#include "game.h"
 
 #include "raylib.h"
 #include <stdio.h>
@@ -19,18 +20,18 @@ void randomBearSound(Sound sounds[])
 
 void loadSounds(Sound sounds[])
 {
-  sounds[GROWL1] = LoadSound("assets/sfx/growl1.mp3");
-  sounds[GROWL2] = LoadSound("assets/sfx/growl2.mp3");
-  sounds[GROWL3] = LoadSound("assets/sfx/growl3.mp3");
-  sounds[DOOR_SLAM] = LoadSound("assets/sfx/door_slam.mp3");
-  sounds[SNIFF] = LoadSound("assets/sfx/sniff.mp3");
-  sounds[FANFARE] = LoadSound("assets/sfx/ultraman_dyna_fanfare.mp3");
-  sounds[SELECT] = LoadSound("assets/sfx/blip_select.wav");
-  sounds[SNORE] = LoadSound("assets/sfx/base_snore.mp3");
-  sounds[HUH] = LoadSound("assets/sfx/huh.mp3");
-  sounds[MIRANDA] = LoadSound("assets/sfx/miranda.mp3");
-  sounds[SIREN] = LoadSound("assets/sfx/police_siren.mp3");
-  sounds[CLOTH_RUSTLE] = LoadSound("assets/sfx/cloth_rustle.mp3");
+  sounds[GROWL1] = LoadSound(getAssetPath("sfx/growl1.mp3"));
+  sounds[GROWL2] = LoadSound(getAssetPath("sfx/growl2.mp3"));
+  sounds[GROWL3] = LoadSound(getAssetPath("sfx/growl3.mp3"));
+  sounds[DOOR_SLAM] = LoadSound(getAssetPath("sfx/door_slam.mp3"));
+  sounds[SNIFF] = LoadSound(getAssetPath("sfx/sniff.mp3"));
+  sounds[FANFARE] = LoadSound(getAssetPath("sfx/ultraman_dyna_fanfare.mp3"));
+  sounds[SELECT] = LoadSound(getAssetPath("sfx/blip_select.wav"));
+  sounds[SNORE] = LoadSound(getAssetPath("sfx/base_snore.mp3"));
+  sounds[HUH] = LoadSound(getAssetPath("sfx/huh.mp3"));
+  sounds[MIRANDA] = LoadSound(getAssetPath("sfx/miranda.mp3"));
+  sounds[SIREN] = LoadSound(getAssetPath("sfx/police_siren.mp3"));
+  sounds[CLOTH_RUSTLE] = LoadSound(getAssetPath("sfx/cloth_rustle.mp3"));
 
   // validate loaded sounds
   int valid_count = 0;
