@@ -111,18 +111,18 @@ jobs:
           cp sticky-paws/LICENSE "$APP_BUNDLE/../"
 
           # Zip the app bundle
-          7z a "${{ env.PROJECT_RELEASE_PATH }}.zip" "${{ env.PROJECT_RELEASE_PATH }}"
+          7z a "${{ env.PROJECT_RELEASE_PATH }}" "${{ env.PROJECT_RELEASE_PATH }}"
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.PROJECT_RELEASE_PATH }}.zip
-          path: ./${{ env.PROJECT_RELEASE_PATH }}.zip
+          name: ${{ env.PROJECT_RELEASE_PATH }}
+          path: ./${{ env.PROJECT_RELEASE_PATH }}
 
       - name: Upload Artifact to Release
         uses: softprops/action-gh-release@v1
         with:
-          files: ${{ env.PROJECT_RELEASE_PATH }}.zip
+          files: ${{ env.PROJECT_RELEASE_PATH }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         if: github.event_name == 'release' && github.event.action == 'published'
