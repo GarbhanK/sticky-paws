@@ -83,7 +83,7 @@ jobs:
           APP_MACOS="$APP_CONTENTS/MacOS"
           APP_RESOURCES="$APP_CONTENTS/Resources"
           APP_BUILD_BINARY="sticky-paws/sticky-paws"
-          ICON_FILE="sticky-paws/src//${{ env.PROJECT_NAME }}.icns"
+          ICON_FILE="sticky-paws/src/assets/${{ env.PROJECT_NAME }}.icns"
           INFO_PLIST="sticky-paws/src/Info.plist"
 
           # Copy universal binary
