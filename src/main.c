@@ -251,10 +251,10 @@ int main()
   // NOTE: the `rect` field gets set to the `init` value when the game starts
   Obstacle obstacles[] = {
     {{200, HEIGHT / 2, 150, 150}, {}, false, 10, LoadTexture(getAssetPath("grapes.png"))},
-    {{500, HEIGHT / 3, 110, 300}, {}, false, 10, LoadTexture("assets/baguette.png")},
-    {{300, 250, 115, 100}, {}, false, 10, LoadTexture("assets/cheese.png")},
-    {{800, 450, 90, 130}, {}, false, 10, LoadTexture("assets/cigs.png")},
-    {{80, 115, 400, 100}, {}, false, 10, LoadTexture("assets/wine.png")},
+    {{500, HEIGHT / 3, 110, 300}, {}, false, 10, LoadTexture(getAssetPath("baguette.png"))},
+    {{300, 250, 115, 100}, {}, false, 10, LoadTexture(getAssetPath("cheese.png"))},
+    {{800, 450, 90, 130}, {}, false, 10, LoadTexture(getAssetPath("cigs.png"))},
+    {{80, 115, 400, 100}, {}, false, 10, LoadTexture(getAssetPath("wine.png"))},
   };
 
   // TODO: change for existing obstacles[] array
@@ -265,11 +265,11 @@ int main()
 
   Bear Paw = {
     .tex = LoadTexture(getAssetPath("sticky_paw.png")),
-    .nose = LoadTexture("assets/bear_nose.png")
+    .nose = LoadTexture(getAssetPath("bear_nose.png")),
   };
 
   Target Jar = {
-    .tex = LoadTexture("assets/honey.png"),
+    .tex = LoadTexture(getAssetPath("honey.png")),
     .pos = {WIDTH / 2 - 200, 100},
     .stuck = false,
     .value = 50,
@@ -277,7 +277,7 @@ int main()
 
   // Hazard Gun = {
   //   .hitbox = { 0, 0, 100, 100 },
-  //   .tex = LoadTexture("assets/gun.png"),
+  //   .tex = LoadTexture(getAssetPath("gun.png"),
   //   .pos = { 0, 0 },
   // };
 
@@ -288,16 +288,16 @@ int main()
     .startButton = {WIDTH / 2 - 200, HEIGHT - 120, 350, 80},
     .resetButton = {WIDTH / 2 - 200, 50, 350, 80},
     .tutorialButton = {WIDTH /2 + 165, HEIGHT - 120, 80, 80},
-    .background = LoadTexture("assets/picnic_blanket_grass.png"),
+    .background = LoadTexture(getAssetPath("/picnic_blanket_grass.png")),
     .splashScreen = LoadTexture(getAssetPath("bear_splash.jpg")),
-    .failScreen = LoadTexture("assets/bear_jail.png"),
-    .title = LoadTexture("assets/title_card.png"),
-    .winScreen = LoadTexture("assets/victory_bear.png"),
+    .failScreen = LoadTexture(getAssetPath("bear_jail.png")),
+    .title = LoadTexture(getAssetPath("title_card.png")),
+    .winScreen = LoadTexture(getAssetPath("victory_bear.png")),
     .wakeStates = {
-      LoadTexture("assets/tv_asleep.png"),
-      LoadTexture("assets/tv_1.png"),
-      LoadTexture("assets/tv_2.png"),
-      LoadTexture("assets/tv_3.png"),
+      LoadTexture(getAssetPath("tv_asleep.png")),
+      LoadTexture(getAssetPath("tv_1.png")),
+      LoadTexture(getAssetPath("tv_2.png")),
+      LoadTexture(getAssetPath("tv_3.png")),
     },
     .wakeStatesLen = 4
   };
