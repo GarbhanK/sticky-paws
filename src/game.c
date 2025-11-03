@@ -231,7 +231,9 @@ const char *getAssetPath(const char *filename)
   if (!initialized) {
 #ifdef __APPLE__
     const char *appDir = GetApplicationDirectory();
-    snprintf(fullPath, sizeof(fullPath), "%s../Resources/assets/", basePath);
+    printf("appDir: %s\n", appDir);
+    snprintf(basePath, sizeof(basePath), "%s../Resources/assets/", appDir);
+    printf("snprintf: %s../Resources/assets/\n", appDir);
     inBundle = DirectoryExists(basePath);
 #endif
     if (!inBundle) {
@@ -241,6 +243,6 @@ const char *getAssetPath(const char *filename)
   }
 
   snprintf(fullPath, sizeof(fullPath), "%s%s", basePath, filename);
-  printf("fullpath: %s", fullPath);
+  printf("fullpath: %s\n", fullPath);
   return fullPath;
 }
