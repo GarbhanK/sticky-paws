@@ -1,5 +1,5 @@
 #include "sound.h"
-#include "game.h"
+#include "utils.h"
 
 #include "raylib.h"
 #include <stdio.h>

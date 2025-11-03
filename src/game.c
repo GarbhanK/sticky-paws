@@ -7,6 +7,7 @@
 
 #include "game.h"
 #include "sound.h"
+#include "utils.h"
 
 // Game configuration constants
 const float TOTAL_SPEED_MAX = 400.0f;
@@ -18,41 +19,6 @@ const double TIME_INTERVAL = 0.1f;
 const float WIDTH = 1024.0f;
 const float HEIGHT = 768.0f;
 
-void drawBear(Bear *b)
-{
-  const float noseOffset = 150;
-  const float noseMaxHeight = (HEIGHT - b->nose.height);
-  const float leftLimit = (WIDTH * 0.4) - b->nose.width;
-  const float rightLimit = WIDTH * 0.6;
-
-  bool noseFollowing = true;
-  float noseHeight = b->pos.y + (HEIGHT * 0.5);
-  Vector2 nosePos = {b->pos.x - noseOffset, noseHeight};
-
-  // draw bear paw
-  DrawTexture(b->tex, b->pos.x, b->pos.y, WHITE);
-
-  // check if paw pos is between limits
-  if ((b->pos.x - b->nose.width) < leftLimit) {
-    noseFollowing = false;
-    nosePos = (Vector2){leftLimit, noseHeight};
-  } else if ( (b->pos.x - b->nose.width) > rightLimit) {
-    noseFollowing = false;
-    nosePos = (Vector2){rightLimit, noseHeight};
-  }
-
-  if (noseFollowing) {
-    nosePos = (Vector2){b->pos.x - noseOffset, noseHeight};
-  }
-
-  // limit nose position past the bottom of the texture
-  if (nosePos.y <= noseMaxHeight) {
-    nosePos.y = noseMaxHeight;
-  };
-
-  // draw the bear nose
-  DrawTextureV(b->nose, nosePos, WHITE);
-}
 
 void resetObjects(GameContext *ctx, Target *jar, ObstacleArray *obs)
 {
@@ -202,47 +168,4 @@ int getOldManState(int speed)
     }
 
     return state;
-}
-
-Rectangle rectToHitbox(Obstacle obs, float shrinkFactor)
-{
-  // Create a smaller hitbox centered within the obstacles visual bounds
-  // This makes collision feel more forgiving an natural
-  Rectangle rect = obs.rect;
-
-  float newWidth = rect.width * (1.0f - shrinkFactor);
-  float newHeight = rect.height * (1.0f - shrinkFactor);
-
-  // Center the shrunken hitbox within original rectangle
-  float newX = rect.x + (rect.width - newWidth) / 2.0f;
-  float newY = rect.y + (rect.height - newHeight) / 2.0f;
-
-  Rectangle hitbox = (Rectangle){newX, newY, newWidth, newHeight};
-  return hitbox;
-}
-
-const char *getAssetPath(const char *filename)
-{
-  static char fullPath[PATH_MAX];
-  static char basePath[PATH_MAX];
-  static bool initialized = false;
-  static bool inBundle = false;
-
-  if (!initialized) {
-#ifdef __APPLE__
-    const char *appDir = GetApplicationDirectory();
-    printf("appDir: %s\n", appDir);
-    snprintf(basePath, sizeof(basePath), "%s../Resources/assets/", appDir);
-    printf("snprintf: %s../Resources/assets/\n", appDir);
-    inBundle = DirectoryExists(basePath);
-#endif
-    if (!inBundle) {
-      strcpy(basePath, "assets/");
-    }
-    initialized = true;
-  }
-
-  snprintf(fullPath, sizeof(fullPath), "%s%s", basePath, filename);
-  printf("fullpath: %s\n", fullPath);
-  return fullPath;
 }

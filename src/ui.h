@@ -29,6 +29,7 @@ typedef struct UserInterface {
 } UserInterface;
 
 
+void drawBear(Bear *b);
 void drawUI(GameContext *ctx, UserInterface *ui, bool warning, int barWidth);
 void drawButton(char *msg, Rectangle area);
 void drawCenterText(char *msg, Color colour, int fsize, Vector2 pos);
@@ -36,5 +37,6 @@ bool isButtonPressed(Rectangle button);
 void StartFadeIn(FadeEffect *fade);
 void UpdateFadeIn(FadeEffect *fade, float fadeSpeed);
 void drawTutorial();
+void unloadTextures(UserInterface *ui, Target *jar, Bear *paw);
 
 #endif // UI_H

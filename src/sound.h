@@ -19,7 +19,6 @@ typedef enum {
   MIRANDA,
   SIREN,
   CLOTH_RUSTLE,
-  // STICK,
   SOUND_COUNT,  // last SoundID element is the amount of enumerations
 } SoundID;
 
