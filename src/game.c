@@ -19,21 +19,44 @@ const double TIME_INTERVAL = 0.1f;
 const float WIDTH = 1024.0f;
 const float HEIGHT = 768.0f;
 
-
-void resetObjects(GameContext *ctx, Target *jar, ObstacleArray *obs)
+// Initialize with sensible defaults
+void initGameContext(GameContext *ctx)
 {
+  ctx->currentTime = 0.0;
+  ctx->lastTime = 0.0;
+  ctx->timerPrev = 0.0;
+  ctx->state = START;
+  ctx->timer = 60;  // or whatever your starting timer is
+  ctx->totalSpeed = 0.0f;
+  ctx->failStateEntered = false;
+  ctx->winStateEntered = false;
+  ctx->isSnoring = false;
+  ctx->showTutorial = false;
+  ctx->showWarning = false;
+  ctx->debug = false;
+  ctx->player = NULL;
+  ctx->jar = NULL;
+  ctx->obs = NULL;
+}
+
+void resetObjects(GameContext *ctx)
+{
+  Target *jar = ctx->jar;
+  ObstacleArray *obs = ctx->obs;
+
   // reset scores
   ctx->totalSpeed = 0;
   ctx->timer = 30;
   ctx->score = 0;
 
   // reset honey jar
-  jar->stuck = false;
-  jar->pos = (Vector2){WIDTH / 2 + 50, 100};
-  jar->hitbox = (Rectangle){jar->pos.x, jar->pos.y, jar->hitbox.width, jar->hitbox.height};
+  ctx->jar->stuck = false;
+  ctx->jar->pos = (Vector2){WIDTH / 2 + 50, 100};
+  ctx->jar->hitbox = (Rectangle){jar->pos.x, jar->pos.y, jar->hitbox.width, jar->hitbox.height};
 
   // loop through obstacles and reset position, rect, and stuck attribute
   for (int i = 0; i < obs->length; i++) {
+    // get pointer to the obstacle at index i
     Obstacle *o = &obs->items[i];
     o->stuck = false;
     o->rect = o->init;

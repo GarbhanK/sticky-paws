@@ -156,7 +156,7 @@ void drawTutorial()
   strcat(tut, "* Press SPACE to toggle fullscreen, ESC to Exit.");
 
   // draw tutorial box elements
-  DrawRectangleRec(tutorialBox, GRAY);
-  DrawText("How to Play", boxPos.x + 15, boxPos.y + 15, 30, BLACK);
-  DrawText(tut, boxPos.x + 15, boxPos.y + 50, 20, BLACK);
+  DrawRectangleRec(tutorialBox, BLACK);
+  DrawText("How to Play", boxPos.x + 15, boxPos.y + 15, 30, WHITE);
+  DrawText(tut, boxPos.x + 15, boxPos.y + 50, 20, WHITE);
 }

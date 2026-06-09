@@ -53,7 +53,6 @@ typedef struct {
   size_t capapcity; // total arr capacity
 } ObstacleArray;
 
-// enum GAMESTATE { START, PLAY, FAIL, WIN } GAMESTATE;
 typedef enum {
   START,
   PLAY,
@@ -62,6 +61,11 @@ typedef enum {
 } GameState;
 
 typedef struct {
+  // entities
+  Bear *player;
+  Target *jar;
+  ObstacleArray *obs;
+
   // time tracking
   double currentTime;
   double lastTime;
@@ -90,7 +94,7 @@ void handleStickyJar(GameContext *ctx, Bear *paw, Target *jar, Sound sb[]);
 void handleStickyObstacle(GameContext *ctx, Bear *paw, ObstacleArray *obs, Sound sb[]);
 void handlePawPushing(Bear *b, ObstacleArray *obs, Vector2 *dt);
 void handleObjectPushing(ObstacleArray *obs, Target *jar, Vector2 *dt);
-void resetObjects(GameContext *ctx, Target *jar, ObstacleArray *obs);
+void resetObjects(GameContext *ctx);
 void handleSpeed(GameContext *ctx);
 
 // queries

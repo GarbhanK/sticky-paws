@@ -35,3 +35,4 @@ cmake --build build
 
 - inside the build folder is another folder named `sticky-paws` on CMakeLists.txt with the executable and `assets` directory
 - cmake will automatically download a current release of raylib but if you want to use your local version you can pass -DFETCHCONTENT_SOURCE_DIR_RAYLIB=<dir_with_raylib>
+
