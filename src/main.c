@@ -2,6 +2,7 @@
 #include <raymath.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <assert.h>
 
 #include "game.h"
 #include "sound.h"
@@ -27,10 +28,6 @@ static void handleStartState(GameContext *ctx, UserInterface *ui) {
     PlaySound(sounds[SELECT]);
     ctx->showTutorial = !ctx->showTutorial;
   }
-
-  if (IsKeyPressed(KEY_SPACE)) {
-    ToggleFullscreen();
-  }
 }
 
 static void handlePlayState(GameContext *ctx, UserInterface *ui) {
@@ -39,9 +36,7 @@ static void handlePlayState(GameContext *ctx, UserInterface *ui) {
   Target        *jar = ctx->jar;
   ObstacleArray *obs = ctx->obs;
 
-  if (IsKeyPressed(KEY_TAB)) {
-    ctx->debug = !ctx->debug;
-  }
+  if (IsKeyPressed(KEY_TAB)) { ctx->debug = !ctx->debug; }
 
   // mouse position diff used to stuck object movement
   Vector2 mouseDelta = GetMouseDelta();
@@ -58,18 +53,20 @@ static void handlePlayState(GameContext *ctx, UserInterface *ui) {
   }
 
   // update paw movement
-  player->pos.x = GetMouseX() - (float)player->tex.width / 2;
-  player->pos.y = GetMouseY();
+  float paw_x = GetMouseX() - (float)player->tex.width /2;
+  float paw_y = GetMouseY();
+  player->pos.x = paw_x;
+  player->pos.y = paw_y;
   player->hitbox = (Rectangle){
-    player->pos.x,
-    player->pos.y,
-    player->tex.width,
-    player->tex.height
+    .x = paw_x,
+    .y = paw_y,
+    .width = player->tex.width,
+    .height = player->tex.height
   };
 
   // update Jar hitbox
   jar->hitbox =
-      (Rectangle){jar->pos.x + 10, jar->pos.y + 15, jar->tex.width - 20, jar->tex.height - 25};
+    (Rectangle){jar->pos.x + 10, jar->pos.y + 15, jar->tex.width - 20, jar->tex.height - 25};
 
   // handle sticky logic
   handleStickyJar(ctx, player, jar, sounds);
@@ -96,14 +93,14 @@ static void handlePlayState(GameContext *ctx, UserInterface *ui) {
     }
 
   if (!ctx->isSnoring && getOldManState(ctx->totalSpeed) <= 2) {
-      ctx->isSnoring = true;
-      SetSoundVolume(sounds[SNORE], 0.2);
-      SetSoundPan(sounds[SNORE], 0.25);
-      PlaySound(sounds[SNORE]);
+    ctx->isSnoring = true;
+    SetSoundVolume(sounds[SNORE], 0.2);
+    SetSoundPan(sounds[SNORE], 0.25);
+    PlaySound(sounds[SNORE]);
   } else if (ctx->isSnoring && getOldManState(ctx->totalSpeed) == 3) {
-      ctx->isSnoring = false;
-      StopSound(sounds[SNORE]);
-      PlaySound(sounds[HUH]);
+    ctx->isSnoring = false;
+    StopSound(sounds[SNORE]);
+    PlaySound(sounds[HUH]);
   }
 
   // picnic blanket rustling when paw moving (TODO: change is so when obj is moving?)
@@ -166,8 +163,8 @@ static void handleWinState(GameContext *ctx, UserInterface *ui) {
 }
 
 static void renderCurrentState(GameContext *ctx, UserInterface *ui) {
-  Bear *paw = ctx->player;
-  Target *jar = ctx->jar;
+  Bear *paw          = ctx->player;
+  Target *jar        = ctx->jar;
   ObstacleArray *obs = ctx->obs;
 
   if (ctx->state == START) {
@@ -189,12 +186,12 @@ static void renderCurrentState(GameContext *ctx, UserInterface *ui) {
     for (int i = 0; i < obs->length; i++) {
       Obstacle *arr = obs->items;
       Obstacle obs = arr[i];
-      Vector2 obs_pos = (Vector2){obs.rect.x, obs.rect.y};
+      Vector2 obs_pos = (Vector2){obs.hitbox.x, obs.hitbox.y};
       DrawTextureEx(obs.tex, obs_pos, 0.0f, 1.0f, WHITE);
 
       // NOTE: hitbox testing
       if (ctx->debug)
-        DrawRectangleLinesEx(rectToHitbox(obs, HITBOX_SHRINK_PERC), 2, GREEN);
+        DrawRectangleLinesEx(rectToHitbox(obs.hitbox, HITBOX_SHRINK_PERC), 2, GREEN);
     }
 
     // draw honey Jar
@@ -203,6 +200,9 @@ static void renderCurrentState(GameContext *ctx, UserInterface *ui) {
       DrawRectangleLinesEx(jar->hitbox, 2, GREEN); // DEBUG HONEY HITBOX
 
     drawBear(paw);
+    if (ctx->debug)
+      DrawRectangleLinesEx(rectToHitbox(paw->hitbox, HITBOX_SHRINK_PERC), 2, GREEN);
+
     drawUI(ctx, ui, ctx->showWarning, ui->barWidth);
 
     if (ui->fade.active) {
@@ -239,35 +239,33 @@ int main()
   initGameContext(&ctx);
 
   // additional obsacles, e.g other picnic items
-  // NOTE: the `rect` field gets set to the `init` value when the game starts
+  // NOTE: the `pos` field gets set to the `init` value when the game starts
   Obstacle obstacles[] = {
-    {{200, HEIGHT / 2, 150, 150}, {}, false, 10, LoadTexture(getAssetPath("grapes.png"))},
-    {{500, HEIGHT / 3, 110, 300}, {}, false, 10, LoadTexture(getAssetPath("baguette.png"))},
-    {{300, 250, 115, 100}, {}, false, 10, LoadTexture(getAssetPath("cheese.png"))},
-    {{800, 450, 90, 130}, {}, false, 10, LoadTexture(getAssetPath("cigs.png"))},
-    {{80, 115, 400, 100}, {}, false, 10, LoadTexture(getAssetPath("wine.png"))},
+    {LoadTexture(getAssetPath("grapes.png")), {200, HEIGHT / 2, 150, 150}, {}, 10, false},
+    {LoadTexture(getAssetPath("baguette.png")), {500, HEIGHT / 3, 110, 300}, {}, 10, false},
+    {LoadTexture(getAssetPath("cheese.png")), {300, 250, 115, 100}, {}, 10, false},
+    {LoadTexture(getAssetPath("cigs.png")), {800, 450, 90, 130}, {}, 10, false},
+    {LoadTexture(getAssetPath("wine.png")), {80, 115, 400, 100}, {}, 10, false},
   };
 
-  // TODO: change for existing obstacles[] array
-  ObstacleArray Obs = {
+  // add obstacles array to the context
+  ctx.obs = &(ObstacleArray){
     .items = obstacles,
     .length = sizeof(obstacles) / sizeof(Obstacle),
   };
-  ctx.obs = &Obs;
 
-  Bear Paw = {
+  // add player and target entities to the context
+  ctx.player = &(Bear){
     .tex = LoadTexture(getAssetPath("sticky_paw.png")),
     .nose = LoadTexture(getAssetPath("bear_nose.png")),
   };
-  ctx.player = &Paw;
 
-  Target Jar = {
+  ctx.jar = &(Target){
     .tex = LoadTexture(getAssetPath("honey.png")),
     .pos = {WIDTH / 2 - 200, 100},
     .stuck = false,
     .value = 50,
   };
-  ctx.jar = &Jar;
 
   // Hazard Gun = {
   //   .hitbox = { 0, 0, 100, 100 },
@@ -318,7 +316,7 @@ int main()
   }
 
   unloadSounds(sounds);
-  unloadTextures(&GameUI, &Jar, &Paw);
+  unloadTextures(&GameUI, ctx.jar, ctx.player);
 
   CloseAudioDevice();
   CloseWindow();

@@ -20,15 +20,15 @@ typedef struct Target {
   Texture2D tex;
   Vector2 pos;
   Rectangle hitbox;
-  bool stuck;
   int value;
+  bool stuck;
 } Target;
 
 typedef struct Bear {
-  Rectangle hitbox;
   Texture2D tex;
-  Texture2D nose;
   Vector2 pos;
+  Rectangle hitbox;
+  Texture2D nose;
 } Bear;
 
 // TODO: Add stage hazards, instant fail when touched
@@ -39,11 +39,12 @@ typedef struct Bear {
 // } Hazard;
 
 typedef struct Obstacle {
-  Rectangle init;   // Initial pos for game reset
-  Rectangle rect;   // Current position and size
-  bool stuck;       // Whether stuck to the paw
-  int value;        // Score value when collided
   Texture2D tex;
+  // Vector2 pos;       // Current position in x,y coordinates
+  Rectangle init;    // Initial pos for game reset
+  Rectangle hitbox;  // Current position and size
+  int value;         // Score value when collided
+  bool stuck;        // Whether stuck to the paw
 } Obstacle;
 
 // https://youtu.be/_KSKH8C9Gf0?si=mmUkxPDIZce6YNlD

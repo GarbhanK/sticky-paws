@@ -1,15 +1,14 @@
 #include "raylib.h"
-#include "game.h"
+// #include "game.h"
 #include <limits.h>
 #include <stdio.h>
 #include <string.h>
 
 
-Rectangle rectToHitbox(Obstacle obs, float shrinkFactor)
+Rectangle rectToHitbox(Rectangle rect, float shrinkFactor)
 {
   // Create a smaller hitbox centered within the obstacles visual bounds
   // This makes collision feel more forgiving an natural
-  Rectangle rect = obs.rect;
 
   float newWidth = rect.width * (1.0f - shrinkFactor);
   float newHeight = rect.height * (1.0f - shrinkFactor);

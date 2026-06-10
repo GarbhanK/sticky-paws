@@ -59,7 +59,7 @@ void resetObjects(GameContext *ctx)
     // get pointer to the obstacle at index i
     Obstacle *o = &obs->items[i];
     o->stuck = false;
-    o->rect = o->init;
+    o->hitbox = o->init;  // reset hitbox to initial position
   }
 }
 
@@ -110,7 +110,7 @@ void handleStickyObstacle(GameContext *ctx, Bear *paw, ObstacleArray *obs, Sound
 
     // obstacle sticky logic
     if (!subject->stuck) {
-      if (CheckCollisionRecs(rectToHitbox(*subject, HITBOX_SHRINK_PERC), paw->hitbox)) {
+      if (CheckCollisionRecs(rectToHitbox(subject->hitbox, HITBOX_SHRINK_PERC), paw->hitbox)) {
         randomBearSound(sb);
         subject->stuck = true;
         ctx->score += subject->value;
@@ -118,8 +118,8 @@ void handleStickyObstacle(GameContext *ctx, Bear *paw, ObstacleArray *obs, Sound
       }
     } else {
       // update Jar pos by adding mouse delta
-      subject->rect.x = subject->rect.x + dt.x;
-      subject->rect.y = subject->rect.y + dt.y;
+      subject->hitbox.x = subject->hitbox.x + dt.x;
+      subject->hitbox.y = subject->hitbox.y + dt.y;
     }
   }
 }
@@ -139,22 +139,22 @@ void handleObjectPushing(ObstacleArray *obs, Target *jar, Vector2 *dt)
       Obstacle *subject = &obs->items[j];
 
       // If a stuck object collides with another, push it
-      if (CheckCollisionRecs(rectToHitbox(*actor, HITBOX_SHRINK_PERC), subject->rect)) {
+      if (CheckCollisionRecs(rectToHitbox(actor->hitbox, HITBOX_SHRINK_PERC), subject->hitbox)) {
         if (actor->stuck) {
-          subject->rect.x = subject->rect.x + dt->x;
-          subject->rect.y = subject->rect.y + dt->y;
+          subject->hitbox.x = subject->hitbox.x + dt->x;
+          subject->hitbox.y = subject->hitbox.y + dt->y;
         }
       }
     }
 
     // object on honey jar logic
-    if (CheckCollisionRecs(jar->hitbox, actor->rect)) {
+    if (CheckCollisionRecs(jar->hitbox, actor->hitbox)) {
       if (!jar->stuck) {
         jar->pos.x = jar->pos.x + dt->x;
         jar->pos.y = jar->pos.y + dt->y;
       } else {
-        actor->rect.x = actor->rect.x + dt->x;
-        actor->rect.y = actor->rect.y + dt->y;
+        actor->hitbox.x = actor->hitbox.x + dt->x;
+        actor->hitbox.y = actor->hitbox.y + dt->y;
       }
     }
   }
@@ -165,9 +165,9 @@ void handlePawPushing(Bear *b, ObstacleArray *obs, Vector2 *dt)
   for (int i = 0; i < obs->length; i++) {
     Obstacle *subject = &obs->items[i];
 
-    if (CheckCollisionRecs(b->hitbox, subject->rect)) {
-      subject->rect.x = subject->rect.x + dt->x;
-      subject->rect.y = subject->rect.y + dt->y;
+    if (CheckCollisionRecs(b->hitbox, subject->hitbox)) {
+      subject->hitbox.x = subject->hitbox.x + dt->x;
+      subject->hitbox.y = subject->hitbox.y + dt->y;
     }
   }
 }
