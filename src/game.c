@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <limits.h>
+#include <stdlib.h>
 
 #include "game.h"
 #include "sound.h"
@@ -37,6 +38,7 @@ void initGameContext(GameContext *ctx)
   ctx->player = NULL;
   ctx->jar = NULL;
   ctx->obs = NULL;
+  ctx->stuckObstacles = NULL;
 }
 
 void resetObjects(GameContext *ctx)
@@ -61,6 +63,9 @@ void resetObjects(GameContext *ctx)
     o->stuck = false;
     o->hitbox = o->init;  // reset hitbox to initial position
   }
+
+  // free objects in the stuck obstacles array
+  freeObstacleArray(&ctx->stuckObstacles);  // safe even if already NULL
 }
 
 void handleSpeed(GameContext *ctx)
@@ -191,4 +196,30 @@ int getOldManState(int speed)
     }
 
     return state;
+}
+
+// Builds an ObstacleArray of stuck obstacles from the given array of obstacles
+ObstacleArray *buildStuckObstacles(ObstacleArray *obs) {
+  // Allocate memory for the stuck obstacle array
+  ObstacleArray *stuck = malloc(sizeof(ObstacleArray));
+  stuck->length = 0;
+  stuck->capacity = obs->length;
+  stuck->items = malloc(stuck->capacity * sizeof(Obstacle));
+
+  // Copy stuck obstacles from the input array to the stuck obstacle array
+  for (int i = 0; i < obs->length; i++) {
+    Obstacle o = obs->items[i];
+    if (o.stuck) {
+      stuck->items[stuck->length++] = o;
+    }
+  }
+
+  return stuck;
+}
+
+void freeObstacleArray(ObstacleArray **arr) {
+    if (*arr == NULL) return;
+    free((*arr)->items);
+    free(*arr);
+    *arr = NULL;  // prevents double-free
 }

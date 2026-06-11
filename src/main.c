@@ -3,6 +3,8 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <assert.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "game.h"
 #include "sound.h"
@@ -48,6 +50,7 @@ static void handlePlayState(GameContext *ctx, UserInterface *ui) {
     ctx->timer = ctx->timer - 1;
   }
 
+  // transition to fail state when timer runs out
   if (ctx->timer == 0) {
     ctx->state = FAIL;
   }
@@ -113,9 +116,11 @@ static void handlePlayState(GameContext *ctx, UserInterface *ui) {
   }
 
   // win game logic (win condition different for fullscreen because mouse can't go below HEIGHT)
-  const bool winConditionMet = GetMouseY() >= HEIGHT - 15;
+  const bool winConditionMet = (ctx->jar->stuck && GetMouseY() >= HEIGHT-15);
 
   if (winConditionMet) {
+    // build the stuck obstacles array once before entering win state
+    ctx->stuckObstacles = buildStuckObstacles(obs);
     ctx->state = WIN;
   }
 }
@@ -220,7 +225,29 @@ static void renderCurrentState(GameContext *ctx, UserInterface *ui) {
   }
 
   if (ctx->state == WIN) {
-    DrawTextureEx(ui->winScreen, (Vector2){0, 0}, 0, 1.0f, WHITE);
+    // TODO: dynamically adjust win screen based on what objects the player collected during their run
+    // make the winScreen just the bear w/ sunset
+    DrawTextureEx(ui->winScreen, (Vector2){0, 0}, 0, 1.1f, WHITE);
+
+    // draw the honey jar to the win screen
+    DrawTextureEx(ctx->jar->tex, (Vector2){290, 570}, 0, 0.75f, WHITE);
+
+    // draw stuck obstacles
+    ObstacleArray *stuck = ctx->stuckObstacles;
+    float x_index_offset = 300;
+
+    for (int i = 0; i < stuck->length; i++) {
+      Obstacle o = stuck->items[i];
+      x_index_offset += o.tex.width;
+
+      // calculate position based on obstacle index and texture width
+      // 450 is the starting x position, and for each obstacle the x position is increased by half the texture width
+      // Vector2 pos = (Vector2){350 + (float)o.tex.width/2 * i, 570};
+      Vector2 pos = (Vector2){x_index_offset, 570};
+      // Vector2 pos = o.winPos;
+
+      DrawTextureEx(o.tex, pos, 0, 0.5f, WHITE);
+    }
     drawButton("RESTART", ui->resetButton);
   }
 }
@@ -239,20 +266,59 @@ int main()
   initGameContext(&ctx);
 
   // additional obsacles, e.g other picnic items
-  // NOTE: the `pos` field gets set to the `init` value when the game starts
+  // NOTE: the `hitbox` field gets set to the `init` value when the game starts
   Obstacle obstacles[] = {
-    {LoadTexture(getAssetPath("grapes.png")), {200, HEIGHT / 2, 150, 150}, {}, 10, false},
-    {LoadTexture(getAssetPath("baguette.png")), {500, HEIGHT / 3, 110, 300}, {}, 10, false},
-    {LoadTexture(getAssetPath("cheese.png")), {300, 250, 115, 100}, {}, 10, false},
-    {LoadTexture(getAssetPath("cigs.png")), {800, 450, 90, 130}, {}, 10, false},
-    {LoadTexture(getAssetPath("wine.png")), {80, 115, 400, 100}, {}, 10, false},
+    {
+      .tex = LoadTexture(getAssetPath("grapes.png")),
+      .init = {200, HEIGHT / 2, 150, 150},
+      .hitbox = {},
+      .winPos = {290, 570},
+      .value = 10,
+      .stuck = false,
+    },
+    {
+      .tex = LoadTexture(getAssetPath("baguette.png")),
+      .init = {500, HEIGHT / 3, 110, 300},
+      .hitbox = {},
+      .winPos = {290, 570},
+      .value = 10,
+      .stuck = false,
+    },
+    {
+      .tex = LoadTexture(getAssetPath("cheese.png")),
+      .init = {300, 250, 115, 100},
+      .hitbox = {},
+      .winPos = {320, 570},
+      .value = 10,
+      .stuck = false,
+    },
+    {
+      .tex = LoadTexture(getAssetPath("cigs.png")),
+      .init = {800, 450, 90, 130},
+      .hitbox = {},
+      .winPos = {360, 570},
+      .value = 10,
+      .stuck = false,
+    },
+    {
+      .tex = LoadTexture(getAssetPath("wine.png")),
+      .init = {80, 115, 400, 100},
+      .hitbox = {},
+      .winPos = {390, 570},
+      .value = 10,
+      .stuck = false,
+    },
   };
+  int count = sizeof(obstacles) / sizeof(Obstacle);
 
-  // add obstacles array to the context
-  ctx.obs = &(ObstacleArray){
-    .items = obstacles,
-    .length = sizeof(obstacles) / sizeof(Obstacle),
-  };
+  // allocate heap memory for the obstacles array and add it to the context
+  ObstacleArray *obsArray = malloc(sizeof(ObstacleArray));
+  obsArray->length = count;
+  obsArray->capacity = count;
+  obsArray->items = malloc(count * sizeof(Obstacle));
+  memcpy(obsArray->items, obstacles, count * sizeof(Obstacle));
+
+  ctx.obs = obsArray;
 
   // add player and target entities to the context
   ctx.player = &(Bear){
@@ -280,11 +346,11 @@ int main()
     .startButton = {WIDTH / 2 - 200, HEIGHT - 120, 350, 80},
     .resetButton = {WIDTH / 2 - 200, 50, 350, 80},
     .tutorialButton = {WIDTH /2 + 165, HEIGHT - 120, 80, 80},
-    .background = LoadTexture(getAssetPath("/picnic_blanket_grass.png")),
+    .background = LoadTexture(getAssetPath("picnic_blanket_grass.png")),
     .splashScreen = LoadTexture(getAssetPath("bear_splash.jpg")),
     .failScreen = LoadTexture(getAssetPath("bear_jail.png")),
     .title = LoadTexture(getAssetPath("title_card.png")),
-    .winScreen = LoadTexture(getAssetPath("victory_bear.png")),
+    .winScreen = LoadTexture(getAssetPath("sunrise_bear.png")),
     .wakeStates = {
       LoadTexture(getAssetPath("tv_asleep.png")),
       LoadTexture(getAssetPath("tv_1.png")),
@@ -317,6 +383,9 @@ int main()
 
   unloadSounds(sounds);
   unloadTextures(&GameUI, ctx.jar, ctx.player);
+
+  // free allocated obstacle array
+  freeObstacleArray(&ctx.obs);
 
   CloseAudioDevice();
   CloseWindow();

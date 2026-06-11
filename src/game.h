@@ -40,9 +40,9 @@ typedef struct Bear {
 
 typedef struct Obstacle {
   Texture2D tex;
-  // Vector2 pos;       // Current position in x,y coordinates
   Rectangle init;    // Initial pos for game reset
   Rectangle hitbox;  // Current position and size
+  Vector2 winPos;    // Position on win screen
   int value;         // Score value when collided
   bool stuck;        // Whether stuck to the paw
 } Obstacle;
@@ -51,7 +51,7 @@ typedef struct Obstacle {
 typedef struct {
   Obstacle *items;  // the Obstacles array
   size_t length;    // current no. items
-  size_t capapcity; // total arr capacity
+  size_t capacity; // total arr capacity
 } ObstacleArray;
 
 typedef enum {
@@ -66,6 +66,7 @@ typedef struct {
   Bear *player;
   Target *jar;
   ObstacleArray *obs;
+  ObstacleArray *stuckObstacles;
 
   // time tracking
   double currentTime;
@@ -89,6 +90,8 @@ typedef struct {
 
 // initialisation
 void initGameContext(GameContext *ctx);
+ObstacleArray *buildStuckObstacles(ObstacleArray *obs);
+void freeObstacleArray(ObstacleArray **arr);
 
 // game logic
 void handleStickyJar(GameContext *ctx, Bear *paw, Target *jar, Sound sb[]);
