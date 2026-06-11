@@ -11,9 +11,7 @@
 - [x] Ensure sticky members are reset to false when restarted after fail
 - [x] Stuck obj acting on unstuck obj, stuck object acting like it's being moved too. need to investigate/fix
 - [x] Countdown timer until loss state
-- [ ] consolidate objects into a common entity struct
 - [ ] randomise layout for objects
-- [ ] obstacle objects, makes a large noise on contact
 - [ ] no instant failure, quick screen with awake guy right before failure screen
 
 **visuals**
@@ -24,8 +22,8 @@
 - [x] rules explainer in the main menu
 - [x] get all of the text in the right place
 - [x] split drawUI() into separate parts
-- [ ] end page only shows objects collected on that run
-- [ ] smooth out floating logo, it comes to a noticable dead stop at the top and bottom of the range
+- [x] end page only shows objects collected on that run
+- [x] smooth out floating logo, it comes to a noticable dead stop at the top and bottom of the range
 - [ ] use shader for yellow border on stuck objects
 
 **audio**
@@ -52,4 +50,3 @@
 - [ ] make more things sticky (jammy baguette, cinnamon bun)
 - [ ] turn off the tv
 - [ ] add in the gun (randomly goes off)
-

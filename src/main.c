@@ -174,7 +174,7 @@ static void renderCurrentState(GameContext *ctx, UserInterface *ui) {
 
   if (ctx->state == START) {
     float bobOffset = sinf(GetTime() * BOB_SPEED) * BOB_AMPLITUDE;
-    Vector2 titlePos = {0, 0-(int)bobOffset};
+    Vector2 titlePos = {0, 0-bobOffset};
 
     DrawTextureEx(ui->splashScreen, (Vector2){0.0}, 0, 1.2, WHITE);
     DrawTextureEx(ui->title, titlePos, 0, 0.75, WHITE);
@@ -217,7 +217,6 @@ static void renderCurrentState(GameContext *ctx, UserInterface *ui) {
 
   if (ctx->state == FAIL) {
     DrawTexture(ui->failScreen, 0, 0, WHITE);
-    // drawCenterText("FAIL", RED, 200, (Vector2){WIDTH * 0.5, HEIGHT * 0.6});
     drawButton("RESTART", ui->startButton);
     if (ui->fade.active) {
       DrawRectangle(0, 0, WIDTH, HEIGHT, Fade(BLACK, ui->fade.alpha));
@@ -225,8 +224,6 @@ static void renderCurrentState(GameContext *ctx, UserInterface *ui) {
   }
 
   if (ctx->state == WIN) {
-    // TODO: dynamically adjust win screen based on what objects the player collected during their run
-    // make the winScreen just the bear w/ sunset
     DrawTextureEx(ui->winScreen, (Vector2){0, 0}, 0, 1.1f, WHITE);
 
     // draw the honey jar to the win screen
@@ -241,10 +238,7 @@ static void renderCurrentState(GameContext *ctx, UserInterface *ui) {
       x_index_offset += o.tex.width;
 
       // calculate position based on obstacle index and texture width
-      // 450 is the starting x position, and for each obstacle the x position is increased by half the texture width
-      // Vector2 pos = (Vector2){350 + (float)o.tex.width/2 * i, 570};
       Vector2 pos = (Vector2){x_index_offset, 570};
-      // Vector2 pos = o.winPos;
 
       DrawTextureEx(o.tex, pos, 0, 0.5f, WHITE);
     }
